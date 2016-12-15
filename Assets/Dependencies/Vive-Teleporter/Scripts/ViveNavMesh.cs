@@ -178,8 +178,7 @@ public class ViveNavMesh : MonoBehaviour
             }
             hitPoint = hit.point;
             UnityEngine.AI.NavMeshHit navHit;
-            pointOnNavmesh = UnityEngine.AI.NavMesh.SamplePosition(hitPoint, out navHit, 0.05f, _NavAreaMask);
-
+            pointOnNavmesh = UnityEngine.AI.NavMesh.SamplePosition(hitPoint, out navHit, 0.1f, _NavAreaMask);
             // This is necessary because NavMesh.SamplePosition does a sphere intersection, not a projection onto the mesh or
             // something like that.  This means that in some scenarios you can have a point that's not actually on/above
             // the NavMesh but is right next to it.  However, if the point is above a Navmesh position that has a normal

@@ -185,7 +185,7 @@ public class TeleportVive : MonoBehaviour {
                 // If the user has decided to teleport (ie lets go of touchpad) then remove all visual indicators
                 // related to selecting things and actually teleport
                 // If the user has decided to cancel (ie squeezes grip button) then remove visual indicators and do nothing
-                if(shouldTeleport && Pointer.PointOnNavMesh)
+                if (shouldTeleport && Pointer.PointOnNavMesh)
                 {
                     // Begin teleport sequence
                     Teleporting = true;
