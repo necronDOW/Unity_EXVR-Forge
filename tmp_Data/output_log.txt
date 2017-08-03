@@ -1,6 +1,6 @@
 Initialize engine version: 2017.1.0f3 (472613c02cf7)
 GfxDevice: creating device client; threaded=1
-VR: OpenVR Error! OpenVR failed initialization with error code VRInitError_Init_ShuttingDown: "VR system shutting down (119)"!
+VR: OpenVR Error! OpenVR failed initialization with error code VRInitError_Init_HmdNotFoundPresenceFailed: "Hmd Not Found Presence Failed (126)"!
  
 (Filename:  Line: 1396)
 
@@ -27,7 +27,7 @@ Platform assembly: C:\Users\User\Documents\GitHub\EXVR-Forge\tmp_Data\Managed\Un
 Loading C:\Users\User\Documents\GitHub\EXVR-Forge\tmp_Data\Managed\UnityEngine.Analytics.dll into Unity Child Domain
 Platform assembly: C:\Users\User\Documents\GitHub\EXVR-Forge\tmp_Data\Managed\System.dll (this message is harmless)
 Platform assembly: C:\Users\User\Documents\GitHub\EXVR-Forge\tmp_Data\Managed\System.Core.dll (this message is harmless)
-- Completed reload, in  0.018 seconds
+- Completed reload, in  0.159 seconds
 <RI> Initializing input.
 <RI> Input initialized.
 <RI> Initialized touch support.
@@ -39,7 +39,107 @@ VR: OpenVR Error! OpenVR failed initialization with error code VRInitError_Init_
  
 (Filename:  Line: 1396)
 
-UnloadTime: 0.960479 ms
+UnloadTime: 0.690364 ms
 Setting up 2 worker threads for Enlighten.
-  Thread -> id: 14f0 -> priority: 1 
-  Thread -> id: 744 -> priority: 1 
+  Thread -> id: 11d4 -> priority: 1 
+  Thread -> id: 17b8 -> priority: 1 
+The prefab 'tmpPlayer' has multiple NetworkIdentity components. There can only be one NetworkIdentity on a prefab, and it must be on the root object.
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+
+Unloading 5 Unused Serialized files (Serialized files now loaded: 0)
+UnloadTime: 1.468628 ms
+
+Unloading 6 unused Assets to reduce memory usage. Loaded Objects now: 525.
+Total: 0.328821 ms (FindLiveObjects: 0.016681 ms CreateObjectMapping: 0.010907 ms MarkObjects: 0.279738 ms  DeleteObjects: 0.021172 ms)
+
+The prefab 'tmpPlayer' has multiple NetworkIdentity components. There can only be one NetworkIdentity on a prefab, and it must be on the root object.
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+
+Unloading 3 Unused Serialized files (Serialized files now loaded: 0)
+UnloadTime: 0.338445 ms
+
+Unloading 3 unused Assets to reduce memory usage. Loaded Objects now: 544.
+Total: 0.223598 ms (FindLiveObjects: 0.027909 ms CreateObjectMapping: 0.025984 ms MarkObjects: 0.139548 ms  DeleteObjects: 0.017644 ms)
+
+The prefab 'tmpPlayer' has multiple NetworkIdentity components. There can only be one NetworkIdentity on a prefab, and it must be on the root object.
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+
+A connection has already been set as ready. There can only be one.
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+
+Did not find target for sync message for 4
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+
+Did not find target for sync message for 4
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+
+Did not find target for sync message for 4
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+
+Unloading 3 Unused Serialized files (Serialized files now loaded: 0)
+UnloadTime: 0.228089 ms
+
+Unloading 3 unused Assets to reduce memory usage. Loaded Objects now: 544.
+Total: 0.180611 ms (FindLiveObjects: 0.030476 ms CreateObjectMapping: 0.013152 ms MarkObjects: 0.133132 ms  DeleteObjects: 0.003208 ms)
+
+The prefab 'tmpPlayer' has multiple NetworkIdentity components. There can only be one NetworkIdentity on a prefab, and it must be on the root object.
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+
+Unloading 4 Unused Serialized files (Serialized files now loaded: 0)
+UnloadTime: 0.203067 ms
+
+Unloading 4 unused Assets to reduce memory usage. Loaded Objects now: 525.
+Total: 0.158796 ms (FindLiveObjects: 0.016040 ms CreateObjectMapping: 0.010586 ms MarkObjects: 0.125754 ms  DeleteObjects: 0.005774 ms)
+
+Did not find target for sync message for 6
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+
+The prefab 'tmpPlayer' has multiple NetworkIdentity components. There can only be one NetworkIdentity on a prefab, and it must be on the root object.
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+
+A connection has already been set as ready. There can only be one.
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+
+Did not find target for sync message for 6
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+
+Did not find target for sync message for 6
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+
+Did not find target for sync message for 6
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+
+Did not find target for sync message for 6
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+
+Did not find target for sync message for 6
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+
+Did not find target for sync message for 6
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+
+Did not find target for sync message for 6
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+
+Did not find target for sync message for 6
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/DebugBindings.gen.cpp Line: 51)
+
