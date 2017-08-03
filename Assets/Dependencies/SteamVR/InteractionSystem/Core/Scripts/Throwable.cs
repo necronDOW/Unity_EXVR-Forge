@@ -46,6 +46,8 @@ namespace Valve.VR.InteractionSystem
 
 		public bool snapAttachEaseInCompleted = false;
 
+        private Hand attachedHand;
+
 
 		//-------------------------------------------------
 		void Awake()
@@ -107,18 +109,19 @@ namespace Valve.VR.InteractionSystem
 				ControllerButtonHints.HideButtonHint( hand, Valve.VR.EVRButtonId.k_EButton_SteamVR_Trigger );
 			}
 		}
-
+        
 		//-------------------------------------------------
 		private void OnAttachedToHand( Hand hand )
 		{
-			attached = true;
+            attachedHand = hand;
+            attached = true;
 
 			onPickUp.Invoke();
 
 			hand.HoverLock( null );
 
 			Rigidbody rb = GetComponent<Rigidbody>();
-			rb.isKinematic = true;
+            rb.isKinematic = true;
 			rb.interpolation = RigidbodyInterpolation.None;
 
 			if ( hand.controller == null )
@@ -156,6 +159,7 @@ namespace Valve.VR.InteractionSystem
 		//-------------------------------------------------
 		private void OnDetachedFromHand( Hand hand )
 		{
+            attachedHand = null;
 			attached = false;
 
 			onDetachFromHand.Invoke();
@@ -163,12 +167,13 @@ namespace Valve.VR.InteractionSystem
 			hand.HoverUnlock( null );
 
 			Rigidbody rb = GetComponent<Rigidbody>();
-			rb.isKinematic = false;
+            rb.isKinematic = false;
 			rb.interpolation = RigidbodyInterpolation.Interpolate;
 
-			Vector3 position = Vector3.zero;
+            Vector3 position = Vector3.zero;
 			Vector3 velocity = Vector3.zero;
 			Vector3 angularVelocity = Vector3.zero;
+
 			if ( hand.controller == null )
 			{
 				velocityEstimator.FinishEstimatingVelocity();
@@ -228,7 +233,7 @@ namespace Valve.VR.InteractionSystem
 					snapAttachEaseInCompleted = true;
 				}
 			}
-		}
+        }
 
 
 		//-------------------------------------------------
@@ -254,5 +259,11 @@ namespace Valve.VR.InteractionSystem
 			gameObject.SetActive( false );
 			velocityEstimator.FinishEstimatingVelocity();
 		}
-	}
+
+        private void OnCollisionStay(Collision collision)
+        {
+            if (attachedHand)
+                attachedHand.controller.TriggerHapticPulse(2000);
+        }
+    }
 }
