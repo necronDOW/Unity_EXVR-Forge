@@ -19,7 +19,10 @@ public class VRNetworkRepresentation : MonoBehaviour
         identity = GetComponent<NetworkIdentity>();
 
         if (!identity.isLocalPlayer)
+        {
             SwitchLayer(0);
+            enabled = false;
+        }
 
         FindVRObjects();
 
