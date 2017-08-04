@@ -37,7 +37,10 @@ public class VRNetworkRepresentation : MonoBehaviour
         if (vrHead)
         {
             CopyTransform(vrHead, transform);
-            transform.position += headOffset;
+
+            transform.position += transform.right * headOffset.x;
+            transform.position += transform.up * headOffset.y;
+            transform.position += transform.forward * headOffset.z;
         }
 
         CopyTransform(vrHands[0], gfxHands[0]);
