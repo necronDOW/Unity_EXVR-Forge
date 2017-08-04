@@ -7,7 +7,7 @@ using Valve.VR.InteractionSystem;
 public class VRNetworkRepresentation : MonoBehaviour
 {
     public string VRParentName = "";
-    public float headOffset = 0.15f;
+    public Vector3 headOffset;
 
     private Transform vrHead, gfxHead;
     private Transform[] vrHands = new Transform[2];
@@ -20,12 +20,10 @@ public class VRNetworkRepresentation : MonoBehaviour
         identity = GetComponent<NetworkIdentity>();
 
         gfxHead = transform.Find("Head");
-        if (gfxHead)
-            gfxHead.localPosition = new Vector3(headOffset, 0.0f, 0.0f);
 
         if (!identity.isLocalPlayer)
         {
-            transform.Find("Head").gameObject.layer = 0;
+            gfxHead.gameObject.layer = 0;
             enabled = false;
         }
 
@@ -36,7 +34,12 @@ public class VRNetworkRepresentation : MonoBehaviour
 
     private void Update()
     {
-        CopyTransform(vrHead, transform);
+        if (vrHead)
+        {
+            CopyTransform(vrHead, transform);
+            transform.position += headOffset;
+        }
+
         CopyTransform(vrHands[0], gfxHands[0]);
         CopyTransform(vrHands[1], gfxHands[1]);
     }
