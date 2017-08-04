@@ -7,13 +7,23 @@ public class BucketSpawner : MonoBehaviour
 {
     public Object prefab;
     public float spawnRate = 1;
+    private Rigidbody rb;
 
+    private void Start()
+    {
+        rb = this.GetComponent<Rigidbody>();
+    }
     void Update()
     {
+        if (rb.isKinematic == true)
+        {
         if ((transform.up.y * 2f) < (transform.position.y - 1f))
             SpawnPrefab();
         else ticks = 0;
+        }
     }
+
+   
 
     private float ticks = 0;
     private void SpawnPrefab()
