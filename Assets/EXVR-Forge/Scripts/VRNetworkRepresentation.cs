@@ -18,15 +18,12 @@ public class VRNetworkRepresentation : MonoBehaviour
     {
         identity = GetComponent<NetworkIdentity>();
 
-        gfxHead = transform.Find("Head");
-
         if (!identity.isLocalPlayer)
-        {
-            gfxHead.gameObject.layer = 0;
-            enabled = false;
-        }
+            SwitchLayer(0);
 
         FindVRObjects();
+
+        gfxHead = transform.Find("Head");
         gfxHands[0] = transform.Find("Hand1");
         gfxHands[1] = transform.Find("Hand2");
     }
@@ -61,5 +58,12 @@ public class VRNetworkRepresentation : MonoBehaviour
             b.position = a.position;
             b.rotation = a.rotation;
         }
+    }
+
+    private void SwitchLayer(int layer)
+    {
+        Transform[] allChildren = GetComponentsInChildren<Transform>();
+        for (int i = 0; i < allChildren.Length; i++)
+            allChildren[i].gameObject.layer = layer;
     }
 }
