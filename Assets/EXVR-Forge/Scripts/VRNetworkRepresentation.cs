@@ -11,18 +11,22 @@ public class VRNetworkRepresentation : MonoBehaviour
     private Transform vrHead, gfxHead;
     private Transform[] vrHands = new Transform[2];
     private Transform[] gfxHands = new Transform[2];
+
     private NetworkIdentity identity;
 
     private void Start()
     {
         identity = GetComponent<NetworkIdentity>();
 
+        gfxHead = transform.Find("Head");
+
         if (!identity.isLocalPlayer)
+        {
+            gfxHead.gameObject.layer = 0;
             enabled = false;
+        }
 
         FindVRObjects();
-
-        gfxHead = transform.Find("Head");
         gfxHands[0] = transform.Find("Hand1");
         gfxHands[1] = transform.Find("Hand2");
     }
