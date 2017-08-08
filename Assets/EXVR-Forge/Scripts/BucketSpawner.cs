@@ -11,7 +11,7 @@ public class BucketSpawner : MonoBehaviour
 
     private void Start()
     {
-        rb = this.GetComponent<Rigidbody>();
+        rb = this.GetComponentInParent<Rigidbody>();
     }
     void Update()
     {
@@ -32,11 +32,11 @@ public class BucketSpawner : MonoBehaviour
 
         if (ticks >= spawnRate)
         {
-            float rand = Random.Range(-0.1f, 0.1f);
+            float rand = Random.Range(-0.025f, 0.025f);
             Vector3 offset = new Vector3(rand, rand, rand);
 
             GameObject instance = (GameObject)Instantiate(prefab, transform.position + offset, transform.rotation);
-            instance.GetComponent<Rigidbody>().AddForce(instance.transform.up * 100f, ForceMode.Force);
+            instance.GetComponentInParent<Rigidbody>().AddForce(instance.transform.up * 100f, ForceMode.Force);
             ticks = 0;
         }
     }
