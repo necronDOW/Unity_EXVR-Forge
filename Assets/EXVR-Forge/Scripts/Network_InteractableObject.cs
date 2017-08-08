@@ -34,5 +34,10 @@ public class Network_InteractableObject : NetworkBehaviour
     public void CmdSetAttached(bool value)
     {
         rigidBody.isKinematic = value;
+
+        if (value)
+        {
+            GetComponent<Throwable>().attachedHand.DetachObject(this.gameObject);
+        }
     }
 }
