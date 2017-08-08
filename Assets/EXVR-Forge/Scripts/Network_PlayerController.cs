@@ -6,13 +6,6 @@ using Valve.VR.InteractionSystem;
 
 public class Network_PlayerController : NetworkBehaviour
 {
-    Network_PlayerRepresentation npr;
-
-    private void Start()
-    {
-        npr = GetComponent<Network_PlayerRepresentation>();
-    }
-
     [Command]
     public void CmdOnGrab(NetworkInstanceId objectId, NetworkIdentity player)
     {
@@ -27,21 +20,6 @@ public class Network_PlayerController : NetworkBehaviour
             if (otherOwner != null)
                 networkId.RemoveClientAuthority(otherOwner);
             networkId.AssignClientAuthority(player.connectionToClient);
-        }
-    }
-
-    [ClientRpc]
-    public void RpcDetachObject(NetworkInstanceId objectId)
-    {
-        GameObject objectToDetach = NetworkServer.FindLocalObject(objectId);
-
-        if (npr)
-        {
-            for (int i = 0; i < npr.vrHands.Length; i++)
-            {
-                Hand hand = npr.vrHands[0].GetComponent<Hand>();
-                hand.DetachObject(objectToDetach);
-            }
         }
     }
 }
