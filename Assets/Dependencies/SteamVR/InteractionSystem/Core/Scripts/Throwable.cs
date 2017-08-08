@@ -46,7 +46,7 @@ namespace Valve.VR.InteractionSystem
 
 		public bool snapAttachEaseInCompleted = false;
 
-        public Hand attachedHand;
+        private Hand attachedHand;
 
 
 		//-------------------------------------------------

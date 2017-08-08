@@ -9,7 +9,7 @@ public class Network_PlayerRepresentation : MonoBehaviour
     public string VRParentName = "";
 
     private Transform vrHead, gfxHead;
-    private Transform[] vrHands = new Transform[2];
+    public Transform[] vrHands = new Transform[2];
     private Transform[] gfxHands = new Transform[2];
 
     private NetworkIdentity identity;
