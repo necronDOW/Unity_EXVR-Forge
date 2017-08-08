@@ -3,16 +3,12 @@ using System.Collections;
 
 public class CoalScript : MonoBehaviour
 {
-    [HideInInspector]
-    public int inFireIndex;
-
     public int startLifetime = 1;
-    public bool destroyed { get; private set; }
+
     private int lifetime;
 
     void Start()
     {
-        inFireIndex = -1;
         lifetime = startLifetime;
     }
 
@@ -20,14 +16,13 @@ public class CoalScript : MonoBehaviour
     {
         ReduceLifetime(100);
 
-        if (destroyed)
+        if (lifetime <= 0)
             Destroy(gameObject, 0.05f);
     }
 
     public void IncreaseLifetime(int amount)
     {
         lifetime += amount;
-
         if (lifetime > startLifetime)
             lifetime = startLifetime;
     }
@@ -35,8 +30,5 @@ public class CoalScript : MonoBehaviour
     public void ReduceLifetime(int amount)
     {
         lifetime -= amount;
-
-        if (lifetime <= 0)
-            destroyed = true;
     }
 }

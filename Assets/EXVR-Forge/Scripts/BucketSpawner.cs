@@ -32,7 +32,7 @@ public class BucketSpawner : MonoBehaviour
 
         if (ticks >= spawnRate)
         {
-            float rand = Random.Range(-0.025f, 0.025f);
+            float rand = Random.Range(-0.1f, 0.1f);
             Vector3 offset = new Vector3(rand, rand, rand);
 
             GameObject instance = (GameObject)Instantiate(prefab, transform.position + offset, transform.rotation);
