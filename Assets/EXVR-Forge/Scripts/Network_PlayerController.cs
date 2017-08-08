@@ -6,7 +6,7 @@ using Valve.VR.InteractionSystem;
 
 public class Network_PlayerController : NetworkBehaviour
 {
-    private Network_PlayerRepresentation npr;
+    Network_PlayerRepresentation npr;
 
     private void Start()
     {
@@ -25,38 +25,23 @@ public class Network_PlayerController : NetworkBehaviour
         else
         {
             if (otherOwner != null)
-            {
                 networkId.RemoveClientAuthority(otherOwner);
-                RpcDetachObject(objectId);
-                CmdDetachObject(objectId);
-            }
             networkId.AssignClientAuthority(player.connectionToClient);
-        }
-    }
-
-    [Command]
-    public void CmdDetachObject(NetworkInstanceId objectId)
-    {
-        GameObject iObject = NetworkServer.FindLocalObject(objectId);
-
-        for (int i = 0; i < npr.vrHands.Length; i++)
-        {
-            Hand hand = npr.vrHands[i].GetComponent<Hand>();
-            if (iObject == hand.currentAttachedObject)
-                hand.DetachObject(hand.currentAttachedObject);
         }
     }
 
     [ClientRpc]
     public void RpcDetachObject(NetworkInstanceId objectId)
     {
-        GameObject iObject = NetworkServer.FindLocalObject(objectId);
-        
-        for (int i = 0; i < npr.vrHands.Length; i++)
+        GameObject objectToDetach = NetworkServer.FindLocalObject(objectId);
+
+        if (npr)
         {
-            Hand hand = npr.vrHands[i].GetComponent<Hand>();
-            if (iObject == hand.currentAttachedObject)
-                hand.DetachObject(hand.currentAttachedObject);
+            for (int i = 0; i < npr.vrHands.Length; i++)
+            {
+                Hand hand = npr.vrHands[0].GetComponent<Hand>();
+                hand.DetachObject(objectToDetach);
+            }
         }
     }
 }
