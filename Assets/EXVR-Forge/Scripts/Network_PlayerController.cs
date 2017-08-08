@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 
-public class VRPlayerController : NetworkBehaviour
+public class Network_PlayerController : NetworkBehaviour
 {
     [Command]
     public void CmdSetAuth(NetworkInstanceId objectId, NetworkIdentity player)

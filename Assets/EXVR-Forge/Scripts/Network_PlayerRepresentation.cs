@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using Valve.VR.InteractionSystem;
 
-public class VRNetworkRepresentation : MonoBehaviour
+public class Network_PlayerRepresentation : MonoBehaviour
 {
     public string VRParentName = "";
 
