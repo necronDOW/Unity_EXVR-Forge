@@ -37,7 +37,8 @@ public class Network_InteractableObject : NetworkBehaviour
 
         if (value)
         {
-            GetComponent<Throwable>().attachedHand.DetachObject(this.gameObject);
+            Hand hand = GetComponent<Throwable>().attachedHand;
+            hand.DetachObject(this.gameObject);
         }
     }
 }
