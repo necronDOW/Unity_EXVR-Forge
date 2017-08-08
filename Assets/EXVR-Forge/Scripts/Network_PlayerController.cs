@@ -28,8 +28,22 @@ public class Network_PlayerController : NetworkBehaviour
             {
                 networkId.RemoveClientAuthority(otherOwner);
                 RpcDetachObject(objectId);
+                CmdDetachObject(objectId);
             }
             networkId.AssignClientAuthority(player.connectionToClient);
+        }
+    }
+
+    [Command]
+    public void CmdDetachObject(NetworkInstanceId objectId)
+    {
+        GameObject iObject = NetworkServer.FindLocalObject(objectId);
+
+        for (int i = 0; i < npr.vrHands.Length; i++)
+        {
+            Hand hand = npr.vrHands[i].GetComponent<Hand>();
+            if (iObject == hand.currentAttachedObject)
+                hand.DetachObject(hand.currentAttachedObject);
         }
     }
 
@@ -41,7 +55,6 @@ public class Network_PlayerController : NetworkBehaviour
         for (int i = 0; i < npr.vrHands.Length; i++)
         {
             Hand hand = npr.vrHands[i].GetComponent<Hand>();
-
             if (iObject == hand.currentAttachedObject)
                 hand.DetachObject(hand.currentAttachedObject);
         }
