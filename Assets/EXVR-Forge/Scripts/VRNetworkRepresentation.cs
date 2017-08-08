@@ -23,6 +23,10 @@ public class VRNetworkRepresentation : MonoBehaviour
             SwitchLayer(0);
             enabled = false;
         }
+        else
+        {
+            gameObject.tag = "VRLocalPlayer";
+        }
 
         FindVRObjects();
 
