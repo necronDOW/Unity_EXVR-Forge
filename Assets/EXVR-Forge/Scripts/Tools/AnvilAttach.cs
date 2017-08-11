@@ -12,6 +12,7 @@ public class AnvilAttach : MonoBehaviour {
     public Material highlight;
     public Material normal;
     private Rigidbody attachedRb;
+    private bool isAttached;
 
     void Start()
     {
@@ -22,22 +23,33 @@ public class AnvilAttach : MonoBehaviour {
     {
         if (other.tag == tooltag)
         {
-            if (!other.GetComponent<Throwable>().attached)
+            if (!isAttached)
             {
-                attachedRb = other.GetComponent<Rigidbody>();
-                attachedRb.constraints = RigidbodyConstraints.FreezeAll;
-                other.transform.position = transform.position;
-                other.transform.rotation = transform.rotation;
-            }
-            else
-            {
-                attachedRb.constraints = RigidbodyConstraints.None;
+                if (!other.GetComponent<Throwable>().attached)
+                {
+                    attachedRb = other.GetComponent<Rigidbody>();
+                    attachedRb.constraints = RigidbodyConstraints.FreezeAll;
+                    other.transform.position = transform.position;
+                    other.transform.rotation = transform.rotation;
+                    isAttached = true;
+                }
+                else
+                {
+                    other.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
+                }
             }
         }
-    } 
+        
+    }
+
+    public void AttachedCheck()
+    {
+        isAttached = false;
+    }
 
     public void Highlight()
     {
+        if(!isAttached)
         GetComponent<Renderer>().material = highlight;
     }
     public void UnHighlight()
