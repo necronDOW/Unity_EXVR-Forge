@@ -9,6 +9,8 @@ using UnityEngine;
 public class AnvilAttach : MonoBehaviour {
 
     public string tooltag;
+    public Material highlight;
+    public Material normal;
     private Rigidbody attachedRb;
 
     void Start()
@@ -20,7 +22,6 @@ public class AnvilAttach : MonoBehaviour {
     {
         if (other.tag == tooltag)
         {
-            //Highlight object
             if (!other.GetComponent<Throwable>().attached)
             {
                 attachedRb = other.GetComponent<Rigidbody>();
@@ -34,5 +35,14 @@ public class AnvilAttach : MonoBehaviour {
             }
         }
     } 
+
+    public void Highlight()
+    {
+        GetComponent<Renderer>().material = highlight;
+    }
+    public void UnHighlight()
+    {
+        GetComponent<Renderer>().material = normal;
+    }
 }
 
