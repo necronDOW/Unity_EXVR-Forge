@@ -8,13 +8,21 @@ public class DeformableMesh : MonoBehaviour
 {
     public float maxInfluence = 1.0f;
     public float forceFactor = 1.0f;
+    public float distanceLimiter = 0.0f;
+
     private MeshFilter mFilter;
     private MeshCollider mCollider;
+    private Vector3[] originalVertices;
+    private Collider currentImpactCollider;
+    private Vector3 currentHitPoint;
 
     private void Start()
     {
         mFilter = GetComponent<MeshFilter>();
         mCollider = GetComponent<MeshCollider>();
+        originalVertices = mFilter.sharedMesh.vertices;
+        currentImpactCollider = null;
+        currentHitPoint = Vector3.zero;
     }
 
     private void OnCollisionExit(Collision collision)
@@ -27,22 +35,40 @@ public class DeformableMesh : MonoBehaviour
         Deform(collision.transform, centralContact);
     }
 
-    private void OnTriggerExit(Collider other)
+    private void OnTriggerEnter(Collider other)
     {
-        RaycastHit hitInfo;
-        float rayLength = other.bounds.size.magnitude * 1.1f;
-
-        if (Physics.Raycast(other.transform.position, other.transform.forward, out hitInfo, rayLength) 
-            || Physics.Raycast(other.transform.position, -other.transform.forward, out hitInfo, rayLength))
+        if (!currentImpactCollider)
         {
-            if (hitInfo.transform.gameObject == gameObject)
-            {
-                Deform(other.transform, hitInfo.point);
-                return;
-            }
-        }
+            currentImpactCollider = other;
 
-        Deform(other.transform, other.transform.position);
+            RaycastHit hitInfo;
+            float rayLength = other.bounds.extents.magnitude;
+
+            if (Physics.Raycast(other.transform.position, other.transform.forward, out hitInfo, rayLength)
+                || Physics.Raycast(other.transform.position, -other.transform.forward, out hitInfo, rayLength))
+            {
+                if (hitInfo.transform.gameObject == gameObject)
+                {
+                    Deform(other.transform, hitInfo.point);
+                    currentHitPoint = hitInfo.point;
+                    return;
+                }
+            }
+
+            Deform(other.transform, other.transform.position);
+            currentHitPoint = other.transform.position;
+        }
+    }
+
+    private void Update()
+    {
+        if (currentImpactCollider && Vector3.Distance(currentImpactCollider.transform.position, currentHitPoint) >= distanceLimiter)
+            currentImpactCollider = null;
+    }
+
+    private void OnApplicationQuit()
+    {
+        ResetMesh();
     }
 
     float startTime = 0.0f;
@@ -69,13 +95,21 @@ public class DeformableMesh : MonoBehaviour
 
         mFilter.sharedMesh.vertices = mVertices;
         mFilter.sharedMesh.RecalculateBounds();
-        mCollider.sharedMesh = mFilter.sharedMesh;
 
         Debug.Log(Time.realtimeSinceStartup - startTime);
+
+        mCollider.sharedMesh = mFilter.sharedMesh;
     }
 
     private Vector3 DivideVector3(Vector3 a, Vector3 b)
     {
         return new Vector3(a.x / b.x, a.y / b.y, a.z / b.z);
+    }
+
+    private void ResetMesh()
+    {
+        mFilter.sharedMesh.vertices = originalVertices;
+        mFilter.sharedMesh.RecalculateBounds();
+        mCollider.sharedMesh = mFilter.sharedMesh;
     }
 }
