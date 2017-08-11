@@ -2,8 +2,54 @@
 using System.Collections;
 using System.Collections.Generic;
 
+[RequireComponent(typeof(BoxCollider))]
+
 public class Fire : MonoBehaviour
 {
+    public float temperature;
+    public float coalIncrement = 0.025f;
+    public float maxTemprature = 1;
+    public int coalLifetimeIncriment = 10000;
+    private int coalsInFire;
+    //private List<CoalScript> coalsInFire;
+    //global fire temprature
+    //when coal enters fire
+    //On Trigger Enter
+    //add lifetime to coal through IncreaseLifetime(int amount)
+    //for each bit of coal added, add to temprature
+    //link particle effects to temprature of the fire within reason
+
+    private void Start()
+    {
+        temperature = 0f;
+        coalsInFire = 0;
+        GetComponent<BoxCollider>().isTrigger = true;
+    }
+
+    private void Update()
+    {
+        // Calculate temprature
+        Debug.Log(coalsInFire);
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if(other.tag == "Coal")
+        {
+            other.GetComponent<CoalScript>().IncreaseLifetime(coalLifetimeIncriment);
+            coalsInFire++;
+        }
+       
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.tag == "Coal")
+        {
+            coalsInFire--;
+        }
+    }
+
     //public float coalIncrement = 0.001f;
     //public float maxTemperature = 0.01f;
     //public ParticleSystem linkedParticles;
@@ -33,6 +79,8 @@ public class Fire : MonoBehaviour
     //    temperature = 0f;
     //    coalsInFire = new List<CoalScript>();
     //}
+
+
 
     //void Update()
     //{

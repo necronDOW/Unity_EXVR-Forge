@@ -40,7 +40,10 @@ public class BendTool : MonoBehaviour {
         parent.GetComponent<BoxCollider>().enabled = true;
         GetComponent<Collider>().enabled = true;
     }
-    //re use old code to hold rod in place when in bending rod
-    //port old bending code
+
+    //on collide and side button press
+
+    //spawn bend prefab
+
 
 }
