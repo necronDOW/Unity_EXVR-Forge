@@ -2,25 +2,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(MeshFilter))]
-[RequireComponent(typeof(MeshCollider))]
-public class DeformableMesh : MonoBehaviour
+public class DeformableMesh : DeformableBase
 {
     public float maxInfluence = 1.0f;
     public float forceFactor = 1.0f;
     public float distanceLimiter = 0.0f;
 
-    private MeshFilter mFilter;
-    private MeshCollider mCollider;
-    private Vector3[] originalVertices;
     private Collider currentImpactCollider;
     private Vector3 currentHitPoint;
 
-    private void Start()
+    protected override void Start()
     {
-        mFilter = GetComponent<MeshFilter>();
-        mCollider = GetComponent<MeshCollider>();
-        originalVertices = mFilter.sharedMesh.vertices;
+        base.Start();
+
         currentImpactCollider = null;
         currentHitPoint = Vector3.zero;
     }
@@ -65,17 +59,9 @@ public class DeformableMesh : MonoBehaviour
         if (currentImpactCollider && Vector3.Distance(currentImpactCollider.transform.position, currentHitPoint) >= distanceLimiter)
             currentImpactCollider = null;
     }
-
-    private void OnApplicationQuit()
-    {
-        ResetMesh();
-    }
-
-    float startTime = 0.0f;
+    
     private void Deform(Transform otherObject, Vector3 hitPoint)
     {
-        startTime = Time.realtimeSinceStartup;
-
         Vector3 impactVectorNormalized = (otherObject.position - hitPoint).normalized;
         Vector3 simplifiedHitPoint = DivideVector3(hitPoint - transform.position, transform.lossyScale);
         Vector3[] mVertices = mFilter.sharedMesh.vertices;
@@ -94,21 +80,6 @@ public class DeformableMesh : MonoBehaviour
         }
 
         mFilter.sharedMesh.vertices = mVertices;
-        mFilter.sharedMesh.RecalculateBounds();
-
-        Debug.Log(Time.realtimeSinceStartup - startTime);
-
-        mCollider.sharedMesh = mFilter.sharedMesh;
-    }
-
-    private Vector3 DivideVector3(Vector3 a, Vector3 b)
-    {
-        return new Vector3(a.x / b.x, a.y / b.y, a.z / b.z);
-    }
-
-    private void ResetMesh()
-    {
-        mFilter.sharedMesh.vertices = originalVertices;
         mFilter.sharedMesh.RecalculateBounds();
         mCollider.sharedMesh = mFilter.sharedMesh;
     }
