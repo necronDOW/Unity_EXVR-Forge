@@ -51,7 +51,6 @@ public class DeformableMesh : MonoBehaviour
         startTime = Time.realtimeSinceStartup;
 
         Vector3 impactVectorNormalized = (otherObject.position - hitPoint).normalized;
-        Debug.DrawLine(otherObject.position, hitPoint, Color.red, Mathf.Infinity);
         Vector3 simplifiedHitPoint = DivideVector3(hitPoint - transform.position, transform.lossyScale);
         Vector3[] mVertices = mFilter.sharedMesh.vertices;
 
