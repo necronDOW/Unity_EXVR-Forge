@@ -36,10 +36,10 @@ public class AnvilAttach : MonoBehaviour {
                 else
                 {
                     other.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
+                    Highlight();
                 }
             }
         }
-        
     }
 
     public void AttachedCheck()
