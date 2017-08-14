@@ -23,8 +23,7 @@ public class CoalScript : MonoBehaviour
     public void IncreaseLifetime(int amount)
     {
         lifetime += amount;
-        if (lifetime > startLifetime)
-            lifetime = startLifetime;
+        Debug.Log("hi");
     }
 
     public void ReduceLifetime(int amount)
