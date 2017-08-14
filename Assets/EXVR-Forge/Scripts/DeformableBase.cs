@@ -22,7 +22,7 @@ public class DeformableBase : MonoBehaviour
         ResetMesh();
     }
 
-    protected Vector3 DivideVector3(Vector3 a, Vector3 b)
+    public static Vector3 DivideVector3(Vector3 a, Vector3 b)
     {
         return new Vector3(a.x / b.x, a.y / b.y, a.z / b.z);
     }
