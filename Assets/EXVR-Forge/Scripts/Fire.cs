@@ -8,9 +8,12 @@ public class Fire : MonoBehaviour
 {
     public float temperature;
     public float coalIncrement = 0.025f;
-    public float maxTemprature = 1;
-    public int coalLifetimeIncriment = 1000000000;
-    private float coalsInFire;
+    public float maxTemprature = 100;
+    public int coalLifetimeIncriment = 10000;
+    public static int coalsInFire;
+    private int extraTime;
+
+
     //private List<CoalScript> coalsInFire;
     //global fire temprature
     //when coal enters fire
@@ -22,30 +25,37 @@ public class Fire : MonoBehaviour
     private void Start()
     {
         temperature = 0f;
-        coalsInFire = 0f;
+        coalsInFire = 0;
         GetComponent<BoxCollider>().isTrigger = true;
+        extraTime = coalLifetimeIncriment;
     }
 
     private void Update()
     {
-        if (coalsInFire > 0)
-            coalsInFire -= 0.0005f;
-
+        temperature = coalsInFire;
         // Calculate temprature
-        //Debug.Log(coalsInFire);
+
     }
 
     private void OnTriggerEnter(Collider other)
     {
         if(other.tag == "Coal")
         {
-            other.GetComponent<CoalScript>().IncreaseLifetime(coalLifetimeIncriment);
             if (coalsInFire < 100)
-                coalsInFire += 1.0f;
-        }
-       
+            {
+                other.GetComponent<CoalScript>().IncreaseLifetime(extraTime);
+                coalsInFire += 1;
+            }
+        }  
     }
 
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.tag == "Coal")
+        {
+            other.GetComponent<CoalScript>().IncreaseLifetime(-extraTime);
+        }
+    }
 
     //public float coalIncrement = 0.001f;
     //public float maxTemperature = 0.01f;

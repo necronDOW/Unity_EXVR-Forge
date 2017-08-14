@@ -3,9 +3,9 @@ using System.Collections;
 
 public class CoalScript : MonoBehaviour
 {
-    public int startLifetime = 1;
-
+    public int startLifetime = 1000;
     private int lifetime;
+    private bool inFire;
 
     void Start()
     {
@@ -14,16 +14,22 @@ public class CoalScript : MonoBehaviour
 
     void Update()
     {
-        ReduceLifetime(100);
+       ReduceLifetime(1);
 
-        if (lifetime <= 0)
+       if (lifetime <= 0)
+       {
+            if (inFire && Fire.coalsInFire > 0)
+            {
+                Fire.coalsInFire -= 1;
+            }
             Destroy(gameObject, 0.05f);
+       }      
     }
 
     public void IncreaseLifetime(int amount)
     {
-        lifetime += amount;
-        Debug.Log("hi");
+        lifetime += amount + Random.Range(-200, 200);
+        inFire = true;
     }
 
     public void ReduceLifetime(int amount)
