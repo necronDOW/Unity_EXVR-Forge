@@ -20,7 +20,7 @@ public class CoalScript : MonoBehaviour
        {
             if (inFire && Fire.coalsInFire > 0)
             {
-                Fire.coalsInFire -= 1;
+                Fire.coalsInFire -= 1.0f;
                 Fire.SetEmissionRate(Fire.coalsInFire);
             }
             Destroy(gameObject, 0.05f);
