@@ -7,14 +7,27 @@ public class CubeMeshGenerator : MonoBehaviour
 {
     private MeshFilter mFilter;
     private MeshCollider mCollider;
+    private Vector3[] vertices, normals;
+    private float xScaled, yScaled, zScaled;
+    private float roundnessReal = 0.0f;
+    private Vector3 centeringOffset;
     
     public int xSize = 1, ySize = 1, zSize = 1;
-    public bool centered = true;
+    [Range(0.01f, 1)] public float roundness = 0.01f;
+    public float meshScale = 1.0f;
 
     private void Awake()
     {
         mFilter = GetComponent<MeshFilter>();
         mCollider = GetComponent<MeshCollider>();
+
+        xScaled = xSize * meshScale;
+        yScaled = ySize * meshScale;
+        zScaled = zSize * meshScale;
+
+        roundnessReal = (Mathf.Min(new float[] { xScaled, yScaled, zScaled }) / 2.0f) * roundness;
+        
+        centeringOffset = new Vector3(xScaled, yScaled, zScaled) * -0.5f;
 
         GenerateMesh();
     }
@@ -27,6 +40,9 @@ public class CubeMeshGenerator : MonoBehaviour
 
         CreateVertices(ref mesh);
         CreateTriangles(ref mesh);
+
+        if (mCollider)
+            mCollider.sharedMesh = mesh;
     }
 
     private void CreateVertices(ref Mesh mesh)
@@ -38,34 +54,63 @@ public class CubeMeshGenerator : MonoBehaviour
             (xSize - 1) * (zSize - 1) +
             (ySize - 1) * (zSize - 1)) * 2;
 
-        Vector3[] vertices = new Vector3[cornerVertices + edgeVertices + faceVertices];
+        vertices = new Vector3[cornerVertices + edgeVertices + faceVertices];
+        normals = new Vector3[vertices.Length];
 
         int v = 0;
         for (int y = 0; y <= ySize; y++) {
             for (int x = 0; x <= xSize; x++)
-                vertices[v++] = new Vector3(x, y, 0.0f);
+                SetVertex(v++, x, y, 0);
 
             for (int z = 1; z <= zSize; z++)
-                vertices[v++] = new Vector3(xSize, y, z);
+                SetVertex(v++, xSize, y, z);
 
             for (int x = xSize - 1; x >= 0; x--)
-                vertices[v++] = new Vector3(x, y, zSize);
+                SetVertex(v++, x, y, zSize);
 
             for (int z = zSize - 1; z > 0; z--)
-                vertices[v++] = new Vector3(0.0f, y, z);
+                SetVertex(v++, 0, y, z);
         }
 
         for (int z = 1; z < zSize; z++) {
             for (int x = 1; x < xSize; x++)
-                vertices[v++] = new Vector3(x, ySize, z);
+                SetVertex(v++, x, ySize, z);
         }
 
         for (int z = 1; z < zSize; z++) {
             for (int x = 1; x < xSize; x++)
-                vertices[v++] = new Vector3(x, 0, z);
+                SetVertex(v++, x, 0, z);
         }
 
         mesh.vertices = vertices;
+        mesh.normals = normals;
+    }
+
+    private void SetVertex(int i, float x, float y, float z)
+    {
+        x *= meshScale;
+        y *= meshScale;
+        z *= meshScale;
+
+        Vector3 inner = vertices[i] = new Vector3(x, y, z);
+
+        if (x < roundnessReal)
+            inner.x = roundnessReal;
+        else if (x > xScaled - roundnessReal)
+            inner.x = xScaled - roundnessReal;
+
+        if (y < roundnessReal)
+            inner.y = roundnessReal;
+        else if (y > yScaled - roundnessReal)
+            inner.y = yScaled - roundnessReal;
+
+        if (z < roundnessReal)
+            inner.z = roundnessReal;
+        else if (z > zScaled - roundnessReal)
+            inner.z = zScaled - roundnessReal;
+
+        normals[i] = (vertices[i] - inner).normalized;
+        vertices[i] = centeringOffset + inner + normals[i] * roundnessReal;
     }
 
     private void CreateTriangles(ref Mesh mesh)
