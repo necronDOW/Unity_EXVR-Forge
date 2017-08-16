@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 public class Fire : MonoBehaviour
 {
-    public float temperature;
+    public static float temperature;
     public float coalIncrement = 0.025f;
     public static float maxTemprature = 100;
     public int coalLifetimeIncriment = 10000;
@@ -33,7 +33,7 @@ public class Fire : MonoBehaviour
 
     private void Update()
     {
-        temperature = coalsInFire;
+        
     }
 
     private void OnTriggerEnter(Collider other)
@@ -44,6 +44,7 @@ public class Fire : MonoBehaviour
             {
                 other.GetComponent<CoalScript>().IncreaseLifetime(extraTime);
                 coalsInFire += 1.0f;
+                temperature = coalsInFire;
                 SetEmissionRate(coalsInFire);
             }
         }  
@@ -55,6 +56,7 @@ public class Fire : MonoBehaviour
         {
             other.GetComponent<CoalScript>().IncreaseLifetime(-extraTime);
             coalsInFire -= 1.0f;
+            temperature = coalsInFire;
             SetEmissionRate(coalsInFire);
         }
     }
