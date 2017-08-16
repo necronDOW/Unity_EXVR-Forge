@@ -7,6 +7,7 @@ public class DeformableMesh : DeformableBase
     public float maxInfluence = 1.0f;
     public float forceFactor = 1.0f;
     public float distanceLimiter = 0.0f;
+    public bool advancedDeform = false;
 
     private Collider currentImpactCollider;
     private Vector3 currentHitPoint;
@@ -31,19 +32,32 @@ public class DeformableMesh : DeformableBase
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!currentImpactCollider)
-        {
+        if (!currentImpactCollider) {
             currentImpactCollider = other;
 
             RaycastHit hitInfo;
             float rayLength = other.bounds.extents.magnitude;
 
             if (Physics.Raycast(other.transform.position, other.transform.forward, out hitInfo, rayLength)
-                || Physics.Raycast(other.transform.position, -other.transform.forward, out hitInfo, rayLength))
-            {
-                if (hitInfo.transform.gameObject == gameObject)
-                {
-                    Deform(other.transform, hitInfo.point);
+                || Physics.Raycast(other.transform.position, -other.transform.forward, out hitInfo, rayLength)) {
+                if (hitInfo.transform.gameObject == gameObject) {
+                    if (advancedDeform)
+                    {
+                        Vector3[] pts = new Vector3[4];
+                        Vector3 otherRight = other.transform.right * other.bounds.extents.x;
+                        Vector3 otherUp = other.transform.up * other.bounds.extents.y;
+
+                        int p = 0;
+                        for (int i = -1; i <= 1; i += 2)
+                        {
+                            for (int j = -1; j <= 1; j += 2)
+                                pts[p++] = hitInfo.point + (otherRight * i) + (otherUp * j);
+                        }
+
+                        Deform(other.transform, pts);
+                    }
+                    else Deform(other.transform, hitInfo.point);
+
                     currentHitPoint = hitInfo.point;
                     return;
                 }
@@ -59,30 +73,43 @@ public class DeformableMesh : DeformableBase
         if (currentImpactCollider && Vector3.Distance(currentImpactCollider.transform.position, currentHitPoint) >= distanceLimiter)
             currentImpactCollider = null;
     }
-    
-    private void Deform(Transform otherObject, Vector3 hitPoint)
+
+    private void DisplaceVertices(ref Vector3[] vertices, Transform otherObject, Vector3 hitPoint, float force)
     {
         Vector3 impactVectorNormalized = (otherObject.position - hitPoint).normalized;
         Vector3 simplifiedHitPoint = DivideVector3(hitPoint - transform.position, transform.lossyScale);
-        Vector3[] mVertices = mFilter.sharedMesh.vertices;
 
         RotatePointAroundPivot(ref impactVectorNormalized, transform.position, -transform.eulerAngles);
         RotatePointAroundPivot(ref simplifiedHitPoint, transform.position, -transform.eulerAngles);
 
-        for (int i = 0; i < mVertices.Length; i++)
-        {
-            Vector3 diff = simplifiedHitPoint - mVertices[i];
+        for (int i = 0; i < vertices.Length; i++) {
+            Vector3 diff = simplifiedHitPoint - vertices[i];
             float dist = diff.magnitude;
             float influence = Mathf.Clamp01(maxInfluence - dist);
 
-            // This line helps with sideways displacment but needs some work.
-            //Vector3 displacement = diff * (1.0f / dist) * forceFactor * influence;
-
-            Vector3 displacement = -impactVectorNormalized * forceFactor * influence;
-            mVertices[i] += displacement;
+            Vector3 displacement = -impactVectorNormalized * force * influence;
+            vertices[i] += displacement;
         }
+    }
 
-        mFilter.sharedMesh.vertices = mVertices;
+    private void Deform(Transform otherObject, Vector3[] hitPoints)
+    {
+        Vector3[] mVertices = mFilter.mesh.vertices;
+        for (int i = 0; i < hitPoints.Length; i++)
+            DisplaceVertices(ref mVertices, otherObject, hitPoints[i], forceFactor / hitPoints.Length);
+        UpdateMesh(mVertices);
+    }
+    
+    private void Deform(Transform otherObject, Vector3 hitPoint)
+    {
+        Vector3[] mVertices = mFilter.sharedMesh.vertices;
+        DisplaceVertices(ref mVertices, otherObject, hitPoint, forceFactor);
+        UpdateMesh(mVertices);
+    }
+
+    private void UpdateMesh(Vector3[] vertices)
+    {
+        mFilter.sharedMesh.vertices = vertices;
         mFilter.sharedMesh.RecalculateBounds();
         mCollider.sharedMesh = mFilter.sharedMesh;
     }

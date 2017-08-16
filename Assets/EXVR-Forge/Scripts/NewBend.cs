@@ -1,9 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
+using UnityThreading;
 
 public class NewBend : MonoBehaviour
 {
+    private static int maxWorkGroupSize = 1024;
     private static int numBendSegments = 3;
 
     public float curvature = 0;
@@ -20,18 +23,31 @@ public class NewBend : MonoBehaviour
     private Vector3[] binormals = new Vector3[numBendSegments];
     private Vector3[] tangents = new Vector3[numBendSegments];
 
+    private List<Thread> threads = new List<Thread>();
+    private ts_Transform ts_transform, ts_targetTransform;
+
     // Use this for initialization
     private void Start()
     {
         ProjectTarget();
 
         transform.position -= transform.TransformPoint(0, length, 0) * 0.5f;
+        ts_transform = new ts_Transform(transform);
+        ts_targetTransform = new ts_Transform(target.transform);
     }
 
+    float timer = 0.0f;
     // LateUpdate happens after all Update functions
     private void LateUpdate()
     {
+        timer = Time.realtimeSinceStartup;
+
+        ts_transform.CopyValues(transform);
+        ts_targetTransform.CopyValues(target.transform);
+
         Deform();
+
+        Debug.Log(Time.realtimeSinceStartup - timer);
     }
 
     private void ProjectTarget()
@@ -45,41 +61,66 @@ public class NewBend : MonoBehaviour
         origVerts = mesh.vertices;
     }
 
+    Vector3[] thread_pts;
     private void Deform()
     {
-        Vector3[] pts = new Vector3[origVerts.Length];
+        thread_pts = new Vector3[origVerts.Length];
+
+        for (int i = 0; i < origVerts.Length; i += maxWorkGroupSize) {
+            int workgroupSize = (i + maxWorkGroupSize < origVerts.Length) ? maxWorkGroupSize : origVerts.Length - i;
+            threads.Add(StartThread(i, i + workgroupSize, ts_transform, ts_targetTransform));
+        }
+
+        foreach (Thread t in threads)
+            t.Join();
+
+        threads.Clear();
+        mesh.vertices = thread_pts;
+    }
+
+    private Thread StartThread(int iStart, int iEnd, ts_Transform thisT, ts_Transform otherT)
+    {
+        Thread t = new Thread(() => DeformThread(iStart, iEnd, thisT, otherT));
+        t.Start();
+        return t;
+    }
+
+    private void DeformThread(int iStart, int iEnd, ts_Transform thisT, ts_Transform otherT)
+    {
         Vector3 P, N, BiN, T;
         Vector3 P2, N2, BiN2, T2;
-        Vector3 bendEnd = target.transform.TransformPoint(0, length, 0);
+        Vector3 bendEnd = otherT.TransformPoint(0, length, 0);
 
-        N = transform.TransformDirection(new Vector3(1, 0, 0));
-        BiN = transform.TransformDirection(new Vector3(0, 0, -1));
-        T = transform.TransformDirection(new Vector3(0, 1, 0));
+        N = thisT.TransformDirection(1, 0, 0);
+        BiN = thisT.TransformDirection(0, 0, -1);
+        T = thisT.TransformDirection(0, 1, 0);
 
-        for (int i = 0; i < origVerts.Length; i++) {
-            Vector3 wsPt = target.transform.TransformPoint(origVerts[i]);
+        for (int i = iStart; i < iEnd; i++)
+        {
+            Vector3 wsPt = otherT.TransformPoint(origVerts[i]);
 
-            float u = PtLineProject(wsPt, transform.TransformPoint(new Vector3(0, 0, 0)), transform.TransformPoint(new Vector3(0, 1 * length, 0)));
+            float u = PtLineProject(wsPt, thisT.TransformPoint(Vector3.zero), thisT.TransformPoint(0, 1 * length, 0));
             u = Mathf.Min(1.0F, Mathf.Max(u, 0.0F));
-            
+
             float tmp = Vector3.Dot(wsPt, bendEnd);
             tmp = Mathf.Min(Mathf.Max(tmp, 0), bendEnd.magnitude);
 
-            P = transform.TransformPoint(new Vector3(0, 0, 0) + u * (new Vector3(0, 1 * length, 0) - new Vector3(0, 0, 0)));
+            P = thisT.TransformPoint(u * new Vector3(0, 1 * length, 0));
 
             float dN, dBiN, dT;
             dN = PtLineProject(wsPt, P, P + N);
             dBiN = PtLineProject(wsPt, P, P + BiN);
             dT = PtLineProject(wsPt, P, P + T);
-            
-            float x, y, z;
 
-            if (curvature != 0) {
-                x = (Mathf.Cos(u * curvature / Mathf.PI) * Mathf.PI / curvature - Mathf.PI / curvature) * length;
-                y = (Mathf.Sin(u * curvature / Mathf.PI) * Mathf.PI / curvature) * length;
-                z = 0;
-                P2 = transform.TransformPoint(new Vector3(x, y, z));
-                N2 = transform.TransformDirection(Vector3.Normalize(new Vector3(x, y, z) - new Vector3(-Mathf.PI / curvature * length, 0, 0)));
+            Vector3 v = Vector3.zero;
+
+            if (curvature != 0)
+            {
+                v.x = (Mathf.Cos(u * curvature / Mathf.PI) * Mathf.PI / curvature - Mathf.PI / curvature) * length;
+                v.y = (Mathf.Sin(u * curvature / Mathf.PI) * Mathf.PI / curvature) * length;
+                v.z = 0;
+                P2 = thisT.TransformPoint(v);
+                N2 = thisT.TransformDirection(Vector3.Normalize(v - new Vector3(-Mathf.PI / curvature * length, 0, 0)));
 
                 if (curvature < 0)
                     N2 *= -1;
@@ -87,20 +128,16 @@ public class NewBend : MonoBehaviour
                 BiN2 = BiN;
                 T2 = Vector3.Cross(N2, BiN2);
             }
-            else {
+            else
+            {
                 P2 = P;
                 N2 = N;
                 BiN2 = BiN;
                 T2 = T;
             }
-            
-            pts[i] = Vector3.Lerp(origVerts[i], target.transform.InverseTransformPoint(P2 + dN * N2 + dBiN * BiN2 + dT * T2), amount);
+
+            thread_pts[i] = Vector3.Lerp(origVerts[i], otherT.InverseTransformPoint(P2 + dN * N2 + dBiN * BiN2 + dT * T2), amount);
         }
-
-        mesh.vertices = pts;
-
-        if (target.transform.GetComponent<MeshCollider>() != null)
-            target.transform.GetComponent<MeshCollider>().sharedMesh = mesh;
     }
 
     private void PlotPoints()
@@ -178,7 +215,8 @@ public class NewBend : MonoBehaviour
     {
         mesh.RecalculateNormals();
 
-        Destroy(gameObject);
+        if (target.transform.GetComponent<MeshCollider>() != null)
+            target.transform.GetComponent<MeshCollider>().sharedMesh = mesh;
     }
 
     private void OnDrawGizmos()
