@@ -66,6 +66,9 @@ public class DeformableMesh : DeformableBase
         Vector3 simplifiedHitPoint = DivideVector3(hitPoint - transform.position, transform.lossyScale);
         Vector3[] mVertices = mFilter.sharedMesh.vertices;
 
+        RotatePointAroundPivot(ref impactVectorNormalized, transform.position, -transform.eulerAngles);
+        RotatePointAroundPivot(ref simplifiedHitPoint, transform.position, -transform.eulerAngles);
+
         for (int i = 0; i < mVertices.Length; i++)
         {
             Vector3 diff = simplifiedHitPoint - mVertices[i];
@@ -82,5 +85,12 @@ public class DeformableMesh : DeformableBase
         mFilter.sharedMesh.vertices = mVertices;
         mFilter.sharedMesh.RecalculateBounds();
         mCollider.sharedMesh = mFilter.sharedMesh;
+    }
+
+    private void RotatePointAroundPivot(ref Vector3 point, Vector3 pivot, Vector3 angles)
+    {
+        Vector3 dir = point - pivot;
+        dir = Quaternion.Euler(angles) * dir;
+        point = dir + pivot;
     }
 }

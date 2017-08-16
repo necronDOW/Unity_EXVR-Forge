@@ -4,54 +4,49 @@ using System.Collections.Generic;
 
 public class Bend : MonoBehaviour
 {
-    private const float angularMultiplier = 0.0548311372f;
-
-    public float angle = 0;
+	public float curvature = 0;
 	public float length = 1;
 	public float amount = 1;
 	public bool showGizmo = true;
-    public GameObject target { get; private set; }
 
 	public GameObject[] moves;
-    private List<Mesh> meshes = new List<Mesh>();
-    private List<Transform> transforms = new List<Transform>();
-    private List<Vector3[]> origVerts = new List<Vector3[]>();
-    private List<Vector3[]> verts  = new List<Vector3[]>();
+	List<Mesh> meshes = new List<Mesh>();
+	List<Transform> transforms = new List<Transform>();
+	List<Vector3[]> origVerts = new List<Vector3[]>();
+	List<Vector3[]> verts  = new List<Vector3[]>();
 
 	//5 is the default number of segments in the bend
 	//decrease this number to improve performance
-	private static int numBendSegments = 2;
-    private Vector3[] origPts = new Vector3[numBendSegments];
-    private Vector3[] pts = new Vector3[numBendSegments];
-    private Vector3[] normals = new Vector3[numBendSegments];
-    private Vector3[] binormals = new Vector3[numBendSegments];
-    private Vector3[] tangents = new Vector3[numBendSegments];
-    private Vector3 targetStartPosition;
+	static int numBendSegments = 5;
+	Vector3[] origPts = new Vector3[numBendSegments]; 
+	Vector3[] pts = new Vector3[numBendSegments];
+	Vector3[] normals = new Vector3[numBendSegments];
+	Vector3[] binormals = new Vector3[numBendSegments];
+	Vector3[] tangents = new Vector3[numBendSegments];
 
-    // Use this for initialization
-    void Start()
+    private int oldMovesLength = 0;
+
+	// Use this for initialization
+	void Start ()
+	{
+        oldMovesLength = moves.Length;
+
+        if (moves.Length != 0)
+            ProjectTargets();
+	}
+
+    private void Update()
     {
-        SetMeshes(moves);
+        if (oldMovesLength != moves.Length)
+            ProjectTargets();
+
+        oldMovesLength = moves.Length;
     }
 
     // LateUpdate happens after all Update functions
     void LateUpdate ()
 	{
-        if (target != null)
-        {
-            Vector3 point = new Vector3(transform.position.x, target.transform.position.y, target.transform.position.z);
-
-            transform.LookAt(point);
-            transform.Rotate(new Vector3(0, 0, 1), -90f);
-            transform.Rotate(new Vector3(0, 1, 0), 90f);
-
-            Vector3 a = targetStartPosition - transform.position;
-            Vector3 b = target.transform.position - transform.position;
-            Debug.Log("a:" + a + ", b:" + b);
-            angle = Vector3.Angle(a, b);
-        }
-        
-        Deform();
+		Deform();
 	}
 	
 	void ProjectTargets()
@@ -59,21 +54,18 @@ public class Bend : MonoBehaviour
 		meshes.Clear();
 		transforms.Clear();
 		origVerts.Clear();
-
-		for(int i = 0; i < moves.Length; i++)
-		{
-            if (moves[i].GetComponent<MeshFilter>())
-            {
-                meshes.Add(moves[i].GetComponent<MeshFilter>().mesh);
-                transforms.Add(moves[i].transform);
-                origVerts.Add(meshes[i].vertices);
-            }
+        
+		for(int i = 0; i < moves.Length; i++) {
+			meshes.Add(moves[i].GetComponent<MeshFilter>().mesh);
+			transforms.Add(moves[i].transform);
+			origVerts.Add(meshes[i].vertices);
 		}
 	}
 	void UpdatePts(){
 		origVerts.Clear ();
-		for(int i=0; i<moves.Length;i++)
+		for(int i=0; i<moves.Length;i++) {
 			origVerts.Add (meshes[i].vertices);
+		}
 	}
 	
 	void Deform()
@@ -83,17 +75,14 @@ public class Bend : MonoBehaviour
 		Vector3[] restPts;
 		Vector3[] pts;
 	
-		
-		for(int m = 0; m < meshes.Count; m++)
-		{
+		for(int m = 0; m < meshes.Count; m++) {
 			mesh = meshes[m];
 			xform = transforms[m];
 			restPts = origVerts[m];
 
 			pts = new Vector3[restPts.Length];
 			
-			for(int i = 0; i < restPts.Length; i++)
-			{
+			for(int i = 0; i < restPts.Length; i++) {
 				Vector3 wsPt=xform.TransformPoint (restPts[i]);
 				//Project pt onto bend line segment to get u param
 
@@ -117,15 +106,12 @@ public class Bend : MonoBehaviour
 				dN = PtLineProject(wsPt, P, P+N);
 				dBiN = PtLineProject(wsPt, P, P+BiN);
 				dT = PtLineProject(wsPt, P, P+T);
-                
+
 				//Evaluate posed P', N', BiN', T'
 				Vector3 P2, N2, BiN2, T2;
 				float x, y, z;
 
-				if (angle != 0)
-				{
-                    float curvature = angle * angularMultiplier;
-
+				if( curvature != 0) {
 					x = (Mathf.Cos(u * curvature/Mathf.PI) * Mathf.PI/curvature - Mathf.PI/curvature) * length;
 					y = (Mathf.Sin(u * curvature/Mathf.PI) * Mathf.PI/curvature) * length;
 					z = 0;
@@ -137,8 +123,7 @@ public class Bend : MonoBehaviour
 					BiN2 = BiN;
 					T2 = Vector3.Cross(N2, BiN2);
 				}
-				else
-				{
+				else {
 					P2 = P;
 					N2 = N;
 					BiN2 = BiN;
@@ -151,8 +136,9 @@ public class Bend : MonoBehaviour
 
 			mesh.vertices = pts;
 		
-			if(xform.GetComponent<MeshCollider>()!=null)
+			if(xform.GetComponent<MeshCollider>()!=null) {
 				xform.GetComponent<MeshCollider>().sharedMesh=mesh;
+			}
 		}
 	}
 	
@@ -164,29 +150,26 @@ public class Bend : MonoBehaviour
 			//Puts the bend in the same space as the mesh
 			origPts[i] = transform.TransformPoint(new Vector3(0,u*length,0));
 			normals[i] = transform.TransformDirection(new Vector3(0,1,0));
-
+            
 			float x, y, z;
 			Vector3 pt, normal, binormal, tangent;
 
-			if(angle != 0)
-			{
-                float curvature = angle * angularMultiplier;
-
-                x = (Mathf.Cos(u * curvature/Mathf.PI) * Mathf.PI/curvature - Mathf.PI/curvature) * length;
+			if (curvature != 0) {
+				x = (Mathf.Cos(u * curvature/Mathf.PI) * Mathf.PI/curvature - Mathf.PI/curvature) * length;
 				y = (Mathf.Sin(u * curvature/Mathf.PI) * Mathf.PI/curvature) * length;
 				z = 0;
 				pt = transform.TransformPoint(new Vector3(x,y,z));
 				normal = transform.TransformDirection(Vector3.Normalize(new Vector3(x,y,z) - new Vector3(-Mathf.PI/curvature*length,0,0)));
-				if(curvature < 0)
-				{
+
+                if (curvature < 0) {
 					normal *= -1;
 				}
 			}
-			else
-			{
+			else {
 				pt = origPts[i];
 				normal = transform.TransformDirection(new Vector3(1,0,0));
 			}
+
 			binormal = transform.TransformDirection(new Vector3(0,0,-1));
 			tangent = Vector3.Cross (normal, binormal);
 			
@@ -196,16 +179,15 @@ public class Bend : MonoBehaviour
 			tangents[i] = tangent;
 		}
 
-		for(int i = 0; i < pts.Length; i++)
-		{
+		for(int i = 0; i < pts.Length; i++) {
 			Gizmos.color = Color.red;
-			Gizmos.DrawLine (pts[i], pts[i]+.1F*normals[i]);
+			Gizmos.DrawLine (pts[i], pts[i]+.1F*normals[i]*length);
 			
 			Gizmos.color = Color.green;
-			Gizmos.DrawLine (pts[i], pts[i]+.1F*tangents[i]);
+			Gizmos.DrawLine (pts[i], pts[i]+.1F*tangents[i]*length);
 			
 			Gizmos.color = Color.blue;
-			Gizmos.DrawLine (pts[i], pts[i]+.1F*binormals[i]);
+			Gizmos.DrawLine (pts[i], pts[i]+.1F*binormals[i]*length);
 			
 			Gizmos.color = new Color(1,1,1,.5F);
 			if(i < pts.Length-1)
@@ -231,18 +213,4 @@ public class Bend : MonoBehaviour
 		if(showGizmo)
 			DrawBend();
 	}
-
-    public void SetMeshes(GameObject[] meshedObjects)
-    {
-        moves = meshedObjects;
-        ProjectTargets();
-    }
-
-    public void SetTarget(GameObject gameObject)
-    {
-        target = gameObject;
-
-        if (gameObject != null)
-            targetStartPosition = gameObject.transform.position;
-    }
 }
