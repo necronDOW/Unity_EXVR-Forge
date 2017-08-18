@@ -6,7 +6,7 @@ using Valve.VR.InteractionSystem;
 public class CuttingTool : MonoBehaviour {
 
     public string tooltag;
-
+    public static bool rodAttached;
     private Rigidbody attachedRb;
     private GameObject parent;
 
@@ -24,6 +24,7 @@ public class CuttingTool : MonoBehaviour {
 
             if (!other.GetComponent<Throwable>().attached)
             {
+                rodAttached = true;
                 GetComponent<Collider>().enabled = false;
                 attachedRb = other.GetComponent<Rigidbody>();
                 attachedRb.constraints = RigidbodyConstraints.FreezeAll;
@@ -39,6 +40,8 @@ public class CuttingTool : MonoBehaviour {
     {
         parent.GetComponent<BoxCollider>().enabled = true;
         GetComponent<Collider>().enabled = true;
+        rodAttached = false;
+        Cutter.cut = false;
     }
 
     //on collide and side button press
