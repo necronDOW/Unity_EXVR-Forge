@@ -1,7 +1,6 @@
-﻿using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
+using UnityEngine;
 using UnityThreading;
 
 public class BendInstance : MonoBehaviour
@@ -32,6 +31,13 @@ public class BendInstance : MonoBehaviour
     private List<Thread> threads = new List<Thread>();
     private ts_Transform ts_transform, ts_targetTransform;
 
+    private Thread StartThread(int iStart, int iEnd, ts_Transform thisT, ts_Transform otherT, BendParameters bp)
+    {
+        Thread t = new Thread(() => DeformThread(iStart, iEnd, thisT, otherT, bp));
+        t.Start();
+        return t;
+    }
+
     // Use this for initialization
     private void Start()
     {
@@ -41,19 +47,14 @@ public class BendInstance : MonoBehaviour
         ts_transform = new ts_Transform(transform);
         ts_targetTransform = new ts_Transform(target.transform);
     }
-
-    float timer = 0.0f;
+    
     // LateUpdate happens after all Update functions
     private void LateUpdate()
     {
-        timer = Time.realtimeSinceStartup;
-
         ts_transform.CopyValues(transform);
         ts_targetTransform.CopyValues(target.transform);
 
         Deform();
-
-        Debug.Log(Time.realtimeSinceStartup - timer);
     }
 
     private void ProjectTarget()
@@ -83,18 +84,8 @@ public class BendInstance : MonoBehaviour
             threads.Add(StartThread(i, i + workgroupSize, ts_transform, ts_targetTransform, bp));
         }
 
-        foreach (Thread t in threads)
-            t.Join();
-
-        threads.Clear();
+        ThreadTools.WaitForThreads(ref threads);
         mesh.vertices = thread_pts;
-    }
-
-    private Thread StartThread(int iStart, int iEnd, ts_Transform thisT, ts_Transform otherT, BendParameters bp)
-    {
-        Thread t = new Thread(() => DeformThread(iStart, iEnd, thisT, otherT, bp));
-        t.Start();
-        return t;
     }
 
     private void DeformThread(int iStart, int iEnd, ts_Transform thisT, ts_Transform otherT, BendParameters bp)

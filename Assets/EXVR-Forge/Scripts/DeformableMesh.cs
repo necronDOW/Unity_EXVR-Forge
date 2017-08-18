@@ -1,16 +1,49 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
+using UnityThreading;
 
 public class DeformableMesh : DeformableBase
 {
+    struct DeformVectors
+    {
+        public Vector3 impact;
+        public Vector3 simplified;
+
+        public DeformVectors(Transform transform, Vector3 otherPosition, Vector3 hitPoint)
+        {
+            impact = (otherPosition - hitPoint).normalized;
+            simplified = DivideVector3(hitPoint - transform.position, transform.lossyScale);
+
+            RotatePointAroundPivot(ref impact, transform.position, -transform.eulerAngles);
+            RotatePointAroundPivot(ref simplified, transform.position, -transform.eulerAngles);
+        }
+
+        private void RotatePointAroundPivot(ref Vector3 point, Vector3 pivot, Vector3 angles)
+        {
+            Vector3 dir = point - pivot;
+            dir = Quaternion.Euler(angles) * dir;
+            point = dir + pivot;
+        }
+    }
+
+    private static int maxWorkGroupSize = 1024;
+
     public float maxInfluence = 1.0f;
     public float forceFactor = 1.0f;
     public float distanceLimiter = 0.0f;
-    public bool advancedDeform = false;
 
     private Collider currentImpactCollider;
     private Vector3 currentHitPoint;
+
+    private List<Thread> threads = new List<Thread>();
+
+    private Thread StartThread(int iStart, int iEnd, DeformVectors vectors, float force)
+    {
+        Thread t = new Thread(() => DisplaceVertices(iStart, iEnd, vectors.impact, vectors.simplified, force));
+        t.Start();
+        return t;
+    }
 
     protected override void Start()
     {
@@ -29,7 +62,7 @@ public class DeformableMesh : DeformableBase
 
         Deform(collision.transform, centralContact);
     }
-
+    
     private void OnTriggerEnter(Collider other)
     {
         if (!currentImpactCollider) {
@@ -41,22 +74,17 @@ public class DeformableMesh : DeformableBase
             if (Physics.Raycast(other.transform.position, other.transform.forward, out hitInfo, rayLength)
                 || Physics.Raycast(other.transform.position, -other.transform.forward, out hitInfo, rayLength)) {
                 if (hitInfo.transform.gameObject == gameObject) {
-                    if (advancedDeform)
-                    {
-                        Vector3[] pts = new Vector3[4];
-                        Vector3 otherRight = other.transform.right * other.bounds.extents.x;
-                        Vector3 otherUp = other.transform.up * other.bounds.extents.y;
+                    Vector3[] pts = new Vector3[4];
+                    Vector3 otherRight = other.transform.right * other.bounds.extents.x;
+                    Vector3 otherUp = other.transform.up * other.bounds.extents.y;
 
-                        int p = 0;
-                        for (int i = -1; i <= 1; i += 2)
-                        {
-                            for (int j = -1; j <= 1; j += 2)
-                                pts[p++] = hitInfo.point + (otherRight * i) + (otherUp * j);
-                        }
-
-                        Deform(other.transform, pts);
+                    int p = 0;
+                    for (int i = -1; i <= 1; i += 2) {
+                        for (int j = -1; j <= 1; j += 2)
+                            pts[p++] = hitInfo.point + (otherRight * i) + (otherUp * j);
                     }
-                    else Deform(other.transform, hitInfo.point);
+
+                    Deform(other.transform, pts);
 
                     currentHitPoint = hitInfo.point;
                     return;
@@ -74,37 +102,50 @@ public class DeformableMesh : DeformableBase
             currentImpactCollider = null;
     }
 
-    private void DisplaceVertices(ref Vector3[] vertices, Transform otherObject, Vector3 hitPoint, float force)
+    Vector3[] thread_vertices;
+    private void DisplaceVertices(int iStart, int iEnd, Vector3 impactVectorNormalized, Vector3 simplifiedHitPoint, float force)
     {
-        Vector3 impactVectorNormalized = (otherObject.position - hitPoint).normalized;
-        Vector3 simplifiedHitPoint = DivideVector3(hitPoint - transform.position, transform.lossyScale);
-
-        RotatePointAroundPivot(ref impactVectorNormalized, transform.position, -transform.eulerAngles);
-        RotatePointAroundPivot(ref simplifiedHitPoint, transform.position, -transform.eulerAngles);
-
-        for (int i = 0; i < vertices.Length; i++) {
-            Vector3 diff = simplifiedHitPoint - vertices[i];
+        for (int i = iStart; i < iEnd; i++) {
+            Vector3 diff = simplifiedHitPoint - thread_vertices[i];
             float dist = diff.magnitude;
             float influence = Mathf.Clamp01(maxInfluence - dist);
-
             Vector3 displacement = -impactVectorNormalized * force * influence;
-            vertices[i] += displacement;
+
+            thread_vertices[i] += displacement;
         }
     }
 
     private void Deform(Transform otherObject, Vector3[] hitPoints)
     {
-        Vector3[] mVertices = mFilter.mesh.vertices;
+        thread_vertices = mFilter.mesh.vertices;
         for (int i = 0; i < hitPoints.Length; i++)
-            DisplaceVertices(ref mVertices, otherObject, hitPoints[i], forceFactor / hitPoints.Length);
-        UpdateMesh(mVertices);
+        {
+            for (int j = 0; j < thread_vertices.Length; j += maxWorkGroupSize)
+            {
+                DeformVectors vectors = new DeformVectors(transform, otherObject.transform.position, hitPoints[i]);
+                int workgroupSize = (j + maxWorkGroupSize < thread_vertices.Length) ? maxWorkGroupSize : thread_vertices.Length - j;
+                threads.Add(StartThread(j, j + workgroupSize, vectors, forceFactor / hitPoints.Length));
+            }
+        }
+
+        ThreadTools.WaitForThreads(ref threads);
+        UpdateMesh(thread_vertices);
     }
     
     private void Deform(Transform otherObject, Vector3 hitPoint)
     {
-        Vector3[] mVertices = mFilter.sharedMesh.vertices;
-        DisplaceVertices(ref mVertices, otherObject, hitPoint, forceFactor);
-        UpdateMesh(mVertices);
+        thread_vertices = mFilter.sharedMesh.vertices;
+
+        DeformVectors vectors = new DeformVectors(transform, otherObject.transform.position, hitPoint);
+
+        for (int i = 0; i < thread_vertices.Length; i += maxWorkGroupSize)
+        {
+            int workgroupSize = (i + maxWorkGroupSize < thread_vertices.Length) ? maxWorkGroupSize : thread_vertices.Length - i;
+            threads.Add(StartThread(i, i + workgroupSize, vectors, forceFactor));
+        }
+
+        ThreadTools.WaitForThreads(ref threads);
+        UpdateMesh(thread_vertices);
     }
 
     private void UpdateMesh(Vector3[] vertices)
@@ -112,12 +153,5 @@ public class DeformableMesh : DeformableBase
         mFilter.sharedMesh.vertices = vertices;
         mFilter.sharedMesh.RecalculateBounds();
         mCollider.sharedMesh = mFilter.sharedMesh;
-    }
-
-    private void RotatePointAroundPivot(ref Vector3 point, Vector3 pivot, Vector3 angles)
-    {
-        Vector3 dir = point - pivot;
-        dir = Quaternion.Euler(angles) * dir;
-        point = dir + pivot;
     }
 }

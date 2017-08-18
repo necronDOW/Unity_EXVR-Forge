@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Threading;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace UnityThreading
 {
@@ -34,5 +36,15 @@ namespace UnityThreading
         public Vector3 TransformDirection(float x, float y, float z) { return TransformPoint(new Vector3(x, y, z)) - position; }
         public Vector3 InverseTransformPoint(Vector3 pt) { return Vector3.Scale(new Vector3(1 / lossyScale.x, 1 / lossyScale.y, 1 / lossyScale.z), Quaternion.Inverse(rotation) * (pt - position)); }
         public Vector3 InverseTransformPoint(float x, float y, float z) { return InverseTransformPoint(new Vector3(x, y, z)); }
+    }
+
+    public static class ThreadTools
+    {
+        public static void WaitForThreads(ref List<Thread> threads)
+        {
+            foreach (Thread t in threads)
+                t.Join();
+            threads.Clear();
+        }
     }
 }

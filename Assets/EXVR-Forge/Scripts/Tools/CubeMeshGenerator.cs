@@ -2,21 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(MeshFilter))]
+[RequireComponent(typeof(MeshFilter), typeof(MeshInfo))]
 public class CubeMeshGenerator : MonoBehaviour
 {
-    public struct Range
-    {
-        public int start { get; private set; }
-        public int end { get; private set; }
-
-        public Range(int _start, int _end)
-        {
-            start = _start;
-            end = _end;
-        }
-    }
-
+    private MeshInfo mInfo;
     private MeshFilter mFilter;
     private MeshCollider mCollider;
     private Vector3[] vertices, normals;
@@ -27,10 +16,10 @@ public class CubeMeshGenerator : MonoBehaviour
     public int xSize = 1, ySize = 1, zSize = 1;
     [Range(0.01f, 1)] public float roundness = 0.01f;
     public float meshScale = 1.0f;
-    public Range topCapVertexRange, bottomCapVertexRange;
 
     private void Awake()
     {
+        mInfo = GetComponent<MeshInfo>();
         mFilter = GetComponent<MeshFilter>();
         mCollider = GetComponent<MeshCollider>();
 
@@ -42,10 +31,11 @@ public class CubeMeshGenerator : MonoBehaviour
         
         centeringOffset = new Vector3(xScaled, yScaled, zScaled) * -0.5f;
 
-        GenerateMesh();
+        if (GenerateMesh())
+            Destroy(this);
     }
     
-    private void GenerateMesh()
+    private bool GenerateMesh()
     {
         Mesh mesh = new Mesh();
         mesh.name = name + "_generated-mesh";
@@ -56,6 +46,8 @@ public class CubeMeshGenerator : MonoBehaviour
 
         if (mCollider)
             mCollider.sharedMesh = mesh;
+
+        return true;
     }
 
     private void CreateVertices(ref Mesh mesh)
@@ -85,8 +77,10 @@ public class CubeMeshGenerator : MonoBehaviour
                 SetVertex(v++, 0, y, z);
         }
 
-        topCapVertexRange = new Range(v, v + (xSize - 1) * zSize - xSize);
-        bottomCapVertexRange = new Range(topCapVertexRange.end + 1, v + ((zSize-1) * (xSize-1)) * 2 - 1);
+        mInfo.vxr_topCap = new MeshInfo.VertexRange(v, v + (xSize - 1) * zSize - xSize);
+        mInfo.vxr_bottomCap = new MeshInfo.VertexRange(mInfo.vxr_topCap.end + 1, v + ((zSize-1) * (xSize-1)) * 2 - 1);
+        mInfo.loopSpacing = (xSize + zSize) * 2;
+        mInfo.loopCount = ySize + 1;
 
         for (int z = 1; z < zSize; z++) {
             for (int x = 1; x < xSize; x++)

@@ -1,9 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class FPSDisplay : MonoBehaviour
 {
+    public int fontSize = 24;
+
     private float deltaTime = 0.0f;
     private Rect rect;
     private GUIStyle style;
@@ -25,7 +25,7 @@ public class FPSDisplay : MonoBehaviour
 
         style = new GUIStyle();
         style.alignment = TextAnchor.UpperLeft;
-        style.fontSize = h * 2 / 100;
+        style.fontSize = fontSize;
         style.normal.textColor = new Color(.0f, .0f, .5f, 1f);
     }
 
