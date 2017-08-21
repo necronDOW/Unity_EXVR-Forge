@@ -15,7 +15,7 @@ public class ProSkaterScript : MonoBehaviour
     private Color defaultColor;
     private Color defaultEmission;
     private MeshRenderer mR;
-    private SphereCollider sC;
+    private Collider thisCollider;
 
     void Start()
     {
@@ -26,7 +26,7 @@ public class ProSkaterScript : MonoBehaviour
         mR.material.EnableKeyword("_EMISSION");
         defaultColor = mR.material.color;
         defaultEmission = mR.material.GetColor("_EmissionColor");
-        sC = GetComponent<SphereCollider>();
+        thisCollider = GetComponent<Collider>();
 
         SetActive(false);
     }
@@ -58,7 +58,7 @@ public class ProSkaterScript : MonoBehaviour
 
     public void SetActive(bool value)
     {
-        sC.enabled = value;
+        thisCollider.enabled = value;
 
         if (value)
         {

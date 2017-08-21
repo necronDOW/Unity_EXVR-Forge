@@ -65,6 +65,9 @@ public class DeformableMesh : DeformableBase
     
     private void OnTriggerEnter(Collider other)
     {
+        DeformableAgent da = other.GetComponent<DeformableAgent>();
+        float dispersion = (da) ? da.dispersion : 1.0f;
+
         if (!currentImpactCollider) {
             currentImpactCollider = other;
 
@@ -74,13 +77,13 @@ public class DeformableMesh : DeformableBase
             if (Physics.Raycast(other.transform.position, other.transform.forward, out hitInfo, rayLength)
                 || Physics.Raycast(other.transform.position, -other.transform.forward, out hitInfo, rayLength)) {
                 if (hitInfo.transform.gameObject == gameObject) {
-                    Vector3[] pts = new Vector3[4];
-                    Vector3 otherRight = other.transform.right * other.bounds.extents.x;
-                    Vector3 otherUp = other.transform.up * other.bounds.extents.y;
+                    Vector3[] pts = new Vector3[9];
+                    Vector3 otherRight = other.transform.right * other.bounds.extents.x * dispersion;
+                    Vector3 otherUp = other.transform.up * other.bounds.extents.y * dispersion;
 
                     int p = 0;
-                    for (int i = -1; i <= 1; i += 2) {
-                        for (int j = -1; j <= 1; j += 2)
+                    for (int i = -1; i <= 1; i += 1) {
+                        for (int j = -1; j <= 1; j += 1)
                             pts[p++] = hitInfo.point + (otherRight * i) + (otherUp * j);
                     }
 
