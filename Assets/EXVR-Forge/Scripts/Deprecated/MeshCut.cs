@@ -5,20 +5,18 @@ using System.Collections.Generic;
 namespace MeshCutter
 {
 
-	public class MeshCut{
-
-
-		public class MeshCutSide{
-
+	public class MeshCut
+    {
+		public class MeshCutSide
+        {
 			public List<Vector3>  vertices  = new List<Vector3>();
 			public List<Vector3>  normals   = new List<Vector3>();
 			public List<Vector2>  uvs       = new List<Vector2>();
 			public List<int>      triangles = new List<int>();
 			public List<List<int>> subIndices = new List<List<int>>();
-
-
-			public void ClearAll(){
-
+            
+			public void ClearAll()
+            {
 				vertices.Clear();
 				normals.Clear();
 				uvs.Clear();
@@ -26,8 +24,8 @@ namespace MeshCutter
 				subIndices.Clear();
 			}
 
-			public void AddTriangle( int p1, int p2, int p3, int submesh){
-
+			public void AddTriangle( int p1, int p2, int p3, int submesh)
+            {
 				// triangle index order goes 1,2,3,4....
 
 				int base_index = vertices.Count;
@@ -54,16 +52,15 @@ namespace MeshCutter
 
 			}
 
-			public void AddTriangle(Vector3[] points3, Vector3[] normals3, Vector2[] uvs3, Vector3 faceNormal, int submesh){
-
+			public void AddTriangle(Vector3[] points3, Vector3[] normals3, Vector2[] uvs3, Vector3 faceNormal, int submesh)
+            {
 				Vector3 calculated_normal = Vector3.Cross((points3[1] - points3[0]).normalized, (points3[2] - points3[0]).normalized);
 
 				int p1 = 0;
 				int p2 = 1;
 				int p3 = 2;
 
-				if(Vector3.Dot(calculated_normal, faceNormal) < 0){
-
+				if (Vector3.Dot(calculated_normal, faceNormal) < 0) {
 					p1 = 2;
 					p2 = 1;
 					p3 = 0;
@@ -91,7 +88,6 @@ namespace MeshCutter
 				uvs.Add(uvs3[p2]);
 				uvs.Add(uvs3[p3]);
 			}
-
 		}
 
 		private static MeshCutSide left_side = new MeshCutSide();
@@ -99,19 +95,17 @@ namespace MeshCutter
 
 		private static Plane blade;
 		private static Mesh victim_mesh;
-
-		// capping stuff
+        
 		private static List<Vector3> new_vertices = new List<Vector3>();
-
-
+        
 		/// <summary>
 		/// Cut the specified victim, blade_plane and capMaterial.
 		/// </summary>
 		/// <param name="victim">Victim.</param>
 		/// <param name="blade_plane">Blade plane.</param>
 		/// <param name="capMaterial">Cap material.</param>
-		public static GameObject[] Cut(GameObject victim, Vector3 anchorPoint, Vector3 normalDirection, Material capMaterial){
-
+		public static GameObject[] Cut(GameObject victim, Vector3 anchorPoint, Vector3 normalDirection, Material capMaterial)
+        {
 			// set the blade relative to victim
 			blade = new Plane(victim.transform.InverseTransformDirection(-normalDirection),
 				victim.transform.InverseTransformPoint(anchorPoint));
@@ -130,15 +124,13 @@ namespace MeshCutter
 			int   p1,p2,p3;
 
 			// go throught the submeshes
-			for(int sub=0; sub<victim_mesh.subMeshCount; sub++){
-
+			for (int sub=0; sub<victim_mesh.subMeshCount; sub++) {
 				indices = victim_mesh.GetIndices(sub);
 
 				left_side.subIndices.Add(new List<int>());
 				right_side.subIndices.Add(new List<int>());
 
-				for(int i=0; i<indices.Length; i+=3){
-
+				for (int i=0; i<indices.Length; i+=3) {
 					p1 = indices[i];
 					p2 = indices[i+1];
 					p3 = indices[i+2];
@@ -149,26 +141,19 @@ namespace MeshCutter
 
 
 					// whole triangle
-					if(sides[0] == sides[1] && sides[0] == sides[2]){
-
-						if(sides[0]){ // left side
+					if (sides[0] == sides[1] && sides[0] == sides[2]) {
+						if (sides[0]) // left side
 							left_side.AddTriangle(p1,p2,p3,sub);
-						}else{
-							right_side.AddTriangle(p1,p2,p3,sub);
-						}
-
-					}else{ // cut the triangle
-						
-						Cut_this_Face(sub, sides, p1, p2, p3);
+						else right_side.AddTriangle(p1,p2,p3,sub);
 					}
+                    else Cut_this_Face(sub, sides, p1, p2, p3);
 				}
 			}
 
 
 			Material[] mats = victim.GetComponent<MeshRenderer>().sharedMaterials;
 
-			if(mats[mats.Length-1].name != capMaterial.name){ // add cap indices
-
+			if (mats[mats.Length-1].name != capMaterial.name) { // add cap indices
 				left_side.subIndices.Add(new List<int>());
 				right_side.subIndices.Add(new List<int>());
 
@@ -230,13 +215,11 @@ namespace MeshCutter
 			rightSideObj.GetComponent<MeshRenderer>().materials = mats;
 
 			return new GameObject[]{ leftSideObj, rightSideObj };
-
 		}
 			
 
-		static void Cut_this_Face(int submesh, bool[] sides, int index1, int index2, int index3){
-
-
+		static void Cut_this_Face (int submesh, bool[] sides, int index1, int index2, int index3)
+        {
 			Vector3[] leftPoints = new Vector3[2];
 			Vector3[] leftNormals = new Vector3[2];
 			Vector2[] leftUvs = new Vector2[2];
@@ -248,20 +231,18 @@ namespace MeshCutter
 			bool didset_right = false;
 
 			int p = index1;
-			for(int side=0; side<3; side++){
-
-				switch(side){
-				case 0: p = index1;
-					break;
-				case 1: p = index2;
-					break;
-				case 2: p = index3;
-					break;
-
+			for (int side=0; side<3; side++) {
+				switch (side) {
+				    case 0: p = index1;
+					    break;
+				    case 1: p = index2;
+					    break;
+				    case 2: p = index3;
+					    break;
 				}
 
-				if(sides[side]){
-					if(!didset_left){
+				if (sides[side]) {
+					if (!didset_left) {
 						didset_left = true;
 
 						leftPoints[0]   = victim_mesh.vertices[p];
@@ -270,16 +251,15 @@ namespace MeshCutter
 						leftUvs[1]     = leftUvs[0];
 						leftNormals[0] = victim_mesh.normals[p];
 						leftNormals[1] = leftNormals[0];
-
-					}else{
-
+					}
+                    else {
 						leftPoints[1]    = victim_mesh.vertices[p];
 						leftUvs[1]      = victim_mesh.uv[p];
 						leftNormals[1]  = victim_mesh.normals[p];
-
 					}
-				}else{
-					if(!didset_right){
+				}
+                else {
+					if (!didset_right) {
 						didset_right = true;
 
 						rightPoints[0]   = victim_mesh.vertices[p];
@@ -289,7 +269,8 @@ namespace MeshCutter
 						rightNormals[0] = victim_mesh.normals[p];
 						rightNormals[1] = rightNormals[0];
 
-					}else{
+					}
+                    else {
 
 						rightPoints[1]   = victim_mesh.vertices[p];
 						rightUvs[1]     = victim_mesh.uv[p];
@@ -346,51 +327,44 @@ namespace MeshCutter
 		private static List<Vector3> capVertTracker = new List<Vector3>();
 		private static List<Vector3> capVertpolygon = new List<Vector3>();
 
-		static void Capping(){
-
+		static void Capping()
+        {
 			capVertTracker.Clear();
 
-			for(int i=0; i<new_vertices.Count; i++)
-				if(!capVertTracker.Contains(new_vertices[i]))
-				{
-					capVertpolygon.Clear();
-					capVertpolygon.Add(new_vertices[i]);
-					capVertpolygon.Add(new_vertices[i+1]);
+            for (int i = 0; i < new_vertices.Count; i++) {
+                if (!capVertTracker.Contains(new_vertices[i])) {
+                    capVertpolygon.Clear();
+                    capVertpolygon.Add(new_vertices[i]);
+                    capVertpolygon.Add(new_vertices[i + 1]);
 
-					capVertTracker.Add(new_vertices[i]);
-					capVertTracker.Add(new_vertices[i+1]);
+                    capVertTracker.Add(new_vertices[i]);
+                    capVertTracker.Add(new_vertices[i + 1]);
 
+                    bool isDone = false;
+                    while (!isDone) {
+                        isDone = true;
 
-					bool isDone = false;
-					while(!isDone){
-						isDone = true;
+                        for (int k = 0; k < new_vertices.Count; k += 2) { // go through the pairs
+                            if (new_vertices[k] == capVertpolygon[capVertpolygon.Count - 1] && !capVertTracker.Contains(new_vertices[k + 1])) { // if so add the other
+                                isDone = false;
+                                capVertpolygon.Add(new_vertices[k + 1]);
+                                capVertTracker.Add(new_vertices[k + 1]);
+                            }
+                            else if (new_vertices[k + 1] == capVertpolygon[capVertpolygon.Count - 1] && !capVertTracker.Contains(new_vertices[k])) {// if so add the other
+                                isDone = false;
+                                capVertpolygon.Add(new_vertices[k]);
+                                capVertTracker.Add(new_vertices[k]);
+                            }
+                        }
+                    }
 
-						for(int k=0; k<new_vertices.Count; k+=2){ // go through the pairs
-
-							if(new_vertices[k] == capVertpolygon[capVertpolygon.Count-1] && !capVertTracker.Contains(new_vertices[k+1])){ // if so add the other
-
-								isDone = false;
-								capVertpolygon.Add(new_vertices[k+1]);
-								capVertTracker.Add(new_vertices[k+1]);
-
-							}else if(new_vertices[k+1] == capVertpolygon[capVertpolygon.Count-1] && !capVertTracker.Contains(new_vertices[k])){// if so add the other
-
-								isDone = false;
-								capVertpolygon.Add(new_vertices[k]);
-								capVertTracker.Add(new_vertices[k]);
-							}
-						}
-					}
-
-					FillCap(capVertpolygon);
-
-				}
-			
+                    FillCap(capVertpolygon);
+                }
+            }
 		}
 
-		static void FillCap(List<Vector3> vertices){
-
-
+		static void FillCap(List<Vector3> vertices)
+        {
 			// center of the cap
 			Vector3 center = Vector3.zero;
 			foreach(Vector3 point in vertices)
@@ -410,8 +384,7 @@ namespace MeshCutter
 			Vector3 newUV1 = Vector3.zero;
 			Vector3 newUV2 = Vector3.zero;
 
-			for(int i=0; i<vertices.Count; i++){
-
+			for (int i=0; i<vertices.Count; i++) {
 				displacement = vertices[i] - center;
 				newUV1 = Vector3.zero;
 				newUV1.x = 0.5f + Vector3.Dot(displacement, left);
@@ -427,26 +400,16 @@ namespace MeshCutter
 			//	uvs.Add(new Vector2(relativePosition.x, relativePosition.y));
 			//	normals.Add(blade.normal);
 
-				left_side.AddTriangle( new Vector3[]{
-					vertices[i], vertices[(i+1) % vertices.Count], center
-				},new Vector3[]{
-					-blade.normal, -blade.normal, -blade.normal
-				},new Vector2[]{
-					newUV1, newUV2, new Vector2(0.5f, 0.5f)
-				},-blade.normal, left_side.subIndices.Count-1);
+				left_side.AddTriangle(new Vector3[] { vertices[i], vertices[(i+1) % vertices.Count], center },
+                    new Vector3[] { -blade.normal, -blade.normal, -blade.normal },
+                    new Vector2[] { newUV1, newUV2, new Vector2(0.5f, 0.5f) },
+                    -blade.normal, left_side.subIndices.Count-1);
 
-				right_side.AddTriangle( new Vector3[]{
-					vertices[i], vertices[(i+1) % vertices.Count], center
-				},new Vector3[]{
-					blade.normal, blade.normal, blade.normal
-				},new Vector2[]{
-					newUV1, newUV2, new Vector2(0.5f, 0.5f)
-				},blade.normal, right_side.subIndices.Count-1);
-
+				right_side.AddTriangle( new Vector3[] { vertices[i], vertices[(i+1) % vertices.Count], center },
+                    new Vector3[] { blade.normal, blade.normal, blade.normal },
+                    new Vector2[] { newUV1, newUV2, new Vector2(0.5f, 0.5f) },
+                    blade.normal, right_side.subIndices.Count-1);
 			}
-				
-
 		}
-	
 	}
 }
