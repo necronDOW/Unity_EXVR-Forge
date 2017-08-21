@@ -15,49 +15,11 @@ public class SaveButton : MonoBehaviour
         {
             if (oilTarget && oilTarget.exportTarget != null)
             {
-                STL.ExportBinary(oilTarget.exportTarget, Application.dataPath + "/Exports/", "object_export");
-                Debug.Log("Done");
+                STL.ExportBinary(oilTarget.exportTarget.GetComponent<MeshFilter>(), Application.dataPath + "/Exports/", "object_" + System.DateTime.Now);
+                Destroy(oilTarget.exportTarget);
+                Debug.Log("Object Exported");
                 //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex, LoadSceneMode.Single);
             }
         }
     }
-    //    void OnTriggerEnter(Collider other)
-    //{
-    //    Debug.Log(other.name);
-    //    if (other.attachedRigidbody.tag == "VrController")
-    //    {
-    //        SteamVR_TrackedObject obj = other.attachedRigidbody.GetComponent<SteamVR_TrackedObject>();
-
-    //        if (obj)
-    //            device = SteamVR_Controller.Input((int)obj.index);
-    //    }
-    //}
-
-    //void OnTriggerStay(Collider other)
-    //{
-    //    if (other.attachedRigidbody.tag == "VrController" && device != null)
-    //    {
-    //        SteamVR_TrackedObject obj = other.attachedRigidbody.GetComponent<SteamVR_TrackedObject>();
-
-    //        if (obj && (int)obj.index == device.index && device.GetHairTriggerDown())
-    //        {
-    //            if (oilTarget && oilTarget.exportTarget != null)
-    //            {
-    //                STL.ExportBinary(oilTarget.exportTarget, Application.dataPath + "/Exports/", "object_export");
-    //                //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex, LoadSceneMode.Single);
-    //            }
-    //        }
-    //    }
-    //}
-
-    //void OnTriggerExit(Collider other)
-    //{
-    //    if (other.attachedRigidbody.tag == "VrController")
-    //    {
-    //        SteamVR_TrackedObject obj = other.attachedRigidbody.GetComponent<SteamVR_TrackedObject>();
-
-    //        if (obj && (int)obj.index == device.index)
-    //            device = null;
-    //    }
-    //}
 }

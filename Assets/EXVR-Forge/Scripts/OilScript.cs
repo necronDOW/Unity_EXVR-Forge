@@ -4,7 +4,7 @@ using System.Collections;
 public class OilScript : MonoBehaviour
 {
     [HideInInspector]
-    public MeshFilter exportTarget;
+    public GameObject exportTarget;
     public ProSkaterScript proSkaterScript;
 
     private void Start()
@@ -20,7 +20,7 @@ public class OilScript : MonoBehaviour
 
             if (target.GetComponent<MeshFilter>())
             {
-                exportTarget = target.GetComponent<MeshFilter>();
+                exportTarget = target.GetComponent<GameObject>();
                 proSkaterScript.SetActive(true);
             }
         }
