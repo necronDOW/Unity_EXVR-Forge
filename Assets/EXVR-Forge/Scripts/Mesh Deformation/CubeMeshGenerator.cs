@@ -43,6 +43,7 @@ public class CubeMeshGenerator : MonoBehaviour
 
         CreateVertices(ref mesh);
         CreateTriangles(ref mesh);
+        
 
         if (mCollider)
             mCollider.sharedMesh = mesh;
