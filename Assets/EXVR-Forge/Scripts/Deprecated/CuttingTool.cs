@@ -3,34 +3,32 @@ using System.Collections.Generic;
 using UnityEngine;
 using Valve.VR.InteractionSystem;
 
-public class CuttingTool : MonoBehaviour {
-
-    public string tooltag;
-    public static bool rodAttached;
-    private Rigidbody attachedRb;
-    private GameObject parent;
+[RequireComponent(typeof(Collider))]
+public class CuttingTool : MonoBehaviour
+{
+    public AudioSource hitSound;
+    
+    private Collider[] colliders; // 0 = parent, 1 = this.
+    private CuttableMesh cutTarget;
 
     void Start()
     {
-        GetComponent<BoxCollider>().isTrigger = true;
-        parent = this.transform.parent.gameObject;
+        colliders = transform.parent.GetComponentsInChildren<Collider>();
     }
 
     private void OnTriggerStay(Collider other)
     {
-        if (other.tag == tooltag)
-        {
-            parent.GetComponent<BoxCollider>().enabled = false;
+        CuttableMesh cutTarget = other.GetComponent<CuttableMesh>();
 
-            if (!other.GetComponent<Throwable>().attached)
-            {
-                rodAttached = true;
-                GetComponent<Collider>().enabled = false;
-                attachedRb = other.GetComponent<Rigidbody>();
-                attachedRb.constraints = RigidbodyConstraints.FreezeAll;
+        if (cutTarget) {
+            colliders[0].enabled = false;
+
+            if (true) {//!other.GetComponent<Throwable>().attached) {
+                other.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
+                cutTarget.cuttingTool = this;
+                cutTarget.minImpactDistance += colliders[1].bounds.extents.magnitude;
             }
-            else
-            {
+            else {
                 other.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
             }
         }
@@ -38,15 +36,10 @@ public class CuttingTool : MonoBehaviour {
 
     public void ReEnableCutTool()
     {
-        parent.GetComponent<BoxCollider>().enabled = true;
-        GetComponent<Collider>().enabled = true;
-        rodAttached = false;
-        Cutter.cut = false;
+        foreach (Collider c in colliders)
+            c.enabled = true;
+
+        cutTarget.cuttingTool = null;
+        cutTarget.minImpactDistance -= colliders[1].bounds.extents.magnitude;
     }
-
-    //on collide and side button press
-
-    //spawn bend prefab
-
-
 }
