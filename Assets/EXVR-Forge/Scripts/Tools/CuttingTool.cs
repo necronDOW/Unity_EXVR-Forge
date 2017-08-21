@@ -23,7 +23,7 @@ public class CuttingTool : MonoBehaviour
         if (cutTarget) {
             colliders[0].enabled = false;
 
-            if (true) {//!other.GetComponent<Throwable>().attached) {
+            if (!other.GetComponent<Throwable>().attached) {//!other.GetComponent<Throwable>().attached) {
                 other.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
                 cutTarget.cuttingTool = this;
                 cutTarget.minImpactDistance += colliders[1].bounds.extents.magnitude;
