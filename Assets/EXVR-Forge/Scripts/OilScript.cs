@@ -4,18 +4,23 @@ using System.Collections;
 public class OilScript : MonoBehaviour
 {
     [HideInInspector]
-    public MeshFilter exportTarget;
+    public GameObject exportTarget;
     public ProSkaterScript proSkaterScript;
+
+    private void Start()
+    {
+        GetComponent<BoxCollider>().isTrigger = true;
+    }
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.tag == "Maluable")
+        if (other.tag == "Rod")
         {
             GameObject target = other.attachedRigidbody.gameObject;
 
             if (target.GetComponent<MeshFilter>())
             {
-                exportTarget = target.GetComponent<MeshFilter>();
+                exportTarget = target.GetComponent<GameObject>();
                 proSkaterScript.SetActive(true);
             }
         }
@@ -23,7 +28,7 @@ public class OilScript : MonoBehaviour
 
     void OnTriggerExit(Collider other)
     {
-        if (other.tag == "Maluable")
+        if (other.tag == "Rod")
         {
             GameObject target = other.attachedRigidbody.gameObject;
 
