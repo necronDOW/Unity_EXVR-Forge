@@ -7,9 +7,14 @@ public class OilScript : MonoBehaviour
     public MeshFilter exportTarget;
     public ProSkaterScript proSkaterScript;
 
+    private void Start()
+    {
+        GetComponent<BoxCollider>().isTrigger = true;
+    }
+
     void OnTriggerEnter(Collider other)
     {
-        if (other.tag == "Maluable")
+        if (other.tag == "Rod")
         {
             GameObject target = other.attachedRigidbody.gameObject;
 
@@ -23,7 +28,7 @@ public class OilScript : MonoBehaviour
 
     void OnTriggerExit(Collider other)
     {
-        if (other.tag == "Maluable")
+        if (other.tag == "Rod")
         {
             GameObject target = other.attachedRigidbody.gameObject;
 

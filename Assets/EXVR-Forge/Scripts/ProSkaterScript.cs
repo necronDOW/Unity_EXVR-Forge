@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Valve.VR.InteractionSystem;
 
+[RequireComponent(typeof(Interactable))]
 public class ProSkaterScript : MonoBehaviour
 {
     public float variance;
@@ -44,16 +46,14 @@ public class ProSkaterScript : MonoBehaviour
         transform.Rotate(rotation);
     }
 
-    void OnTriggerEnter(Collider other)
+    private void OnHandHoverBegin(Hand hand)
     {
-        if (other.attachedRigidbody.tag == "VrController")
-            mR.material.SetColor("_EmissionColor", activeEmission);
+        mR.material.SetColor("_EmissionColor", activeEmission);
     }
 
-    void OnTriggerExit(Collider other)
+    private void OnHandHoverEnd(Hand hand)
     {
-        if (other.attachedRigidbody.tag == "VrController")
-            mR.material.SetColor("_EmissionColor", defaultEmission);
+        mR.material.SetColor("_EmissionColor", defaultEmission);
     }
 
     public void SetActive(bool value)
