@@ -39,7 +39,10 @@ public class CuttingTool : MonoBehaviour
         foreach (Collider c in colliders)
             c.enabled = true;
 
-        cutTarget.cuttingTool = null;
-        cutTarget.minImpactDistance -= colliders[1].bounds.extents.magnitude;
+        if (cutTarget)
+        {
+            cutTarget.cuttingTool = null;
+            cutTarget.minImpactDistance -= colliders[1].bounds.extents.magnitude;
+        }
     }
 }
