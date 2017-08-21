@@ -77,8 +77,8 @@ public class CubeMeshGenerator : MonoBehaviour
                 SetVertex(v++, 0, y, z);
         }
 
-        mInfo.vxr_topCap = new MeshInfo.VertexRange(v, v + (xSize - 1) * zSize - xSize);
-        mInfo.vxr_bottomCap = new MeshInfo.VertexRange(mInfo.vxr_topCap.end + 1, v + ((zSize-1) * (xSize-1)) * 2 - 1);
+        mInfo.vxr_topCap = new MeshInfo.Range(v, v + (xSize - 1) * zSize - xSize - 1);
+        mInfo.vxr_bottomCap = new MeshInfo.Range(mInfo.vxr_topCap.end + 1, v + ((zSize-1) * (xSize-1)) * 2 - 1);
         mInfo.loopSpacing = (xSize + zSize) * 2;
         mInfo.loopCount = ySize + 1;
 
@@ -135,6 +135,9 @@ public class CubeMeshGenerator : MonoBehaviour
                 t = SetQuad(triangles, t, v, v + 1, v + ring, v + ring + 1);
             t = SetQuad(triangles, t, v, v - ring + 1, v + ring, v + 1);
         }
+
+        mInfo.tr_topCap = new MeshInfo.Range(t, t + (xSize * zSize * 6) - 1);
+        mInfo.tr_bottomCap = new MeshInfo.Range(mInfo.tr_topCap.end + 1, mInfo.tr_topCap.end + (xSize * zSize * 6));
 
         t = CreateTopFace(triangles, t, ring);
         t = CreateBottomFace(mesh.vertexCount, triangles, t, ring);
