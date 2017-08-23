@@ -102,14 +102,15 @@ namespace MeshCutter
 		/// <param name="victim">Victim.</param>
 		/// <param name="blade_plane">Blade plane.</param>
 		/// <param name="capMaterial">Cap material.</param>
-		public static GameObject[] Cut(GameObject victim, Vector3 anchorPoint, Vector3 normalDirection, Material capMaterial)
+		public static GameObject[] Cut(GameObject victim, Vector3 anchorPoint, Vector3 normalDirection, Material capMaterial, float cutExtents = Mathf.Infinity)
         {
-			// set the blade relative to victim
-			blade = new Plane(victim.transform.InverseTransformDirection(-normalDirection),
-				victim.transform.InverseTransformPoint(anchorPoint));
+            Vector3 invAnchorPoint = victim.transform.InverseTransformPoint(anchorPoint);
 
-			// get the victims mesh
-			victim_mesh = victim.GetComponent<MeshFilter>().sharedMesh;
+            // set the blade relative to victim
+            blade = new Plane(victim.transform.InverseTransformDirection(-normalDirection), invAnchorPoint);
+
+            // get the victims mesh
+            victim_mesh = victim.GetComponent<MeshFilter>().sharedMesh;
 
 			// reset values
 			new_vertices.Clear();
@@ -135,14 +136,20 @@ namespace MeshCutter
 					sides[0] = blade.GetSide(victim_mesh.vertices[p1]);
 					sides[1] = blade.GetSide(victim_mesh.vertices[p2]);
 					sides[2] = blade.GetSide(victim_mesh.vertices[p3]);
-                    
-					// whole triangle
-					if (sides[0] == sides[1] && sides[0] == sides[2]) {
-						if (sides[0]) // left side
-							left_side.AddTriangle(p1,p2,p3,sub);
-						else right_side.AddTriangle(p1,p2,p3,sub);
-					}
-                    else Cut_this_Face(sub, sides, p1, p2, p3);
+
+                    // whole triangle
+                    if (sides[0] == sides[1] && sides[0] == sides[2])
+                    {
+                        if (sides[0]) // left side
+                            left_side.AddTriangle(p1, p2, p3, sub);
+                        else right_side.AddTriangle(p1, p2, p3, sub);
+                    }
+                    else
+                    {
+                        if (WithinExtents(invAnchorPoint, victim_mesh.vertices[p1], victim_mesh.vertices[p2], victim_mesh.vertices[p3], cutExtents))
+                            Cut_this_Face(sub, sides, p1, p2, p3);
+                        else return null;
+                    }
 				}
 			}
             
@@ -204,7 +211,16 @@ namespace MeshCutter
 
 			return new GameObject[]{ leftSideObj, rightSideObj };
 		}
-			
+
+        static bool WithinExtents(Vector3 pt, Vector3 p1, Vector3 p2, Vector3 p3, float extents)
+        {
+            if (extents == Mathf.Infinity)
+                return true;
+
+            if (Vector3.Distance(pt, p1) > extents || Vector3.Distance(pt, p2) > extents || Vector3.Distance(pt, p3) > extents)
+                return false;
+            else return true;
+        }
 
 		static void Cut_this_Face (int submesh, bool[] sides, int index1, int index2, int index3)
         {

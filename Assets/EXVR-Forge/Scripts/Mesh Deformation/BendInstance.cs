@@ -42,8 +42,7 @@ public class BendInstance : MonoBehaviour
     private void Start()
     {
         ProjectTarget();
-
-        transform.position -= transform.TransformPoint(0, length, 0) * 0.5f;
+        
         ts_transform = new ts_Transform(transform);
         ts_targetTransform = new ts_Transform(target.transform);
     }

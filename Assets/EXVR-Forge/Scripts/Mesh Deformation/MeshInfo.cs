@@ -33,7 +33,8 @@ public class MeshInfo : MonoBehaviour
         Vector3 localizedPoint = transform.InverseTransformPoint(point);
         float minDist = Vector3.Distance(localizedPoint, VertexAtLoop(minLoop));
 
-        for (int i = 1; i < loopCount; i++) {
+        for (int i = 1; i < loopCount; i++)
+        {
             float thisDist = Vector3.Distance(localizedPoint, VertexAtLoop(i));
             if (thisDist < minDist)
             {

@@ -8,13 +8,13 @@ public class CuttableMesh : MonoBehaviour
     public Material capMaterial;
 
     public int hitsToCut = 4;
-    public float cutCooldown = 5.0f;
-    [HideInInspector] public CuttingTool cuttingTool;
-    [HideInInspector] public float minImpactDistance;
 
-    private int hits = 0;
-    private bool canCut = true;
+    private int hits;
     private MeshInfo mInfo;
+    private float minImpactDistance;
+    private bool canCut = false;
+    private Transform cuttingSrc;
+    private float cuttingSrcExtents;
 
     private void Start()
     {
@@ -24,34 +24,21 @@ public class CuttableMesh : MonoBehaviour
         minImpactDistance = Mathf.Min(c.bounds.extents.x, Mathf.Min(c.bounds.extents.y, c.bounds.extents.z)) * 2.0f;
     }
 
-    float cooldownTimer = 0.0f;
-    private void Update()
-    {
-        if (!canCut)
-        {
-            if ((cooldownTimer += Time.deltaTime) >= cutCooldown)
-            {
-                canCut = true;
-                cooldownTimer = 0.0f;
-            }
-        }
-    }
-
     private void OnTriggerEnter(Collider other)
     {
-        if (cuttingTool && other.transform.gameObject != cuttingTool.transform.gameObject)
-        {
-            if (!canCut)
-                return;
+        if (!canCut)
+            return;
 
-            if (Vector3.Distance(other.transform.position, cuttingTool.transform.position) 
-                < (minImpactDistance + other.bounds.extents.magnitude) * 1.1f)
+        if (other.gameObject != cuttingSrc.gameObject)
+        {
+            if (Vector3.Distance(other.transform.position, cuttingSrc.position) 
+                < (minImpactDistance + cuttingSrcExtents + other.bounds.extents.magnitude) * 1.1f)
             {
+                Debug.Log(hits);
                 if (hits++ >= hitsToCut)
                 {
                     PerformCut();
-                    canCut = false;
-                    hits = 0;
+                    DisableCut();
                 }
             }
         }
@@ -59,7 +46,20 @@ public class CuttableMesh : MonoBehaviour
 
     public void PerformCut()
     {
-        int cuttingLoop = mInfo.ClosestLoopToPoint(cuttingTool.transform.position);
-        MeshCutter.MeshCut.Cut(gameObject, cuttingTool.transform.position, cuttingTool.transform.right, capMaterial);
+        MeshCutter.MeshCut.Cut(gameObject, cuttingSrc.position, cuttingSrc.right, capMaterial, minImpactDistance);
+    }
+
+    public void EnableCut(Transform cuttingSrc, Collider cuttingSrcCollider)
+    {
+        canCut = true;
+        cuttingSrcExtents = cuttingSrcCollider.bounds.extents.magnitude;
+        this.cuttingSrc = cuttingSrc;
+        hits = 0;
+    }
+
+    public void DisableCut()
+    {
+        canCut = false;
+        hits = 0;
     }
 }
