@@ -22,9 +22,40 @@ public class MeshInfo : MonoBehaviour
     public int loopSpacing, loopCount;
     public MeshFilter mFilter { get; private set; }
 
+    public int[] sortedVertexIndices;
+
     private void Start()
     {
         mFilter = GetComponent<MeshFilter>();
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="topCapStart">The starting vertex for the top-most cap (inclusive).</param>
+    /// <param name="topCapEnd">The ending vertex for the top-most cap (exclusive).</param>
+    /// <param name="bottomCapStart">The starting vertex for the bottom-most cap (inclusive).</param>
+    /// <param name="bottomCapEnd">The ending vertex for the bottom-most cap (exclusive).</param>
+    public void UpdateSortedVertexIndices(int length, int s_topCap, int e_topCap, int s_botCap, int e_botCap)
+    {
+        sortedVertexIndices = new int[length];
+        for (int i = 0; i < length; i++)
+            sortedVertexIndices[i] = -1;
+
+        int v = 0;
+        for (int i = s_topCap; i < e_topCap; i++)
+            sortedVertexIndices[v++] = i;
+
+        v = length - (e_botCap - s_botCap);
+        for (int i = s_botCap; i < e_botCap; i++)
+            sortedVertexIndices[v++] = i;
+
+        v = 0;
+        for (int i = 0; i < length; i++)
+        {
+            if (sortedVertexIndices[i] == -1)
+                sortedVertexIndices[i] = v++;
+        }
     }
 
     public int ClosestLoopToPoint(Vector3 point)

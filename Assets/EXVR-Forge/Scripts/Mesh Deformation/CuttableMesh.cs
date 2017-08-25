@@ -46,7 +46,7 @@ public class CuttableMesh : MonoBehaviour
 
     public void PerformCut()
     {
-        MeshCutter.MeshCut.Cut(gameObject, cuttingSrc.position, cuttingSrc.right, capMaterial, minImpactDistance);
+        MeshCutter.MeshCut.Cut(gameObject, cuttingSrc.position, cuttingSrc.right, capMaterial);
     }
 
     public void EnableCut(Transform cuttingSrc, Collider cuttingSrcCollider)

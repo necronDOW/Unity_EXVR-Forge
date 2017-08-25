@@ -8,12 +8,14 @@ public class DeformableBase : MonoBehaviour
 {
     protected MeshFilter mFilter;
     protected MeshCollider mCollider;
+    protected int[] originalTriangles;
     protected Vector3[] originalVertices;
 
     protected virtual void Start()
     {
         mFilter = GetComponent<MeshFilter>();
         mCollider = GetComponent<MeshCollider>();
+        originalTriangles = mFilter.sharedMesh.triangles;
         originalVertices = mFilter.sharedMesh.vertices;
     }
 
@@ -29,6 +31,7 @@ public class DeformableBase : MonoBehaviour
 
     protected void ResetMesh()
     {
+        mFilter.sharedMesh.triangles = originalTriangles;
         mFilter.sharedMesh.vertices = originalVertices;
         mFilter.sharedMesh.RecalculateBounds();
         mCollider.sharedMesh = mFilter.sharedMesh;

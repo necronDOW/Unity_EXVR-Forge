@@ -83,6 +83,8 @@ public class CubeMeshGenerator : MonoBehaviour
         mInfo.loopSpacing = (xSize + zSize) * 2;
         mInfo.loopCount = ySize + 1;
 
+        mInfo.UpdateSortedVertexIndices(vertices.Length, mInfo.vxr_topCap.start, mInfo.vxr_topCap.end+1, mInfo.vxr_bottomCap.start, mInfo.vxr_bottomCap.end+1);
+
         for (int z = 1; z < zSize; z++) {
             for (int x = 1; x < xSize; x++)
                 SetVertex(v++, x, ySize, z);

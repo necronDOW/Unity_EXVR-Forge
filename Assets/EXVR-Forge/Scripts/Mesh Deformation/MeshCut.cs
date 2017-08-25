@@ -102,7 +102,7 @@ namespace MeshCutter
 		/// <param name="victim">Victim.</param>
 		/// <param name="blade_plane">Blade plane.</param>
 		/// <param name="capMaterial">Cap material.</param>
-		public static GameObject[] Cut(GameObject victim, Vector3 anchorPoint, Vector3 normalDirection, Material capMaterial, float cutExtents = Mathf.Infinity)
+		public static GameObject[] Cut(GameObject victim, Vector3 anchorPoint, Vector3 normalDirection, Material capMaterial, MeshInfo mInfo = null)
         {
             Vector3 invAnchorPoint = victim.transform.InverseTransformPoint(anchorPoint);
 
@@ -144,12 +144,7 @@ namespace MeshCutter
                             left_side.AddTriangle(p1, p2, p3, sub);
                         else right_side.AddTriangle(p1, p2, p3, sub);
                     }
-                    else
-                    {
-                        if (WithinExtents(invAnchorPoint, victim_mesh.vertices[p1], victim_mesh.vertices[p2], victim_mesh.vertices[p3], cutExtents))
-                            Cut_this_Face(sub, sides, p1, p2, p3);
-                        else return null;
-                    }
+                    else Cut_this_Face(sub, sides, p1, p2, p3);
 				}
 			}
             
@@ -211,16 +206,6 @@ namespace MeshCutter
 
 			return new GameObject[]{ leftSideObj, rightSideObj };
 		}
-
-        static bool WithinExtents(Vector3 pt, Vector3 p1, Vector3 p2, Vector3 p3, float extents)
-        {
-            if (extents == Mathf.Infinity)
-                return true;
-
-            if (Vector3.Distance(pt, p1) > extents || Vector3.Distance(pt, p2) > extents || Vector3.Distance(pt, p3) > extents)
-                return false;
-            else return true;
-        }
 
 		static void Cut_this_Face (int submesh, bool[] sides, int index1, int index2, int index3)
         {
