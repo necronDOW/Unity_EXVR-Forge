@@ -34,7 +34,6 @@ public class CuttableMesh : MonoBehaviour
             if (Vector3.Distance(other.transform.position, cuttingSrc.position) 
                 < (minImpactDistance + cuttingSrcExtents + other.bounds.extents.magnitude) * 1.1f)
             {
-                Debug.Log(hits);
                 if (hits++ >= hitsToCut)
                 {
                     PerformCut();
@@ -46,7 +45,7 @@ public class CuttableMesh : MonoBehaviour
 
     public void PerformCut()
     {
-        MeshCutter.MeshCut.Cut(gameObject, cuttingSrc.position, cuttingSrc.right, capMaterial);
+        MeshCutter.MeshCut.Cut(gameObject, cuttingSrc.position, cuttingSrc.right, capMaterial, mInfo);
     }
 
     public void EnableCut(Transform cuttingSrc, Collider cuttingSrcCollider)

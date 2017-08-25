@@ -121,31 +121,41 @@ namespace MeshCutter
 			int[] indices;
 			int p1,p2,p3;
 
-			// go throught the submeshes
-			for (int sub=0; sub<victim_mesh.subMeshCount; sub++) {
+            int minCut = int.MaxValue, maxCut = int.MinValue;
+
+            // go throught the submeshes
+            for (int sub=0; sub<victim_mesh.subMeshCount; sub++) {
 				indices = victim_mesh.GetIndices(sub);
 
 				left_side.subIndices.Add(new List<int>());
 				right_side.subIndices.Add(new List<int>());
 
-				for (int i=0; i<indices.Length; i+=3) {
-					p1 = indices[i];
-					p2 = indices[i+1];
-					p3 = indices[i+2];
-
-					sides[0] = blade.GetSide(victim_mesh.vertices[p1]);
-					sides[1] = blade.GetSide(victim_mesh.vertices[p2]);
-					sides[2] = blade.GetSide(victim_mesh.vertices[p3]);
-
-                    // whole triangle
-                    if (sides[0] == sides[1] && sides[0] == sides[2])
+                for (int i = 0; i < indices.Length; i += 3) {
+                    if (RequiresCut(ref sides, indices[i], indices[i + 1], indices[i + 2]))
                     {
-                        if (sides[0]) // left side
-                            left_side.AddTriangle(p1, p2, p3, sub);
-                        else right_side.AddTriangle(p1, p2, p3, sub);
+                        minCut = MinInt(MinInt(MinInt(minCut, indices[i]), indices[i + 1]), indices[i + 2]);
+                        maxCut = MaxInt(MaxInt(MaxInt(minCut, indices[i]), indices[i + 1]), indices[i + 2]);
                     }
-                    else Cut_this_Face(sub, sides, p1, p2, p3);
-				}
+                }
+
+				//for (int i=0; i<indices.Length; i+=3) {
+				//	p1 = indices[i];
+				//	p2 = indices[i+1];
+				//	p3 = indices[i+2];
+
+				//	sides[0] = blade.GetSide(victim_mesh.vertices[p1]);
+				//	sides[1] = blade.GetSide(victim_mesh.vertices[p2]);
+				//	sides[2] = blade.GetSide(victim_mesh.vertices[p3]);
+
+    //                // whole triangle
+    //                if (sides[0] == sides[1] && sides[0] == sides[2])
+    //                {
+    //                    if (sides[0]) // left side
+    //                        left_side.AddTriangle(p1, p2, p3, sub);
+    //                    else right_side.AddTriangle(p1, p2, p3, sub);
+    //                }
+    //                else Cut_this_Face(sub, sides, p1, p2, p3);
+				//}
 			}
             
 			Material[] mats = victim.GetComponent<MeshRenderer>().sharedMaterials;
@@ -206,6 +216,27 @@ namespace MeshCutter
 
 			return new GameObject[]{ leftSideObj, rightSideObj };
 		}
+
+        static int MinInt(int a, int b)
+        {
+            return (a < b) ? a : b;
+        }
+
+        static int MaxInt(int a, int b)
+        {
+            return (a > b) ? a : b;
+        }
+
+        static bool RequiresCut(ref bool[] sides, int p1, int p2, int p3)
+        {
+            sides[0] = blade.GetSide(victim_mesh.vertices[p1]);
+            sides[1] = blade.GetSide(victim_mesh.vertices[p2]);
+            sides[2] = blade.GetSide(victim_mesh.vertices[p3]);
+
+            if (sides[0] == sides[1] && sides[0] == sides[2])
+                return false;
+            else return true;
+        }
 
 		static void Cut_this_Face (int submesh, bool[] sides, int index1, int index2, int index3)
         {
