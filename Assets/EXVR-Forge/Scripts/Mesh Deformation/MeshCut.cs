@@ -92,7 +92,7 @@ namespace MeshCutter
 		/// <param name="victim">Victim.</param>
 		/// <param name="blade_plane">Blade plane.</param>
 		/// <param name="capMaterial">Cap material.</param>
-		public static GameObject[] Cut(GameObject victim, Vector3 anchorPoint, Vector3 normalDirection, Material capMaterial, MeshInfo mInfo = null)
+		public static GameObject[] Cut(GameObject victim, Vector3 anchorPoint, Vector3 normalDirection, MeshInfo mInfo = null)
         {
             Vector3 invAnchorPoint = victim.transform.InverseTransformPoint(anchorPoint);
 
@@ -123,8 +123,11 @@ namespace MeshCutter
             {
                 if (RequiresCut(ref sides, indices[i], indices[i + 1], indices[i + 2]))
                 {
-                    minCut = MinInt(MinInt(MinInt(minCut, indices[i]), indices[i + 1]), indices[i + 2]);
-                    maxCut = MaxInt(MaxInt(MaxInt(minCut, indices[i]), indices[i + 1]), indices[i + 2]);
+                    if (Vector3.Distance(victim_mesh.vertices[indices[i]], anchorPoint) < 0.1f)
+                    {
+                        minCut = MinInt(MinInt(MinInt(minCut, indices[i]), indices[i + 1]), indices[i + 2]);
+                        maxCut = MaxInt(MaxInt(MaxInt(minCut, indices[i]), indices[i + 1]), indices[i + 2]);
+                    }
                 }
             }
 
@@ -134,27 +137,40 @@ namespace MeshCutter
                 p2 = indices[i + 1];
                 p3 = indices[i + 2];
 
-                sides[0] = blade.GetSide(victim_mesh.vertices[p1]);
-                sides[1] = blade.GetSide(victim_mesh.vertices[p2]);
-                sides[2] = blade.GetSide(victim_mesh.vertices[p3]);
-
-                // whole triangle
-                if (sides[0] == sides[1] && sides[0] == sides[2])
+                if (p1 >= mInfo.vxr_topCap.start && p1 <= mInfo.vxr_topCap.end+1)
+                    left_side.AddTriangle(p1, p2, p3);
+                else if (p1 >= mInfo.vxr_bottomCap.start && p1 <= mInfo.vxr_bottomCap.end+1)
+                    right_side.AddTriangle(p1, p2, p3);
+                else
                 {
-                    if (sides[0]) // left side
-                        left_side.AddTriangle(p1, p2, p3);
-                    else right_side.AddTriangle(p1, p2, p3);
+
+                    if (RequiresCut(ref sides, p1, p2, p3))
+                    {
+                        if (p1 > maxCut)
+                            left_side.AddTriangle(p1, p2, p3);
+                        else if (p1 < minCut)
+                            right_side.AddTriangle(p1, p2, p3);
+                        else Cut_this_Face(sides, p1, p2, p3);
+                    }
+                    else
+                    {
+                        if (sides[0]) // left side
+                        {
+                            if (p1 <= minCut)
+                                right_side.AddTriangle(p1, p2, p3);
+                            else left_side.AddTriangle(p1, p2, p3);
+                        }
+                        else
+                        {
+                            if (p1 >= maxCut)
+                                left_side.AddTriangle(p1, p2, p3);
+                            else right_side.AddTriangle(p1, p2, p3);
+                        }
+                    }
                 }
-                else Cut_this_Face(sides, p1, p2, p3);
             }
 
             Material mat = victim.GetComponent<MeshRenderer>().sharedMaterial;
-
-			if (mat.name != capMaterial.name) { // add cap indices
-                Material newMat = mat;
-				newMat = capMaterial;
-				mat = newMat;
-			}
             
 			// cap the opennings
 			Capping();
@@ -188,7 +204,6 @@ namespace MeshCutter
 			rightSideObj.transform.rotation = victim.transform.rotation;
             rightSideObj.transform.localScale = victim.transform.localScale;
             rightSideObj.GetComponent<MeshFilter>().mesh = right_HalfMesh;
-            rightSideObj.tag = "Rod";
 		
 			// assign mats
 			leftSideObj.GetComponent<MeshRenderer>().material = mat;
@@ -197,17 +212,17 @@ namespace MeshCutter
 			return new GameObject[]{ leftSideObj, rightSideObj };
 		}
 
-        static int MinInt(int a, int b)
+        private static int MinInt(int a, int b)
         {
             return (a < b) ? a : b;
         }
 
-        static int MaxInt(int a, int b)
+        private static int MaxInt(int a, int b)
         {
             return (a > b) ? a : b;
         }
 
-        static bool RequiresCut(ref bool[] sides, int p1, int p2, int p3)
+        private static bool RequiresCut(ref bool[] sides, int p1, int p2, int p3)
         {
             sides[0] = blade.GetSide(victim_mesh.vertices[p1]);
             sides[1] = blade.GetSide(victim_mesh.vertices[p2]);
@@ -218,7 +233,7 @@ namespace MeshCutter
             else return true;
         }
 
-		static void Cut_this_Face (bool[] sides, int index1, int index2, int index3)
+        private static void Cut_this_Face (bool[] sides, int index1, int index2, int index3)
         {
 			Vector3[] leftPoints = new Vector3[2];
 			Vector3[] leftNormals = new Vector3[2];
@@ -308,7 +323,7 @@ namespace MeshCutter
 		private static List<Vector3> capVertTracker = new List<Vector3>();
 		private static List<Vector3> capVertpolygon = new List<Vector3>();
 
-		static void Capping()
+		private static void Capping()
         {
 			capVertTracker.Clear();
 
@@ -344,7 +359,7 @@ namespace MeshCutter
             }
 		}
 
-		static void FillCap(List<Vector3> vertices)
+		private static void FillCap(List<Vector3> vertices)
         {
 			// center of the cap
 			Vector3 center = Vector3.zero;

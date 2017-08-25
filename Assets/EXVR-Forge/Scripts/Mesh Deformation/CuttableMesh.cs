@@ -5,8 +5,6 @@ using UnityEngine;
 [RequireComponent(typeof(MeshInfo))]
 public class CuttableMesh : MonoBehaviour
 {
-    public Material capMaterial;
-
     public int hitsToCut = 4;
 
     private int hits;
@@ -45,7 +43,7 @@ public class CuttableMesh : MonoBehaviour
 
     public void PerformCut()
     {
-        MeshCutter.MeshCut.Cut(gameObject, cuttingSrc.position, cuttingSrc.right, capMaterial, mInfo);
+        MeshCutter.MeshCut.Cut(gameObject, cuttingSrc.position, cuttingSrc.right, mInfo);
     }
 
     public void EnableCut(Transform cuttingSrc, Collider cuttingSrcCollider)
