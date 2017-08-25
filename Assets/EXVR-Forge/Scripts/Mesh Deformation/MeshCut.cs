@@ -35,13 +35,13 @@ namespace MeshCutter
 				triangles.Add(base_index+1);
 				triangles.Add(base_index+2);
 
-				vertices.Add(victim_mesh.vertices[p1]);
-				vertices.Add(victim_mesh.vertices[p2]);
-				vertices.Add(victim_mesh.vertices[p3]);
+				vertices.Add(victim_verts[p1]);
+				vertices.Add(victim_verts[p2]);
+				vertices.Add(victim_verts[p3]);
 
-				normals.Add(victim_mesh.normals[p1]);
-				normals.Add(victim_mesh.normals[p2]);
-				normals.Add(victim_mesh.normals[p3]);
+				normals.Add(victim_norms[p1]);
+				normals.Add(victim_norms[p2]);
+				normals.Add(victim_norms[p3]);
 			}
 
 			public void AddTriangle(Vector3[] points3, Vector3[] normals3, Vector3 faceNormal)
@@ -85,7 +85,10 @@ namespace MeshCutter
 		private static Mesh victim_mesh;
         
 		private static List<Vector3> new_vertices = new List<Vector3>();
-        
+        private static Vector3[] victim_verts;
+        private static Vector3[] victim_norms;
+
+        static float timer = 0.0f;
 		/// <summary>
 		/// Cut the specified victim, blade_plane and capMaterial.
 		/// </summary>
@@ -101,9 +104,11 @@ namespace MeshCutter
 
             // get the victims mesh
             victim_mesh = victim.GetComponent<MeshFilter>().sharedMesh;
+            victim_verts = victim_mesh.vertices;
+            victim_norms = victim_mesh.normals;
 
-			// reset values
-			new_vertices.Clear();
+            // reset values
+            new_vertices.Clear();
 			left_side.ClearAll();
 			right_side.ClearAll();
             
@@ -118,12 +123,12 @@ namespace MeshCutter
 
             left_side.indices = new List<int>();
             right_side.indices = new List<int>();
-
+            
             for (int i = 0; i < indices.Length; i += 3)
             {
                 if (RequiresCut(ref sides, indices[i], indices[i + 1], indices[i + 2]))
                 {
-                    if (Vector3.Distance(victim_mesh.vertices[indices[i]], anchorPoint) < 0.1f)
+                    if (Vector3.Distance(victim_verts[indices[i]], anchorPoint) < 0.1f)
                     {
                         minCut = MinInt(MinInt(MinInt(minCut, indices[i]), indices[i + 1]), indices[i + 2]);
                         maxCut = MaxInt(MaxInt(MaxInt(minCut, indices[i]), indices[i + 1]), indices[i + 2]);
@@ -173,7 +178,7 @@ namespace MeshCutter
             Material mat = victim.GetComponent<MeshRenderer>().sharedMaterial;
             
 			// cap the opennings
-			Capping();
+			int capVertexCount = Capping();
             
 			// Left Mesh
 			Mesh left_HalfMesh = new Mesh();
@@ -204,13 +209,36 @@ namespace MeshCutter
 			rightSideObj.transform.rotation = victim.transform.rotation;
             rightSideObj.transform.localScale = victim.transform.localScale;
             rightSideObj.GetComponent<MeshFilter>().mesh = right_HalfMesh;
-		
-			// assign mats
-			leftSideObj.GetComponent<MeshRenderer>().material = mat;
+
+            CopyDeformComponents(leftSideObj, left_HalfMesh, rightSideObj, right_HalfMesh, capVertexCount);
+
+            // assign mats
+            leftSideObj.GetComponent<MeshRenderer>().material = mat;
 			rightSideObj.GetComponent<MeshRenderer>().material = mat;
 
-			return new GameObject[]{ leftSideObj, rightSideObj };
+            return new GameObject[]{ leftSideObj, rightSideObj };
 		}
+
+        private static void CopyDeformComponents(GameObject left, Mesh leftMesh, GameObject right, Mesh rightMesh, int capVertexCount)
+        {
+            Rigidbody r_r = right.AddComponent<Rigidbody>();
+            r_r.isKinematic = left.GetComponent<Rigidbody>().isKinematic;
+
+            DeformableMesh l_dm = left.GetComponent<DeformableMesh>();
+            DeformableMesh r_dm = right.AddComponent<DeformableMesh>();
+            r_dm.maxInfluence = l_dm.maxInfluence;
+            r_dm.forceFactor = l_dm.forceFactor;
+            r_dm.distanceLimiter = l_dm.distanceLimiter;
+
+            CuttableMesh l_cm = left.GetComponent<CuttableMesh>();
+            CuttableMesh r_cm = right.AddComponent<CuttableMesh>();
+            r_cm.hitsToCut = l_cm.hitsToCut;
+
+            MeshInfo l_mi = left.GetComponent<MeshInfo>();
+            MeshInfo r_mi = right.GetComponent<MeshInfo>();
+
+            // Need to set capping vertex indices... But would like to change vertex generation to be smooth.
+        }
 
         private static int MinInt(int a, int b)
         {
@@ -224,9 +252,9 @@ namespace MeshCutter
 
         private static bool RequiresCut(ref bool[] sides, int p1, int p2, int p3)
         {
-            sides[0] = blade.GetSide(victim_mesh.vertices[p1]);
-            sides[1] = blade.GetSide(victim_mesh.vertices[p2]);
-            sides[2] = blade.GetSide(victim_mesh.vertices[p3]);
+            sides[0] = blade.GetSide(victim_verts[p1]);
+            sides[1] = blade.GetSide(victim_verts[p2]);
+            sides[2] = blade.GetSide(victim_verts[p3]);
 
             if (sides[0] == sides[1] && sides[0] == sides[2])
                 return false;
@@ -258,30 +286,30 @@ namespace MeshCutter
 					if (!didset_left) {
 						didset_left = true;
 
-						leftPoints[0]   = victim_mesh.vertices[p];
-						leftPoints[1]   = leftPoints[0];
-						leftNormals[0] = victim_mesh.normals[p];
+						leftPoints[0] = victim_verts[p];
+						leftPoints[1] = leftPoints[0];
+						leftNormals[0] = victim_norms[p];
 						leftNormals[1] = leftNormals[0];
 					}
                     else {
-						leftPoints[1]    = victim_mesh.vertices[p];
-						leftNormals[1]  = victim_mesh.normals[p];
+						leftPoints[1] = victim_verts[p];
+						leftNormals[1] = victim_norms[p];
 					}
 				}
                 else {
 					if (!didset_right) {
 						didset_right = true;
 
-						rightPoints[0]   = victim_mesh.vertices[p];
-						rightPoints[1]   = rightPoints[0];
-						rightNormals[0] = victim_mesh.normals[p];
+						rightPoints[0] = victim_verts[p];
+						rightPoints[1] = rightPoints[0];
+						rightNormals[0] = victim_norms[p];
 						rightNormals[1] = rightNormals[0];
 
 					}
                     else {
 
-						rightPoints[1]   = victim_mesh.vertices[p];
-						rightNormals[1] = victim_mesh.normals[p];
+						rightPoints[1] = victim_verts[p];
+						rightNormals[1] = victim_norms[p];
 
 					}
 				}
@@ -323,7 +351,7 @@ namespace MeshCutter
 		private static List<Vector3> capVertTracker = new List<Vector3>();
 		private static List<Vector3> capVertpolygon = new List<Vector3>();
 
-		private static void Capping()
+		private static int Capping()
         {
 			capVertTracker.Clear();
 
@@ -357,7 +385,9 @@ namespace MeshCutter
                     FillCap(capVertpolygon);
                 }
             }
-		}
+
+            return capVertpolygon.Count;
+        }
 
 		private static void FillCap(List<Vector3> vertices)
         {
