@@ -10,7 +10,6 @@ namespace MeshCutter
         {
 			public List<Vector3> vertices = new List<Vector3>();
 			public List<Vector3> normals = new List<Vector3>();
-			//public List<Vector2> uvs = new List<Vector2>();
 			public List<int> triangles = new List<int>();
 			public List<int> indices = new List<int>();
             
@@ -18,7 +17,6 @@ namespace MeshCutter
             {
 				vertices.Clear();
 				normals.Clear();
-				//uvs.Clear();
 				triangles.Clear();
 				indices.Clear();
 			}
@@ -44,10 +42,6 @@ namespace MeshCutter
 				normals.Add(victim_mesh.normals[p1]);
 				normals.Add(victim_mesh.normals[p2]);
 				normals.Add(victim_mesh.normals[p3]);
-
-				//uvs.Add(victim_mesh.uv[p1]);
-				//uvs.Add(victim_mesh.uv[p2]);
-				//uvs.Add(victim_mesh.uv[p3]);
 			}
 
 			public void AddTriangle(Vector3[] points3, Vector3[] normals3, Vector3 faceNormal)
@@ -81,10 +75,6 @@ namespace MeshCutter
 				normals.Add(normals3[p1]);
 				normals.Add(normals3[p2]);
 				normals.Add(normals3[p3]);
-
-				//uvs.Add(uvs3[p1]);
-				//uvs.Add(uvs3[p2]);
-				//uvs.Add(uvs3[p3]);
 			}
 		}
 
@@ -175,7 +165,6 @@ namespace MeshCutter
 			left_HalfMesh.vertices  = left_side.vertices.ToArray();
 			left_HalfMesh.triangles = left_side.triangles.ToArray();
 			left_HalfMesh.normals   = left_side.normals.ToArray();
-            //left_HalfMesh.uv        = left_side.uvs.ToArray();
 
             left_HalfMesh.SetIndices(left_side.indices.ToArray(), MeshTopology.Triangles, 0);
 
@@ -185,7 +174,6 @@ namespace MeshCutter
 			right_HalfMesh.vertices  = right_side.vertices.ToArray();
 			right_HalfMesh.triangles = right_side.triangles.ToArray();
 			right_HalfMesh.normals   = right_side.normals.ToArray();
-            //right_HalfMesh.uv        = right_side.uvs.ToArray();
 
             right_HalfMesh.SetIndices(right_side.indices.ToArray(), MeshTopology.Triangles, 0);
 
@@ -234,10 +222,8 @@ namespace MeshCutter
         {
 			Vector3[] leftPoints = new Vector3[2];
 			Vector3[] leftNormals = new Vector3[2];
-			//Vector2[] leftUvs = new Vector2[2];
 			Vector3[] rightPoints = new Vector3[2];
 			Vector3[] rightNormals = new Vector3[2];
-			//Vector2[] rightUvs = new Vector2[2];
 
 			bool didset_left = false;
 			bool didset_right = false;
@@ -259,14 +245,11 @@ namespace MeshCutter
 
 						leftPoints[0]   = victim_mesh.vertices[p];
 						leftPoints[1]   = leftPoints[0];
-						//leftUvs[0]     = victim_mesh.uv[p];
-						//leftUvs[1]     = leftUvs[0];
 						leftNormals[0] = victim_mesh.normals[p];
 						leftNormals[1] = leftNormals[0];
 					}
                     else {
 						leftPoints[1]    = victim_mesh.vertices[p];
-						//leftUvs[1]      = victim_mesh.uv[p];
 						leftNormals[1]  = victim_mesh.normals[p];
 					}
 				}
@@ -276,8 +259,6 @@ namespace MeshCutter
 
 						rightPoints[0]   = victim_mesh.vertices[p];
 						rightPoints[1]   = rightPoints[0];
-						//rightUvs[0]     = victim_mesh.uv[p];
-						//rightUvs[1]     = rightUvs[0];
 						rightNormals[0] = victim_mesh.normals[p];
 						rightNormals[1] = rightNormals[0];
 
@@ -285,7 +266,6 @@ namespace MeshCutter
                     else {
 
 						rightPoints[1]   = victim_mesh.vertices[p];
-						//rightUvs[1]     = victim_mesh.uv[p];
 						rightNormals[1] = victim_mesh.normals[p];
 
 					}
@@ -299,7 +279,6 @@ namespace MeshCutter
 
 			normalizedDistance =  distance/(rightPoints[0] - leftPoints[0]).magnitude;
 			Vector3 newVertex1 = Vector3.Lerp(leftPoints[0], rightPoints[0], normalizedDistance);
-			//Vector2 newUv1     = Vector2.Lerp(leftUvs[0], rightUvs[0], normalizedDistance);
 			Vector3 newNormal1 = Vector3.Lerp(leftNormals[0] , rightNormals[0], normalizedDistance);
 
 			new_vertices.Add(newVertex1);
@@ -308,7 +287,6 @@ namespace MeshCutter
 
 			normalizedDistance =  distance/(rightPoints[1] - leftPoints[1]).magnitude;
 			Vector3 newVertex2 = Vector3.Lerp(leftPoints[1], rightPoints[1], normalizedDistance);
-			//Vector2 newUv2     = Vector2.Lerp(leftUvs[1], rightUvs[1], normalizedDistance);
 			Vector3 newNormal2 = Vector3.Lerp(leftNormals[1] , rightNormals[1], normalizedDistance);
 
 			new_vertices.Add(newVertex2);
@@ -375,34 +353,7 @@ namespace MeshCutter
 
 			center = center/vertices.Count;
 
-			// you need an axis based on the cap
-			Vector3 upward = Vector3.zero;
-			// 90 degree turn
-			upward.x = blade.normal.y;
-			upward.y = -blade.normal.x;
-			upward.z = blade.normal.z;
-			Vector3 left = Vector3.Cross(blade.normal, upward);
-
-			Vector3 displacement = Vector3.zero;
-			//Vector3 newUV1 = Vector3.zero;
-			//Vector3 newUV2 = Vector3.zero;
-
 			for (int i=0; i<vertices.Count; i++) {
-				displacement = vertices[i] - center;
-				//newUV1 = Vector3.zero;
-				//newUV1.x = 0.5f + Vector3.Dot(displacement, left);
-				//newUV1.y = 0.5f + Vector3.Dot(displacement, upward);
-				//newUV1.z = 0.5f + Vector3.Dot(displacement, blade.normal);
-
-				displacement = vertices[(i+1) % vertices.Count] - center;
-				//newUV2 = Vector3.zero;
-				//newUV2.x = 0.5f + Vector3.Dot(displacement, left);
-				//newUV2.y = 0.5f + Vector3.Dot(displacement, upward);
-				//newUV2.z = 0.5f + Vector3.Dot(displacement, blade.normal);
-
-			//	uvs.Add(new Vector2(relativePosition.x, relativePosition.y));
-			//	normals.Add(blade.normal);
-
 				left_side.AddTriangle(new Vector3[] { vertices[i], vertices[(i+1) % vertices.Count], center },
                     new Vector3[] { -blade.normal, -blade.normal, -blade.normal }, -blade.normal);
 
