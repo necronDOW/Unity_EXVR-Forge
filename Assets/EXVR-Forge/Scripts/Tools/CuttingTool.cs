@@ -42,7 +42,6 @@ public class CuttingTool : MonoBehaviour
             if (t && t.attached)
             {
                 other.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
-                ReEnableCutTool();
                 cutTarget = null;
             }
         }
@@ -53,6 +52,7 @@ public class CuttingTool : MonoBehaviour
         foreach (Collider c in colliders)
             c.enabled = true;
 
-        cutTarget.DisableCut();
+        if (cutTarget)
+            cutTarget.DisableCut();
     }
 }
