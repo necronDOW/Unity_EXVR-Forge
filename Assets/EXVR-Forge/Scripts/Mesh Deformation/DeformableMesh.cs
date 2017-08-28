@@ -70,7 +70,7 @@ public class DeformableMesh : DeformableBase
 
         if (!currentImpactCollider) {
             currentImpactCollider = other;
-
+            Debug.Log("test");
             RaycastHit hitInfo;
             float rayLength = other.bounds.extents.magnitude;
 
