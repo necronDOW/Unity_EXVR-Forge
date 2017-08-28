@@ -128,7 +128,7 @@ namespace MeshCutter
             {
                 if (RequiresCut(ref sides, indices[i], indices[i + 1], indices[i + 2]))
                 {
-                    if (Vector3.Distance(victim_verts[indices[i]], anchorPoint) < 0.1f)
+                    if (Vector3.Distance(victim_verts[indices[i]], invAnchorPoint) < 0.1f)
                     {
                         minCut = MinInt(MinInt(MinInt(minCut, indices[i]), indices[i + 1]), indices[i + 2]);
                         maxCut = MaxInt(MaxInt(MaxInt(minCut, indices[i]), indices[i + 1]), indices[i + 2]);
@@ -142,35 +142,27 @@ namespace MeshCutter
                 p2 = indices[i + 1];
                 p3 = indices[i + 2];
 
-                if (p1 >= mInfo.vxr_topCap.start && p1 <= mInfo.vxr_topCap.end+1)
-                    left_side.AddTriangle(p1, p2, p3);
-                else if (p1 >= mInfo.vxr_bottomCap.start && p1 <= mInfo.vxr_bottomCap.end+1)
-                    right_side.AddTriangle(p1, p2, p3);
+                if (RequiresCut(ref sides, p1, p2, p3))
+                {
+                    if (p1 > maxCut)
+                        left_side.AddTriangle(p1, p2, p3);
+                    else if (p1 < minCut)
+                        right_side.AddTriangle(p1, p2, p3);
+                    else Cut_this_Face(sides, p1, p2, p3);
+                }
                 else
                 {
-
-                    if (RequiresCut(ref sides, p1, p2, p3))
+                    if (sides[0]) // left side
                     {
-                        if (p1 > maxCut)
-                            left_side.AddTriangle(p1, p2, p3);
-                        else if (p1 < minCut)
+                        if (p1 <= minCut)
                             right_side.AddTriangle(p1, p2, p3);
-                        else Cut_this_Face(sides, p1, p2, p3);
+                        else left_side.AddTriangle(p1, p2, p3);
                     }
                     else
                     {
-                        if (sides[0]) // left side
-                        {
-                            if (p1 <= minCut)
-                                right_side.AddTriangle(p1, p2, p3);
-                            else left_side.AddTriangle(p1, p2, p3);
-                        }
-                        else
-                        {
-                            if (p1 >= maxCut)
-                                left_side.AddTriangle(p1, p2, p3);
-                            else right_side.AddTriangle(p1, p2, p3);
-                        }
+                        if (p1 >= maxCut)
+                            left_side.AddTriangle(p1, p2, p3);
+                        else right_side.AddTriangle(p1, p2, p3);
                     }
                 }
             }
@@ -233,11 +225,6 @@ namespace MeshCutter
             CuttableMesh l_cm = left.GetComponent<CuttableMesh>();
             CuttableMesh r_cm = right.AddComponent<CuttableMesh>();
             r_cm.hitsToCut = l_cm.hitsToCut;
-
-            MeshInfo l_mi = left.GetComponent<MeshInfo>();
-            MeshInfo r_mi = right.GetComponent<MeshInfo>();
-
-            // Need to set capping vertex indices... But would like to change vertex generation to be smooth.
         }
 
         private static int MinInt(int a, int b)

@@ -25,7 +25,7 @@ public class CuttingTool : MonoBehaviour
             colliders[0].enabled = false;
 
             Throwable t = other.GetComponent<Throwable>();
-            if (true) {//(t && !t.attached) {
+            if (t && !t.attached) {
                 other.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
                 cutTarget.EnableCut(transform, colliders[1]);
             }

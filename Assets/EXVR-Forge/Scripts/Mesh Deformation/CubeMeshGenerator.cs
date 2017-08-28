@@ -64,6 +64,12 @@ public class CubeMeshGenerator : MonoBehaviour
         normals = new Vector3[vertices.Length];
 
         int v = 0;
+        // Bottom face
+        for (int z = 1; z < zSize; z++) {
+            for (int x = 1; x < xSize; x++)
+                SetVertex(v++, x, 0, z);
+        }
+        
         for (int y = 0; y <= ySize; y++) {
             for (int x = 0; x <= xSize; x++)
                 SetVertex(v++, x, y, 0);
@@ -78,23 +84,12 @@ public class CubeMeshGenerator : MonoBehaviour
                 SetVertex(v++, 0, y, z);
         }
 
-        mInfo.vxr_topCap = new MeshInfo.Range(v, v + (xSize - 1) * zSize - xSize - 1);
-        mInfo.vxr_bottomCap = new MeshInfo.Range(mInfo.vxr_topCap.end + 1, v + ((zSize-1) * (xSize-1)) * 2 - 1);
-        mInfo.loopSpacing = (xSize + zSize) * 2;
-        mInfo.loopCount = ySize + 1;
-
-        mInfo.UpdateSortedVertexIndices(vertices.Length, mInfo.vxr_topCap.start, mInfo.vxr_topCap.end+1, mInfo.vxr_bottomCap.start, mInfo.vxr_bottomCap.end+1);
-
+        // Top face
         for (int z = 1; z < zSize; z++) {
             for (int x = 1; x < xSize; x++)
                 SetVertex(v++, x, ySize, z);
         }
-
-        for (int z = 1; z < zSize; z++) {
-            for (int x = 1; x < xSize; x++)
-                SetVertex(v++, x, 0, z);
-        }
-
+        
         mesh.vertices = vertices;
         mesh.normals = normals;
     }
@@ -131,19 +126,16 @@ public class CubeMeshGenerator : MonoBehaviour
         int quads = (xSize * ySize + xSize * zSize + ySize * zSize) * 2;
         int[] triangles = new int[quads * 6];
         int ring = (xSize + zSize) * 2;
-        int t = 0, v = 0;
+        int t = 0, v = (xSize-1) * (zSize-1);
 
         for (int y = 0; y < ySize; y++, v++) {
             for (int q = 0; q < ring - 1; q++, v++)
                 t = SetQuad(triangles, t, v, v + 1, v + ring, v + ring + 1);
             t = SetQuad(triangles, t, v, v - ring + 1, v + ring, v + 1);
         }
-
-        mInfo.tr_topCap = new MeshInfo.Range(t, t + (xSize * zSize * 6) - 1);
-        mInfo.tr_bottomCap = new MeshInfo.Range(mInfo.tr_topCap.end + 1, mInfo.tr_topCap.end + (xSize * zSize * 6));
-
-        t = CreateTopFace(triangles, t, ring);
+        
         t = CreateBottomFace(mesh.vertexCount, triangles, t, ring);
+        t = CreateTopFace(triangles, t, ring);
 
         mesh.triangles = triangles;
     }
@@ -159,12 +151,13 @@ public class CubeMeshGenerator : MonoBehaviour
 
     private int CreateTopFace(int[] triangles, int t, int ring)
     {
-        int v = ring * ySize;
+        int faceSize = (xSize - 1) * (zSize - 1);
+        int v = ring * ySize + faceSize;
         for (int x = 0; x < xSize - 1; x++, v++)
             t = SetQuad(triangles, t, v, v + 1, v + ring - 1, v + ring);
         t = SetQuad(triangles, t, v, v + 1, v + ring - 1, v + 2);
 
-        int vMin = ring * (ySize + 1) - 1;
+        int vMin = ring * (ySize + 1) - 1 + faceSize;
         int vMid = vMin + 1;
         int vMax = v + 2;
 
@@ -186,18 +179,20 @@ public class CubeMeshGenerator : MonoBehaviour
 
     private int CreateBottomFace(int vertexCount, int[] triangles, int t, int ring)
     {
-        int v = 1;
-        int vMid = vertexCount - (xSize - 1) * (zSize - 1);
-        t = SetQuad(triangles, t, ring - 1, vMid, 0, 1);
+        int faceSize = (xSize - 1) * (zSize - 1);
+        int v = faceSize;
+        int vMid = 0;
+
+        t = SetQuad(triangles, t, v + ring - 1, vMid, v, ++v);
         for (int x = 1; x < xSize - 1; x++, v++, vMid++)
             t = SetQuad(triangles, t, vMid, vMid + 1, v, v + 1);
         t = SetQuad(triangles, t, vMid, v + 2, v, v + 1);
-
-        int vMin = ring - 2;
+        
+        int vMin = faceSize + ring - 2;
         vMid -= xSize - 2;
         int vMax = v + 2;
 
-        for (int z = 1; z < zSize - 1; z++, vMin--, vMid++, vMax++) {
+        for (int z = 1; z < zSize-1; z++, vMin--, vMid++, vMax++) {
             t = SetQuad(triangles, t, vMin, vMid + xSize - 1, vMin + 1, vMid);
             for (int x = 1; x < xSize - 1; x++, vMid++)
                 t = SetQuad(triangles, t, vMid + xSize - 1, vMid + xSize, vMid, vMid + 1);
@@ -205,6 +200,7 @@ public class CubeMeshGenerator : MonoBehaviour
         }
 
         int vTop = vMin - 1;
+
         t = SetQuad(triangles, t, vTop + 1, vTop, vTop + 2, vMid);
         for (int x = 1; x < xSize - 1; x++, vTop--, vMid++)
             t = SetQuad(triangles, t, vTop, vTop - 1, vMid, vMid + 1);
