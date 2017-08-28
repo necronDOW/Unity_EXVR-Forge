@@ -19,6 +19,7 @@ public class BendInstance : MonoBehaviour
     public float amount = 1;
     public bool showGizmo = true;
     public GameObject target;
+    public bool direction = false;
 
     private Mesh mesh;
     private Vector3[] origVerts;
@@ -30,6 +31,7 @@ public class BendInstance : MonoBehaviour
 
     private List<Thread> threads = new List<Thread>();
     private ts_Transform ts_transform, ts_targetTransform;
+    private int seperatingIndex = 0;
 
     private Thread StartThread(int iStart, int iEnd, ts_Transform thisT, ts_Transform otherT, BendParameters bp)
     {
@@ -60,6 +62,27 @@ public class BendInstance : MonoBehaviour
     {
         mesh = target.GetComponent<MeshFilter>().sharedMesh;
         origVerts = mesh.vertices;
+
+        seperatingIndex = closestVertex(target.transform.InverseTransformPoint(transform.position), origVerts);
+        direction = (closestVertex(target.transform.InverseTransformPoint(transform.position + (transform.up * 0.1f)), origVerts) < seperatingIndex);
+    }
+
+    private int closestVertex(Vector3 pt, Vector3[] verts)
+    {
+        int closestIndex = 0;
+        float minDist = Mathf.Infinity;
+
+        for (int i = 0; i < verts.Length; i++)
+        {
+            float dist = Vector3.Distance(verts[i], pt);
+            if (dist < minDist)
+            {
+                closestIndex = i;
+                minDist = dist;
+            }
+        }
+
+        return closestIndex;
     }
 
     private void UpdatePts()
@@ -78,10 +101,19 @@ public class BendInstance : MonoBehaviour
         bp.T = ts_transform.TransformDirection(0, 1, 0);
         bp.bendEnd = ts_targetTransform.TransformPoint(0, length, 0);
 
-        for (int i = 0; i < origVerts.Length; i += maxWorkGroupSize) {
+        int start = (direction) ? 0 : seperatingIndex;
+        int end = (direction) ? seperatingIndex : origVerts.Length;
+
+        for (int i = start; i < end; i += maxWorkGroupSize) {
             int workgroupSize = (i + maxWorkGroupSize < origVerts.Length) ? maxWorkGroupSize : origVerts.Length - i;
             threads.Add(StartThread(i, i + workgroupSize, ts_transform, ts_targetTransform, bp));
         }
+
+        start = (direction) ? seperatingIndex : 0;
+        end = (direction) ? origVerts.Length : seperatingIndex;
+
+        for (int i = start; i < end; i++)
+            thread_pts[i] = origVerts[i];
 
         ThreadTools.WaitForThreads(ref threads);
         mesh.vertices = thread_pts;

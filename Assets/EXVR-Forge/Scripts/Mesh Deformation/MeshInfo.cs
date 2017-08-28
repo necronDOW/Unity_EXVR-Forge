@@ -8,8 +8,6 @@ public class MeshInfo : MonoBehaviour
     public int loopSpacing, loopCount;
     public MeshFilter mFilter { get; private set; }
 
-    public int[] sortedVertexIndices;
-
     private void Start()
     {
         mFilter = GetComponent<MeshFilter>();

@@ -13,10 +13,10 @@ public class DeformableMesh : DeformableBase
         public DeformVectors(Transform transform, Vector3 otherPosition, Vector3 hitPoint)
         {
             impact = (otherPosition - hitPoint).normalized;
-            simplified = DivideVector3(hitPoint - transform.position, transform.lossyScale);
+            simplified = transform.InverseTransformPoint(hitPoint);
 
             RotatePointAroundPivot(ref impact, transform.position, -transform.eulerAngles);
-            RotatePointAroundPivot(ref simplified, transform.position, -transform.eulerAngles);
+            //RotatePointAroundPivot(ref simplified, transform.position, -transform.eulerAngles);
         }
 
         private void RotatePointAroundPivot(ref Vector3 point, Vector3 pivot, Vector3 angles)
@@ -70,7 +70,6 @@ public class DeformableMesh : DeformableBase
 
         if (!currentImpactCollider) {
             currentImpactCollider = other;
-            Debug.Log("test");
             RaycastHit hitInfo;
             float rayLength = other.bounds.extents.magnitude;
 
@@ -86,7 +85,6 @@ public class DeformableMesh : DeformableBase
                         for (int j = -1; j <= 1; j += 1)
                             pts[p++] = hitInfo.point + (otherRight * i) + (otherUp * j);
                     }
-
                     Deform(other.transform, pts);
 
                     currentHitPoint = hitInfo.point;
