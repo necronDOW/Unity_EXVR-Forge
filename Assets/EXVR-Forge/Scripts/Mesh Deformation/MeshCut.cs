@@ -141,7 +141,7 @@ namespace MeshCutter
 		/// <param name="victim">Victim.</param>
 		/// <param name="blade_plane">Blade plane.</param>
 		/// <param name="capMaterial">Cap material.</param>
-		public static GameObject[] Cut(GameObject victim, Vector3 anchorPoint, Vector3 normalDirection, MeshInfo mInfo = null)
+		public static GameObject[] Cut(GameObject victim, Vector3 anchorPoint, Vector3 normalDirection, float distanceLimit = Mathf.Infinity)
         {
             Vector3 invAnchorPoint = victim.transform.InverseTransformPoint(anchorPoint);
 
@@ -178,12 +178,12 @@ namespace MeshCutter
                     cutVerts += 3;
 
                     float distance = Vector3.Distance(victim_verts[indices[i]], invAnchorPoint);
-                    if (distance < 0.1f)
+                    if (distance < distanceLimit)
                     {
                         minCut = MinInt(MinInt(MinInt(minCut, indices[i]), indices[i + 1]), indices[i + 2]);
                         maxCut = MaxInt(MaxInt(MaxInt(minCut, indices[i]), indices[i + 1]), indices[i + 2]);
                     }
-                    else if (distance < 0.11f)
+                    else if (distance < distanceLimit * 1.1f)
                         return null;
                 }
             }

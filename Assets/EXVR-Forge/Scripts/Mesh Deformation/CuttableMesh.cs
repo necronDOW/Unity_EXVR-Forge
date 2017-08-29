@@ -11,7 +11,7 @@ public class CuttableMesh : MonoBehaviour
     private MeshInfo mInfo;
     private float minImpactDistance;
     private bool canCut = false;
-    private Transform cuttingSrc;
+    private CuttingTool cuttingSrc;
     private float cuttingSrcExtents;
 
     private void Start()
@@ -29,7 +29,7 @@ public class CuttableMesh : MonoBehaviour
 
         if (other.gameObject != cuttingSrc.gameObject)
         {
-            if (Vector3.Distance(other.transform.position, cuttingSrc.position) 
+            if (Vector3.Distance(other.transform.position, cuttingSrc.transform.position) 
                 < (minImpactDistance + cuttingSrcExtents + other.bounds.extents.magnitude) * 1.1f)
             {
                 CuttingTool.HitSound();
@@ -45,14 +45,14 @@ public class CuttableMesh : MonoBehaviour
 
     public void PerformCut()
     {
-        MeshCutter.MeshCut.Cut(gameObject, cuttingSrc.position, cuttingSrc.right, mInfo);
+        MeshCutter.MeshCut.Cut(gameObject, cuttingSrc.transform.position, cuttingSrc.transform.right, cuttingSrc.cuttingDiameter);
     }
 
     public void EnableCut(Transform cuttingSrc, Collider cuttingSrcCollider)
     {
         canCut = true;
         cuttingSrcExtents = cuttingSrcCollider.bounds.extents.magnitude;
-        this.cuttingSrc = cuttingSrc;
+        this.cuttingSrc = cuttingSrc.GetComponent<CuttingTool>();
         hits = 0;
     }
 
