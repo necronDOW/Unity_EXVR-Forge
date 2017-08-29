@@ -177,11 +177,14 @@ namespace MeshCutter
                 {
                     cutVerts += 3;
 
-                    if (Vector3.Distance(victim_verts[indices[i]], invAnchorPoint) < 0.1f)
+                    float distance = Vector3.Distance(victim_verts[indices[i]], invAnchorPoint);
+                    if (distance < 0.1f)
                     {
                         minCut = MinInt(MinInt(MinInt(minCut, indices[i]), indices[i + 1]), indices[i + 2]);
                         maxCut = MaxInt(MaxInt(MaxInt(minCut, indices[i]), indices[i + 1]), indices[i + 2]);
                     }
+                    else if (distance < 0.11f)
+                        return null;
                 }
             }
             

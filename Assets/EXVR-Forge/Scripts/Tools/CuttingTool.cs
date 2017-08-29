@@ -7,7 +7,8 @@ using Valve.VR.InteractionSystem;
 public class CuttingTool : MonoBehaviour
 {
     public static AudioSource hitSound;
-    
+    public float cuttingDiameter;
+
     private Collider[] colliders; // 0 = parent, 1 = this.
     private CuttableMesh cutTarget;
 
@@ -15,6 +16,14 @@ public class CuttingTool : MonoBehaviour
     {
         colliders = transform.parent.GetComponentsInChildren<Collider>();
         hitSound = GetComponent<AudioSource>();
+
+        if (cuttingDiameter == 0.0f)
+            cuttingDiameter = Mathf.Min(Mathf.Min(colliders[0].bounds.extents.x, colliders[0].bounds.extents.y), colliders[0].bounds.extents.z) * 2.0f;
+    }
+
+    private void Update()
+    {
+        DrawDebug();
     }
 
     private void OnTriggerStay(Collider other)
@@ -45,6 +54,21 @@ public class CuttingTool : MonoBehaviour
                 }
             }
         }
+    }
+
+    private void DrawDebug()
+    {
+        Vector3 topRight = transform.position + (transform.forward + transform.up).normalized * cuttingDiameter;
+        Vector3 bottomRight = transform.position + (transform.forward + -transform.up).normalized * cuttingDiameter;
+        Vector3 bottomLeft = transform.position + (-transform.forward + -transform.up).normalized * cuttingDiameter;
+        Vector3 topLeft = transform.position + (-transform.forward + transform.up).normalized * cuttingDiameter;
+
+        Debug.DrawLine(topRight, bottomRight, Color.red);
+        Debug.DrawLine(bottomRight, bottomLeft, Color.red);
+        Debug.DrawLine(bottomLeft, topLeft, Color.red);
+        Debug.DrawLine(topLeft, topRight, Color.red);
+        Debug.DrawLine(topRight, bottomLeft, Color.red);
+        Debug.DrawLine(topLeft, bottomRight, Color.red);
     }
 
     public void ReEnableCutTool()
