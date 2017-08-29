@@ -21,12 +21,23 @@ namespace MeshCutter
 				indices.Clear();
 			}
 
-			public void AddTriangle( int p1, int p2, int p3)
+            public void AddBlanks(int count)
+            {
+                vertices.AddRange(new Vector3[count]);
+                normals.AddRange(new Vector3[count]);
+                triangles.AddRange(new int[count]);
+                indices.AddRange(new int[count]);
+            }
+
+            public void AddTriangle(int p1, int p2, int p3)
+            {
+                AddTriangle(p1, p2, p3, vertices.Count);
+            }
+
+			public void AddTriangle(int p1, int p2, int p3, int base_index)
             {
 				// triangle index order goes 1,2,3,4....
-
-				int base_index = vertices.Count;
-
+                
                 indices.Add(base_index);
                 indices.Add(base_index+1);
                 indices.Add(base_index+2);
@@ -44,7 +55,12 @@ namespace MeshCutter
 				normals.Add(victim_norms[p3]);
 			}
 
-			public void AddTriangle(Vector3[] points3, Vector3[] normals3, Vector3 faceNormal)
+            public void AddTriangle(Vector3[] points3, Vector3[] normals3, Vector3 faceNormal)
+            {
+                AddTriangle(points3, normals3, faceNormal, vertices.Count);
+            }
+
+			public void AddTriangle(Vector3[] points3, Vector3[] normals3, Vector3 faceNormal, int base_index)
             {
 				Vector3 calculated_normal = Vector3.Cross((points3[1] - points3[0]).normalized, (points3[2] - points3[0]).normalized);
 
@@ -57,8 +73,6 @@ namespace MeshCutter
 					p2 = 1;
 					p3 = 0;
 				}
-
-				int base_index = vertices.Count;
 
                 indices.Add(base_index);
                 indices.Add(base_index+1);
@@ -76,6 +90,38 @@ namespace MeshCutter
 				normals.Add(normals3[p2]);
 				normals.Add(normals3[p3]);
 			}
+
+            public void AddTriangleAtIndex(Vector3[] points3, Vector3[] normals3, Vector3 faceNormal, int base_index)
+            {
+                Vector3 calculated_normal = Vector3.Cross((points3[1] - points3[0]).normalized, (points3[2] - points3[0]).normalized);
+
+                int p1 = 0;
+                int p2 = 1;
+                int p3 = 2;
+
+                if (Vector3.Dot(calculated_normal, faceNormal) < 0)
+                {
+                    p1 = 2;
+                    p2 = 1;
+                    p3 = 0;
+                }
+
+                indices[base_index] = base_index;
+                indices[base_index+1] = base_index+1;
+                indices[base_index+2] = base_index+2;
+
+                triangles[base_index] = base_index;
+                triangles[base_index+1] = base_index+1;
+                triangles[base_index+2] = base_index+2;
+
+                vertices[base_index] = points3[p1];
+                vertices[base_index+1] = points3[p2];
+                vertices[base_index+2] = points3[p3];
+
+                normals[base_index] = normals3[p1];
+                normals[base_index+1] = normals3[p2];
+                normals[base_index+2] = normals3[p3];
+            }
 		}
 
 		private static MeshCutSide left_side = new MeshCutSide();
@@ -123,11 +169,14 @@ namespace MeshCutter
 
             left_side.indices = new List<int>();
             right_side.indices = new List<int>();
-            
+
+            int cutVerts = 0;
             for (int i = 0; i < indices.Length; i += 3)
             {
                 if (RequiresCut(ref sides, indices[i], indices[i + 1], indices[i + 2]))
                 {
+                    cutVerts += 3;
+
                     if (Vector3.Distance(victim_verts[indices[i]], invAnchorPoint) < 0.1f)
                     {
                         minCut = MinInt(MinInt(MinInt(minCut, indices[i]), indices[i + 1]), indices[i + 2]);
@@ -135,6 +184,8 @@ namespace MeshCutter
                     }
                 }
             }
+            
+            left_side.AddBlanks(cutVerts);
 
             for (int i = 0; i < indices.Length; i += 3)
             {
@@ -170,7 +221,7 @@ namespace MeshCutter
             Material mat = victim.GetComponent<MeshRenderer>().sharedMaterial;
             
 			// cap the opennings
-			int capVertexCount = Capping();
+			Capping();
             
 			// Left Mesh
 			Mesh left_HalfMesh = new Mesh();
@@ -202,16 +253,19 @@ namespace MeshCutter
             rightSideObj.transform.localScale = victim.transform.localScale;
             rightSideObj.GetComponent<MeshFilter>().mesh = right_HalfMesh;
 
-            CopyDeformComponents(leftSideObj, left_HalfMesh, rightSideObj, right_HalfMesh, capVertexCount);
+            CopyDeformComponents(leftSideObj, left_HalfMesh, rightSideObj, right_HalfMesh);
 
             // assign mats
             leftSideObj.GetComponent<MeshRenderer>().material = mat;
 			rightSideObj.GetComponent<MeshRenderer>().material = mat;
 
+            Debug.DrawLine(left_HalfMesh.vertices[0], left_HalfMesh.vertices[left_HalfMesh.vertexCount - 1], Color.red, Mathf.Infinity);
+            Debug.DrawLine(right_HalfMesh.vertices[0], right_HalfMesh.vertices[right_HalfMesh.vertexCount - 1], Color.blue, Mathf.Infinity);
+
             return new GameObject[]{ leftSideObj, rightSideObj };
 		}
 
-        private static void CopyDeformComponents(GameObject left, Mesh leftMesh, GameObject right, Mesh rightMesh, int capVertexCount)
+        private static void CopyDeformComponents(GameObject left, Mesh leftMesh, GameObject right, Mesh rightMesh)
         {
             Rigidbody r_r = right.AddComponent<Rigidbody>();
             r_r.isKinematic = left.GetComponent<Rigidbody>().isKinematic;
@@ -368,7 +422,7 @@ namespace MeshCutter
                             }
                         }
                     }
-
+                    
                     FillCap(capVertpolygon);
                 }
             }
@@ -378,20 +432,20 @@ namespace MeshCutter
 
 		private static void FillCap(List<Vector3> vertices)
         {
-			// center of the cap
-			Vector3 center = Vector3.zero;
+            // center of the cap
+            Vector3 center = Vector3.zero;
 			foreach(Vector3 point in vertices)
 				center += point;
 
 			center = center/vertices.Count;
 
-			for (int i=0; i<vertices.Count; i++) {
-				left_side.AddTriangle(new Vector3[] { vertices[i], vertices[(i+1) % vertices.Count], center },
-                    new Vector3[] { -blade.normal, -blade.normal, -blade.normal }, -blade.normal);
+            for (int i=0; i<vertices.Count; i++) {
+                left_side.AddTriangleAtIndex(new Vector3[] { vertices[i], vertices[(i+1) % vertices.Count], center },
+                    new Vector3[] { -blade.normal, -blade.normal, -blade.normal }, -blade.normal, i*3);
 
-				right_side.AddTriangle( new Vector3[] { vertices[i], vertices[(i+1) % vertices.Count], center },
+                right_side.AddTriangle( new Vector3[] { vertices[i], vertices[(i+1) % vertices.Count], center },
                     new Vector3[] { blade.normal, blade.normal, blade.normal }, blade.normal);
 			}
-		}
+        }
 	}
 }
