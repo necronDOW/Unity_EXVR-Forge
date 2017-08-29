@@ -13,6 +13,9 @@ public class MeshStateHandler : MonoBehaviour
     {
         rigidBody = GetComponent<Rigidbody>();
         mCollider = GetComponent<MeshCollider>();
+        rigidBody.useGravity = true;
+
+        ChangeState(false);
     }
 
     private void OnAttachToHand(Hand hand)
@@ -27,7 +30,7 @@ public class MeshStateHandler : MonoBehaviour
 
     public void ChangeState(bool isKinematic)
     {
-        rigidBody.isKinematic = isKinematic;
         mCollider.convex = !isKinematic;
+        rigidBody.isKinematic = isKinematic;
     }
 }

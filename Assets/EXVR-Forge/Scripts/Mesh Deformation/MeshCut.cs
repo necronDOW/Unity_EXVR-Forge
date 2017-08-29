@@ -259,9 +259,6 @@ namespace MeshCutter
             leftSideObj.GetComponent<MeshRenderer>().material = mat;
 			rightSideObj.GetComponent<MeshRenderer>().material = mat;
 
-            Debug.DrawLine(left_HalfMesh.vertices[0], left_HalfMesh.vertices[left_HalfMesh.vertexCount - 1], Color.red, Mathf.Infinity);
-            Debug.DrawLine(right_HalfMesh.vertices[0], right_HalfMesh.vertices[right_HalfMesh.vertexCount - 1], Color.blue, Mathf.Infinity);
-
             return new GameObject[]{ leftSideObj, rightSideObj };
 		}
 
@@ -279,6 +276,8 @@ namespace MeshCutter
             CuttableMesh l_cm = left.GetComponent<CuttableMesh>();
             CuttableMesh r_cm = right.AddComponent<CuttableMesh>();
             r_cm.hitsToCut = l_cm.hitsToCut;
+
+            MeshStateHandler r_msh = right.AddComponent<MeshStateHandler>();
         }
 
         private static int MinInt(int a, int b)

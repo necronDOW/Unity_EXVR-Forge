@@ -29,9 +29,9 @@ public class CuttableMesh : MonoBehaviour
 
         if (other.gameObject != cuttingSrc.gameObject)
         {
-            if (Vector3.Distance(other.transform.position, cuttingSrc.position) 
-                < (minImpactDistance + cuttingSrcExtents + other.bounds.extents.magnitude) * 1.1f)
-            {
+            //if (Vector3.Distance(other.ClosestPointOnBounds(cuttingSrc.position), cuttingSrc.position) 
+            //    < (minImpactDistance + cuttingSrcExtents + other.bounds.extents.magnitude) * 1.1f)
+            //{
                 CuttingTool.HitSound();
                 if (hits++ >= hitsToCut)
                 {
@@ -39,7 +39,7 @@ public class CuttableMesh : MonoBehaviour
                     PerformCut();
                     DisableCut();
                 }
-            }
+            //}
         }
     }
 
