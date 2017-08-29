@@ -18,7 +18,7 @@ public class CoalScript : MonoBehaviour
 
        if (lifetime <= 0)
        {
-            if (inFire && Fire.coalsInFire > 0)
+            if (inFire && Fire.coalsInFire >= 0)
             {
                 Fire.coalsInFire -= 1.0f;
                 Fire.temperature = Fire.coalsInFire;
@@ -30,7 +30,7 @@ public class CoalScript : MonoBehaviour
 
     public void IncreaseLifetime(int amount)
     {
-        lifetime += amount + Random.Range(-200, 200);
+        lifetime += amount;
         inFire = true;
     }
 

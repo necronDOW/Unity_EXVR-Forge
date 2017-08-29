@@ -6,7 +6,7 @@ using Valve.VR.InteractionSystem;
 [RequireComponent(typeof(Collider))]
 public class CuttingTool : MonoBehaviour
 {
-    public AudioSource hitSound;
+    public static AudioSource hitSound;
     
     private Collider[] colliders; // 0 = parent, 1 = this.
     private CuttableMesh cutTarget;
@@ -14,6 +14,7 @@ public class CuttingTool : MonoBehaviour
     void Start()
     {
         colliders = transform.parent.GetComponentsInChildren<Collider>();
+        hitSound = GetComponent<AudioSource>();
     }
 
     private void OnTriggerEnter(Collider other)
@@ -54,5 +55,10 @@ public class CuttingTool : MonoBehaviour
 
         if (cutTarget)
             cutTarget.DisableCut();
+    }
+
+    public static void HitSound()
+    {
+        hitSound.Play();
     }
 }

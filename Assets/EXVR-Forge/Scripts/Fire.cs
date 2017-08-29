@@ -14,6 +14,7 @@ public class Fire : MonoBehaviour
     private int extraTime;
     private static ParticleSystem[] flames;
     private static float[] startValues;
+    private static AudioSource sound;
 
     private void Start()
     {
@@ -28,6 +29,9 @@ public class Fire : MonoBehaviour
         {
             startValues[i] = flames[i].emission.rateOverTime.constantMax;         
         }
+
+        sound = GetComponent<AudioSource>();
+
         SetEmissionRate(0);
     }
 
@@ -71,5 +75,7 @@ public class Fire : MonoBehaviour
             var rate = flames[i].emission;
             rate.rateOverTime = startValues[i] * (emissionRate / maxTemprature);
         }
+        sound.volume = (emissionRate / 100);
+        
     }
 }
