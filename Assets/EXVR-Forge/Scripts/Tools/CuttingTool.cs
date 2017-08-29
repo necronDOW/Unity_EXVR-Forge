@@ -21,25 +21,28 @@ public class CuttingTool : MonoBehaviour
     {
         CuttableMesh cutTarget = other.GetComponent<CuttableMesh>();
 
-        if (!this.cutTarget)
+        if (cutTarget)
         {
-            Throwable t = other.GetComponent<Throwable>();
-            if (t && !t.attached)
+            if (!this.cutTarget)
             {
-                colliders[0].enabled = false;
-                this.cutTarget = cutTarget;
-                other.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
-                cutTarget.EnableCut(transform, colliders[1]);
+                Throwable t = other.GetComponent<Throwable>();
+                if (t && !t.attached)
+                {
+                    colliders[0].enabled = false;
+                    this.cutTarget = cutTarget;
+                    other.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
+                    cutTarget.EnableCut(transform, colliders[1]);
+                }
             }
-        }
-        else if (cutTarget && this.cutTarget == cutTarget)
-        {
-            Throwable t = other.GetComponent<Throwable>();
-
-            if (t && t.attached)
+            else if (this.cutTarget == cutTarget)
             {
-                other.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
-                cutTarget = null;
+                Throwable t = other.GetComponent<Throwable>();
+
+                if (t && t.attached)
+                {
+                    other.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
+                    cutTarget = null;
+                }
             }
         }
     }
@@ -55,6 +58,6 @@ public class CuttingTool : MonoBehaviour
 
     public static void HitSound()
     {
-        hitSound.Play();
+        //hitSound.Play();
     }
 }
