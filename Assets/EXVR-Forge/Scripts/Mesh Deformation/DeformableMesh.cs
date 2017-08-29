@@ -12,10 +12,10 @@ public class DeformableMesh : DeformableBase
 
         public DeformVectors(Transform transform, Vector3 otherPosition, Vector3 hitPoint)
         {
-            impact = (otherPosition - hitPoint).normalized;
+            impact = transform.InverseTransformVector((otherPosition - hitPoint)).normalized;
             simplified = transform.InverseTransformPoint(hitPoint);
 
-            RotatePointAroundPivot(ref impact, transform.position, -transform.eulerAngles);
+            //RotatePointAroundPivot(ref impact, transform.position, -transform.eulerAngles);
             //RotatePointAroundPivot(ref simplified, transform.position, -transform.eulerAngles);
         }
 
