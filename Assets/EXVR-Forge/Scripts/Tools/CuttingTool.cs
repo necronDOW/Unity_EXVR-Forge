@@ -17,29 +17,25 @@ public class CuttingTool : MonoBehaviour
         hitSound = GetComponent<AudioSource>();
     }
 
-    private void OnTriggerEnter(Collider other)
-    {
-        CuttableMesh cutTarget = other.GetComponent<CuttableMesh>();
-
-        if (cutTarget) {
-            this.cutTarget = cutTarget;
-            colliders[0].enabled = false;
-
-            Throwable t = other.GetComponent<Throwable>();
-            if (true) {//(t && !t.attached) {
-                other.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
-                cutTarget.EnableCut(transform, colliders[1]);
-            }
-        }
-    }
-
     private void OnTriggerStay(Collider other)
     {
         CuttableMesh cutTarget = other.GetComponent<CuttableMesh>();
 
-        if (cutTarget && this.cutTarget == cutTarget)
+        if (!this.cutTarget)
         {
             Throwable t = other.GetComponent<Throwable>();
+            if (t && !t.attached)
+            {
+                colliders[0].enabled = false;
+                this.cutTarget = cutTarget;
+                other.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
+                cutTarget.EnableCut(transform, colliders[1]);
+            }
+        }
+        else if (cutTarget && this.cutTarget == cutTarget)
+        {
+            Throwable t = other.GetComponent<Throwable>();
+
             if (t && t.attached)
             {
                 other.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
