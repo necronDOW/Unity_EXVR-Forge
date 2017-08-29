@@ -1,19 +1,33 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-namespace Valve.VR.InteractionSystem
-{
-    [RequireComponent(typeof(Interactable))]
-    public class MeshStateHandler : MonoBehaviour
-    {
-        private void OnAttachedToHand(Hand hand)
-        {
-            Debug.Log("attached");
-        }
+using Valve.VR.InteractionSystem;
 
-        private void OnDetachedFromHand(Hand hand)
-        {
-            Debug.Log("detached");
-        }
+[RequireComponent(typeof(Interactable))]
+public class MeshStateHandler : MonoBehaviour
+{
+    private Rigidbody rigidBody;
+    private MeshCollider mCollider;
+
+    private void Start()
+    {
+        rigidBody = GetComponent<Rigidbody>();
+        mCollider = GetComponent<MeshCollider>();
+    }
+
+    private void OnAttachToHand(Hand hand)
+    {
+        ChangeState(true);
+    }
+
+    private void OnDetachFromHand(Hand hand)
+    {
+        ChangeState(false);
+    }
+
+    public void ChangeState(bool isKinematic)
+    {
+        rigidBody.isKinematic = isKinematic;
+        mCollider.convex = !isKinematic;
     }
 }
