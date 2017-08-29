@@ -186,34 +186,72 @@ namespace MeshCutter
             }
             
             left_side.AddBlanks(cutVerts);
+            
+            bool checkDir = blade.GetSide(victim.transform.InverseTransformVector(victim.transform.up));
 
-            for (int i = 0; i < indices.Length; i += 3)
+            if (checkDir)
             {
-                p1 = indices[i];
-                p2 = indices[i + 1];
-                p3 = indices[i + 2];
+                for (int i = 0; i < indices.Length; i += 3)
+                {
+                    p1 = indices[i];
+                    p2 = indices[i + 1];
+                    p3 = indices[i + 2];
 
-                if (RequiresCut(ref sides, p1, p2, p3))
-                {
-                    if (p1 > maxCut)
-                        left_side.AddTriangle(p1, p2, p3);
-                    else if (p1 < minCut)
-                        right_side.AddTriangle(p1, p2, p3);
-                    else Cut_this_Face(sides, p1, p2, p3);
-                }
-                else
-                {
-                    if (sides[0]) // left side
+                    if (RequiresCut(ref sides, p1, p2, p3))
                     {
-                        if (p1 <= minCut)
+                        if (p1 > maxCut)
+                            left_side.AddTriangle(p1, p2, p3);
+                        else if (p1 < minCut)
                             right_side.AddTriangle(p1, p2, p3);
-                        else left_side.AddTriangle(p1, p2, p3);
+                        else Cut_this_Face(sides, p1, p2, p3);
                     }
                     else
                     {
-                        if (p1 >= maxCut)
+                        if (sides[0])
+                        {
+                            if (p1 <= minCut)
+                                right_side.AddTriangle(p1, p2, p3);
+                            else left_side.AddTriangle(p1, p2, p3);
+                        }
+                        else
+                        {
+                            if (p1 >= maxCut)
+                                left_side.AddTriangle(p1, p2, p3);
+                            else right_side.AddTriangle(p1, p2, p3);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < indices.Length; i += 3)
+                {
+                    p1 = indices[i];
+                    p2 = indices[i + 1];
+                    p3 = indices[i + 2];
+
+                    if (RequiresCut(ref sides, p1, p2, p3))
+                    {
+                        if (p1 < minCut)
                             left_side.AddTriangle(p1, p2, p3);
-                        else right_side.AddTriangle(p1, p2, p3);
+                        else if (p1 > maxCut)
+                            right_side.AddTriangle(p1, p2, p3);
+                        else Cut_this_Face(sides, p1, p2, p3);
+                    }
+                    else
+                    {
+                        if (sides[0])
+                        {
+                            if (p1 >= maxCut)
+                                right_side.AddTriangle(p1, p2, p3);
+                            else left_side.AddTriangle(p1, p2, p3);
+                        }
+                        else
+                        {
+                            if (p1 <= minCut)
+                                left_side.AddTriangle(p1, p2, p3);
+                            else right_side.AddTriangle(p1, p2, p3);
+                        }
                     }
                 }
             }
@@ -258,9 +296,6 @@ namespace MeshCutter
             // assign mats
             leftSideObj.GetComponent<MeshRenderer>().material = mat;
 			rightSideObj.GetComponent<MeshRenderer>().material = mat;
-
-            Debug.DrawLine(left_HalfMesh.vertices[0], left_HalfMesh.vertices[left_HalfMesh.vertexCount - 1], Color.red, Mathf.Infinity);
-            Debug.DrawLine(right_HalfMesh.vertices[0], right_HalfMesh.vertices[right_HalfMesh.vertexCount - 1], Color.blue, Mathf.Infinity);
 
             return new GameObject[]{ leftSideObj, rightSideObj };
 		}
