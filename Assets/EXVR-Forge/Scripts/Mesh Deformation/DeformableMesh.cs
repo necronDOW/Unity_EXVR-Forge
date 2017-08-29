@@ -55,12 +55,16 @@ public class DeformableMesh : DeformableBase
 
     private void OnCollisionExit(Collision collision)
     {
-        Vector3 centralContact = Vector3.zero;
-        for (int i = 0; i < collision.contacts.Length; i++)
-            centralContact += collision.contacts[i].point;
-        centralContact /= collision.contacts.Length;
+        DeformableAgent da = collision.gameObject.GetComponent<DeformableAgent>();
 
-        Deform(collision.transform, centralContact);
+        if (da) {
+            Vector3 centralContact = Vector3.zero;
+            for (int i = 0; i < collision.contacts.Length; i++)
+                centralContact += collision.contacts[i].point;
+            centralContact /= collision.contacts.Length;
+
+            Deform(collision.transform, centralContact);
+        }
     }
     
     private void OnTriggerEnter(Collider other)
@@ -68,7 +72,8 @@ public class DeformableMesh : DeformableBase
         DeformableAgent da = other.GetComponent<DeformableAgent>();
         float dispersion = (da) ? da.dispersion : 1.0f;
 
-        if (!currentImpactCollider) {
+        if (!currentImpactCollider && da) {
+            Debug.Log("test");
             currentImpactCollider = other;
             RaycastHit hitInfo;
             float rayLength = other.bounds.extents.magnitude;
@@ -119,6 +124,7 @@ public class DeformableMesh : DeformableBase
     private void Deform(Transform otherObject, Vector3[] hitPoints)
     {
         thread_vertices = mFilter.mesh.vertices;
+
         for (int i = 0; i < hitPoints.Length; i++)
         {
             for (int j = 0; j < thread_vertices.Length; j += maxWorkGroupSize)

@@ -314,6 +314,8 @@ namespace MeshCutter
             CuttableMesh l_cm = left.GetComponent<CuttableMesh>();
             CuttableMesh r_cm = right.AddComponent<CuttableMesh>();
             r_cm.hitsToCut = l_cm.hitsToCut;
+
+            MeshStateHandler r_msh = right.AddComponent<MeshStateHandler>();
         }
 
         private static int MinInt(int a, int b)
