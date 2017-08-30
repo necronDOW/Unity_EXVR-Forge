@@ -9,7 +9,7 @@ public class MeshStateHandler : MonoBehaviour
     private Rigidbody rigidBody;
     private MeshCollider mCollider;
 
-    private void Start()
+    private void Awake()
     {
         rigidBody = GetComponent<Rigidbody>();
         mCollider = GetComponent<MeshCollider>();
@@ -32,5 +32,6 @@ public class MeshStateHandler : MonoBehaviour
     {
         mCollider.convex = !isKinematic;
         rigidBody.isKinematic = isKinematic;
+        rigidBody.constraints = RigidbodyConstraints.None;
     }
 }

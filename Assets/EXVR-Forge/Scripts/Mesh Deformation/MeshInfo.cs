@@ -14,7 +14,7 @@ public class MeshInfo : MonoBehaviour
     private void Start()
     {
         mFilter = GetComponent<MeshFilter>();
-        meshVertices = mFilter.mesh.vertices;
+        meshVertices = mFilter.sharedMesh.vertices;
     }
 
     public int GetClosestVertexIndex(Vector3 pt)

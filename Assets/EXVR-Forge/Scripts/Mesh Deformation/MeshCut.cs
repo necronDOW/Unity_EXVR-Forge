@@ -143,6 +143,7 @@ namespace MeshCutter
 		/// <param name="capMaterial">Cap material.</param>
 		public static GameObject[] Cut(GameObject victim, Vector3 anchorPoint, Vector3 normalDirection, float distanceLimit = Mathf.Infinity)
         {
+            timer = Time.realtimeSinceStartup;
             Vector3 invAnchorPoint = victim.transform.InverseTransformPoint(anchorPoint);
 
             // set the blade relative to victim
@@ -258,14 +259,12 @@ namespace MeshCutter
                     }
                 }
             }
-
-            Material mat = victim.GetComponent<MeshRenderer>().sharedMaterial;
             
 			// cap the opennings
 			Capping();
-            
-			// Left Mesh
-			Mesh left_HalfMesh = new Mesh();
+
+            // Left Mesh
+            Mesh left_HalfMesh = new Mesh();
 			left_HalfMesh.name =  "Split Mesh Left";
 			left_HalfMesh.vertices  = left_side.vertices.ToArray();
 			left_HalfMesh.triangles = left_side.triangles.ToArray();
@@ -287,39 +286,20 @@ namespace MeshCutter
 
 			GameObject leftSideObj = victim;
             leftSideObj.GetComponent<MeshCollider>().sharedMesh = victim.GetComponent<MeshFilter>().sharedMesh;
+            leftSideObj.GetComponent<MeshStateHandler>().ChangeState(false);
 
-			GameObject rightSideObj = new GameObject(victim.name, typeof(MeshFilter), typeof(MeshRenderer));
+            GameObject rightSideObj = GameObject.Instantiate(leftSideObj);
 			rightSideObj.transform.position = victim.transform.position;
 			rightSideObj.transform.rotation = victim.transform.rotation;
             rightSideObj.transform.localScale = victim.transform.localScale;
             rightSideObj.GetComponent<MeshFilter>().mesh = right_HalfMesh;
+            rightSideObj.GetComponent<MeshCollider>().sharedMesh = right_HalfMesh;
+            rightSideObj.GetComponent<MeshStateHandler>().ChangeState(false);
 
-            CopyDeformComponents(leftSideObj, left_HalfMesh, rightSideObj, right_HalfMesh);
-
-            // assign mats
-            leftSideObj.GetComponent<MeshRenderer>().material = mat;
-			rightSideObj.GetComponent<MeshRenderer>().material = mat;
+            Debug.Log(Time.realtimeSinceStartup - timer);
 
             return new GameObject[]{ leftSideObj, rightSideObj };
 		}
-
-        private static void CopyDeformComponents(GameObject left, Mesh leftMesh, GameObject right, Mesh rightMesh)
-        {
-            Rigidbody r_r = right.AddComponent<Rigidbody>();
-            r_r.isKinematic = left.GetComponent<Rigidbody>().isKinematic;
-
-            DeformableMesh l_dm = left.GetComponent<DeformableMesh>();
-            DeformableMesh r_dm = right.AddComponent<DeformableMesh>();
-            r_dm.maxInfluence = l_dm.maxInfluence;
-            r_dm.forceFactor = l_dm.forceFactor;
-            r_dm.distanceLimiter = l_dm.distanceLimiter;
-
-            CuttableMesh l_cm = left.GetComponent<CuttableMesh>();
-            CuttableMesh r_cm = right.AddComponent<CuttableMesh>();
-            r_cm.hitsToCut = l_cm.hitsToCut;
-
-            MeshStateHandler r_msh = right.AddComponent<MeshStateHandler>();
-        }
 
         private static int MinInt(int a, int b)
         {
