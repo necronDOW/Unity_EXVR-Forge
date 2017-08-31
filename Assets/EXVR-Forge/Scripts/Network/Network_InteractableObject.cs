@@ -15,6 +15,7 @@ public class Network_InteractableObject : NetworkBehaviour
     {
         nid = GetComponent<NetworkIdentity>().netId;
         GetComponent<InteractableHoverEvents>().onAttachedToHand.AddListener(OnGrab);
+        GetComponent<InteractableHoverEvents>().onDetachedFromHand.AddListener(OnRelease);
     }
 
     public void OnGrab()
