@@ -22,4 +22,18 @@ public class Network_PlayerController : NetworkBehaviour
             networkId.AssignClientAuthority(player.connectionToClient);
         }
     }
+
+    [Command]
+    public void CmdOnPickup(NetworkInstanceId objectId)
+    {
+        GameObject iObject = NetworkServer.FindLocalObject(objectId);
+        iObject.GetComponent<Network_InteractableObject>().isAttached = true;
+    }
+
+    [Command]
+    public void CmdOnRelease(NetworkInstanceId objectId)
+    {
+        GameObject iObject = NetworkServer.FindLocalObject(objectId);
+        iObject.GetComponent<Network_InteractableObject>().isAttached = false;
+    }
 }
