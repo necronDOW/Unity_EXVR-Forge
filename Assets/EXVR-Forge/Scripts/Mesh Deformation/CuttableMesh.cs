@@ -32,10 +32,10 @@ public class CuttableMesh : MonoBehaviour
             if (Vector3.Distance(other.transform.position, cuttingSrc.transform.position) 
                 < (minImpactDistance + cuttingSrcExtents + other.bounds.extents.magnitude) * 1.1f)
             {
-                CuttingTool.HitSound();
+                Debug.Log(hits);
                 if (hits++ >= hitsToCut)
                 {
-                    CuttingTool.HitSound();
+                    Debug.Log("cut");
                     PerformCut();
                     DisableCut();
                 }

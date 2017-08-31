@@ -4,18 +4,15 @@ using UnityEngine;
 using Valve.VR.InteractionSystem;
 
 [RequireComponent(typeof(Collider))]
-public class CuttingTool : MonoBehaviour
+public class CuttingTool : AnvilTool
 {
-    public static AudioSource hitSound;
     public float cuttingDiameter;
 
-    private Collider[] colliders; // 0 = parent, 1 = this.
     private CuttableMesh cutTarget;
 
-    void Start()
+    protected override void Start()
     {
-        colliders = transform.parent.GetComponentsInChildren<Collider>();
-        hitSound = GetComponent<AudioSource>();
+        base.Start();
 
         if (cuttingDiameter == 0.0f)
             cuttingDiameter = Mathf.Min(Mathf.Min(colliders[0].bounds.extents.x, colliders[0].bounds.extents.y), colliders[0].bounds.extents.z) * 2.0f;
@@ -26,37 +23,38 @@ public class CuttingTool : MonoBehaviour
         DrawDebug();
     }
 
-    private void OnTriggerStay(Collider other)
+    protected override void Freeze(GameObject o)
     {
-        CuttableMesh cutTarget = other.GetComponent<CuttableMesh>();
+        base.Freeze(o);
 
-        if (cutTarget)
+        if (this.cutTarget == null)
         {
-            if (!this.cutTarget)
-            {
-                Throwable t = other.GetComponent<Throwable>();
-                Network_InteractableObject nio = other.GetComponent<Network_InteractableObject>();
-
-                if ((t && !t.attached) || (nio && !nio.isAttached))
-                {
-                    colliders[0].enabled = false;
-                    this.cutTarget = cutTarget;
-                    other.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
-                    cutTarget.EnableCut(transform, colliders[1]);
-                }
-            }
-            else if (this.cutTarget == cutTarget)
-            {
-                Throwable t = other.GetComponent<Throwable>();
-                Network_InteractableObject nio = other.GetComponent<Network_InteractableObject>();
-
-                if ((t && t.attached) || (nio && nio.isAttached))
-                {
-                    other.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
-                    cutTarget = null;
-                }
-            }
+            this.cutTarget = o.GetComponent<CuttableMesh>();
+            this.cutTarget.EnableCut(transform, colliders[1]);
         }
+    }
+
+    protected override void Unfreeze(GameObject o)
+    {
+        base.Unfreeze(o);
+
+        if (o.GetComponent<CuttableMesh>() == this.cutTarget)
+        {
+            this.cutTarget.DisableCut();
+            this.cutTarget = null;
+        }
+    }
+
+    public void ReEnableCutTool()
+    {
+        //foreach (Collider c in colliders)
+        //    c.enabled = true;
+
+        //if (cutTarget)
+        //{
+        //    cutTarget.DisableCut();
+        //    cutTarget = null;
+        //}
     }
 
     private void DrawDebug()
@@ -72,19 +70,5 @@ public class CuttingTool : MonoBehaviour
         Debug.DrawLine(topLeft, topRight, Color.red);
         Debug.DrawLine(topRight, bottomLeft, Color.red);
         Debug.DrawLine(topLeft, bottomRight, Color.red);
-    }
-
-    public void ReEnableCutTool()
-    {
-        foreach (Collider c in colliders)
-            c.enabled = true;
-
-        if (cutTarget)
-            cutTarget.DisableCut();
-    }
-
-    public static void HitSound()
-    {
-        //hitSound.Play();
     }
 }
