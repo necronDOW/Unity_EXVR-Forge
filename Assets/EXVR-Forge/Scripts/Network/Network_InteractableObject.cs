@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using Valve.VR.InteractionSystem;
 
-[RequireComponent(typeof(InteractableHoverEvents), typeof(NetworkIdentity)]
+[RequireComponent(typeof(InteractableHoverEvents), typeof(NetworkIdentity))]
 public class Network_InteractableObject : NetworkBehaviour
 {
     public bool isAttached = false;
