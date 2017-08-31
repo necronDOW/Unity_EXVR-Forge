@@ -4,21 +4,37 @@ using UnityEngine;
 using UnityEngine.Networking;
 using Valve.VR.InteractionSystem;
 
-[RequireComponent(typeof(InteractableHoverEvents))]
+[RequireComponent(typeof(InteractableHoverEvents), typeof(NetworkIdentity)]
 public class Network_InteractableObject : NetworkBehaviour
 {
     public bool isAttached = false;
 
+    private NetworkInstanceId nid;
+
     private void Start()
     {
+        nid = GetComponent<NetworkIdentity>().netId;
         GetComponent<InteractableHoverEvents>().onAttachedToHand.AddListener(OnGrab);
     }
 
     public void OnGrab()
     {
+        Network_PlayerController npc = GetLocalPlayerController();
+        npc.CmdOnGrab(nid, npc.gameObject.GetComponent<NetworkIdentity>());
+        npc.CmdOnPickup(nid);
+    }
+
+    public void OnRelease()
+    {
+        Network_PlayerController npc = GetLocalPlayerController();
+        npc.CmdOnRelease(nid);
+    }
+
+    public Network_PlayerController GetLocalPlayerController()
+    {
         GameObject player = GameObject.FindGameObjectWithTag("VRLocalPlayer");
-        NetworkIdentity playerID = player.GetComponent<NetworkIdentity>();
-        player.GetComponent<Network_PlayerController>().CmdOnGrab(GetComponent<NetworkIdentity>().netId, playerID);
-        player.GetComponent<Network_PlayerController>().CmdOnPickup(GetComponent<NetworkIdentity>().netId);
+
+        if (player) return player.GetComponent<Network_PlayerController>();
+        else return null;
     }
 }

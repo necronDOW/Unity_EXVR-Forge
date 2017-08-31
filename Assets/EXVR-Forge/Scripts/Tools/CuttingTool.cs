@@ -35,7 +35,9 @@ public class CuttingTool : MonoBehaviour
             if (!this.cutTarget)
             {
                 Throwable t = other.GetComponent<Throwable>();
-                if (t && !t.attached)
+                Network_InteractableObject nio = other.GetComponent<Network_InteractableObject>();
+
+                if ((t && !t.attached) || (nio && !nio.isAttached))
                 {
                     colliders[0].enabled = false;
                     this.cutTarget = cutTarget;
@@ -46,8 +48,9 @@ public class CuttingTool : MonoBehaviour
             else if (this.cutTarget == cutTarget)
             {
                 Throwable t = other.GetComponent<Throwable>();
+                Network_InteractableObject nio = other.GetComponent<Network_InteractableObject>();
 
-                if (t && t.attached)
+                if ((t && t.attached) || (nio && nio.isAttached))
                 {
                     other.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
                     cutTarget = null;
