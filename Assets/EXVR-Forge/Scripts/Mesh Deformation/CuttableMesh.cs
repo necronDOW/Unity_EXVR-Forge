@@ -42,10 +42,14 @@ public class CuttableMesh : MonoBehaviour
 
     public virtual void PerformCut()
     {
+        GameObject[] halves = MeshCutter.MeshCut.Cut(gameObject, cuttingSrc.transform.position, cuttingSrc.transform.right, cuttingSrc.cuttingDiameter);
+
         Network_CuttableMesh ncm = GetComponent<Network_CuttableMesh>();
         if (ncm) {
-            ncm.CmdOnCut(GetComponent<UnityEngine.Networking.NetworkIdentity>().netId, 
-                cuttingSrc.transform.position, cuttingSrc.transform.right, cuttingSrc.cuttingDiameter);
+            ncm.CmdOnCut(halves);
+
+            for (int i = 0; i < halves.Length; i++)
+                Destroy(halves[i], 1.0f);
         }
     }
 
