@@ -7,6 +7,7 @@ using UnityEngine.Networking;
 public class CuttableMesh : MonoBehaviour
 {
     public int hitsToCut = 4;
+    public GameObject rodPrefab;
 
     private int hits;
     private MeshInfo mInfo;
@@ -45,7 +46,7 @@ public class CuttableMesh : MonoBehaviour
     {
         Network_CuttableMesh ncm = GetComponent<Network_CuttableMesh>();
         if (ncm) {
-            ncm.CmdOnCut(GetComponent<NetworkIdentity>().netId, cuttingSrc.transform.position, cuttingSrc.transform.right, cuttingSrc.cuttingDiameter);
+            ncm.CmdOnCut(cuttingSrc.transform.position, cuttingSrc.transform.right, cuttingSrc.cuttingDiameter);
         }
     }
 

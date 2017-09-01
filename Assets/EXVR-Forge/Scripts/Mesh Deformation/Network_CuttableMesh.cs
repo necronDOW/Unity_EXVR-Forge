@@ -5,25 +5,16 @@ using UnityEngine.Networking;
 
 public class Network_CuttableMesh : NetworkBehaviour
 {
-    CuttableMesh meshCut;
-
-    private void Start()
-    {
-        meshCut = GetComponent<CuttableMesh>();
-    }
-
     [Command]
-    public void CmdOnCut(NetworkInstanceId objectId, Vector3 v1, Vector3 v2, float f)
+    public void CmdOnCut(Vector3 v1, Vector3 v2, float f)
     {
         RpcOnCut();
-
-        GameObject iObject = NetworkServer.FindLocalObject(objectId);
-        GameObject[] halves = MeshCutter.MeshCut.Cut(iObject, v1, v2, f);
+        
+        GameObject[] halves = MeshCutter.MeshCut.Cut(gameObject, v1, v2, GetComponent<CuttableMesh>().rodPrefab, f);
 
         if (halves != null) {
             for (int i = 0; i < halves.Length; i++) {
                 NetworkServer.Spawn(halves[i]);
-                Destroy(halves[i], 1.0f);
             }
         }
     }

@@ -141,7 +141,7 @@ namespace MeshCutter
 		/// <param name="victim">Victim.</param>
 		/// <param name="blade_plane">Blade plane.</param>
 		/// <param name="capMaterial">Cap material.</param>
-		public static GameObject[] Cut(GameObject victim, Vector3 anchorPoint, Vector3 normalDirection, float distanceLimit = Mathf.Infinity)
+		public static GameObject[] Cut(GameObject victim, Vector3 anchorPoint, Vector3 normalDirection, GameObject rodPrefab, float distanceLimit = Mathf.Infinity)
         {
             timer = Time.realtimeSinceStartup;
             Vector3 invAnchorPoint = victim.transform.InverseTransformPoint(anchorPoint);
@@ -170,8 +170,6 @@ namespace MeshCutter
 
             left_side.indices = new List<int>();
             right_side.indices = new List<int>();
-
-            
 
             int cutVerts = 0;
             for (int i = 0; i < indices.Length; i += 3)
@@ -283,25 +281,25 @@ namespace MeshCutter
 
             right_HalfMesh.SetIndices(right_side.indices.ToArray(), MeshTopology.Triangles, 0);
 
-            GameObject leftSideObj = GameObject.Instantiate(victim);
-            leftSideObj.GetComponent<MeshFilter>().mesh = left_HalfMesh;
-            leftSideObj.GetComponent<MeshCollider>().sharedMesh = left_HalfMesh;
-            leftSideObj.GetComponent<MeshStateHandler>().ChangeState(false);
-
-            GameObject rightSideObj = GameObject.Instantiate(leftSideObj);
-			rightSideObj.transform.position = victim.transform.position;
-			rightSideObj.transform.rotation = victim.transform.rotation;
-            rightSideObj.transform.localScale = victim.transform.localScale;
-            rightSideObj.GetComponent<MeshFilter>().mesh = right_HalfMesh;
-            rightSideObj.GetComponent<MeshCollider>().sharedMesh = right_HalfMesh;
-            rightSideObj.GetComponent<MeshStateHandler>().ChangeState(false);
-
+            GameObject leftSideObj = Duplicate(rodPrefab, victim.transform, left_HalfMesh);
+            GameObject rightSideObj = Duplicate(rodPrefab, victim.transform, right_HalfMesh);
             GameObject.Destroy(victim);
 
             Debug.Log(Time.realtimeSinceStartup - timer);
 
             return new GameObject[]{ leftSideObj, rightSideObj };
 		}
+
+        private static GameObject Duplicate(GameObject original, Transform transform, Mesh newMesh)
+        {
+            GameObject obj = GameObject.Instantiate(original, transform.position, transform.rotation);
+            obj.transform.localScale = transform.localScale;
+            obj.GetComponent<MeshFilter>().mesh = newMesh;
+            obj.GetComponent<MeshCollider>().sharedMesh = newMesh;
+            obj.GetComponent<MeshStateHandler>().ChangeState(false);
+
+            return obj;
+        }
 
         private static int MinInt(int a, int b)
         {
