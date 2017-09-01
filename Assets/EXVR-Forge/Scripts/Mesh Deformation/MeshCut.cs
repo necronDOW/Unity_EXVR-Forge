@@ -171,6 +171,8 @@ namespace MeshCutter
             left_side.indices = new List<int>();
             right_side.indices = new List<int>();
 
+            
+
             int cutVerts = 0;
             for (int i = 0; i < indices.Length; i += 3)
             {
