@@ -33,22 +33,20 @@ public class CuttableMesh : MonoBehaviour
                 < (minImpactDistance + cuttingSrcExtents + other.bounds.extents.magnitude) * 1.1f)
             {
                 Debug.Log(hits);
-                if (hits++ >= hitsToCut)
-                {
+                if (hits++ >= hitsToCut) {
                     PerformCut();
-                    DisableCut();
                 }
             }
         }
     }
 
-    public virtual void PerformCut(bool allowNetworking = true)
+    public virtual void PerformCut()
     {
         Network_CuttableMesh ncm = GetComponent<Network_CuttableMesh>();
-
-        if (ncm && allowNetworking)
-            ncm.CmdOnCut();
-        else MeshCutter.MeshCut.Cut(gameObject, cuttingSrc.transform.position, cuttingSrc.transform.right, cuttingSrc.cuttingDiameter);
+        if (ncm) {
+            ncm.RpcOnCut(GetComponent<UnityEngine.Networking.NetworkIdentity>().netId,
+                cuttingSrc.transform.position, cuttingSrc.transform.right, cuttingSrc.cuttingDiameter);
+        }
     }
 
     public void EnableCut(Transform cuttingSrc, Collider cuttingSrcCollider)

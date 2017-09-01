@@ -5,16 +5,18 @@ using UnityEngine.Networking;
 
 public class Network_CuttableMesh : NetworkBehaviour
 {
-    [Command]
-    public void CmdOnCut()
+    CuttableMesh meshCut;
+
+    private void Start()
     {
-        Debug.Log("server");
-        RpcOnCut();
+        meshCut = GetComponent<CuttableMesh>();
     }
 
     [ClientRpc]
-    public void RpcOnCut()
+    public void RpcOnCut(NetworkInstanceId objectId, Vector3 anchorPoint, Vector3 normalDirection, float distanceLimit)
     {
-        Debug.Log("client");
+        GameObject iObject = NetworkServer.FindLocalObject(objectId);
+        MeshCutter.MeshCut.Cut(iObject, anchorPoint, normalDirection, distanceLimit);
+        iObject.GetComponent<CuttableMesh>().DisableCut();
     }
 }
