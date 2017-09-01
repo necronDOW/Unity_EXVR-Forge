@@ -45,6 +45,8 @@ public class CuttableMesh : MonoBehaviour
         GameObject[] halves = MeshCutter.MeshCut.Cut(gameObject, cuttingSrc.transform.position, cuttingSrc.transform.right, cuttingSrc.cuttingDiameter);
         Network_CuttableMesh ncm = GetComponent<Network_CuttableMesh>();
         if (ncm) {
+            for (int i = 0; i < halves.Length; i++)
+                Destroy(halves[i], 2.0f);
             ncm.CmdOnCut(halves);
         }
     }

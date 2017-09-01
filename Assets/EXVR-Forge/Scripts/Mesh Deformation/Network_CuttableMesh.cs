@@ -18,10 +18,7 @@ public class Network_CuttableMesh : NetworkBehaviour
         RpcOnCut();
 
         for (int i = 0; i < halves.Length; i++)
-        {
-            Destroy(halves[i], 2.0f);
             NetworkServer.Spawn(halves[i]);
-        }
     }
 
     [ClientRpc]
