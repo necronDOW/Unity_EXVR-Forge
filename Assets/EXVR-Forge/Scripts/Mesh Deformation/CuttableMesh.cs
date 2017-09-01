@@ -44,7 +44,8 @@ public class CuttableMesh : MonoBehaviour
     {
         Network_CuttableMesh ncm = GetComponent<Network_CuttableMesh>();
         if (ncm) {
-            ncm.CmdOnCut(cuttingSrc.transform.position, cuttingSrc.transform.right, cuttingSrc.cuttingDiameter);
+            ncm.CmdOnCut(GetComponent<UnityEngine.Networking.NetworkIdentity>().netId,
+                cuttingSrc.transform.position, cuttingSrc.transform.right, cuttingSrc.cuttingDiameter);
         }
     }
 
