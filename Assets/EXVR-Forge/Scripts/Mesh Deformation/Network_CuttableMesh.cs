@@ -6,26 +6,14 @@ using UnityEngine.Networking;
 public class Network_CuttableMesh : NetworkBehaviour
 {
     [Command]
-    public void CmdOnCut(NetworkInstanceId objectId)
+    public void CmdOnCut()
     {
-        GameObject iObject = NetworkServer.FindLocalObject(objectId);
-        iObject.GetComponent<Network_CuttableMesh>().test();
-        RpcOnCut(objectId);
+        Debug.Log("server");
+        RpcOnCut();
     }
 
     [ClientRpc]
-    public void RpcOnCut(NetworkInstanceId objectId)
-    {
-        GameObject iObject = NetworkServer.FindLocalObject(objectId);
-        iObject.GetComponent<Network_CuttableMesh>().test2();
-    }
-
-    public void test()
-    {
-        Debug.Log("server");
-    }
-
-    public void test2()
+    public void RpcOnCut()
     {
         Debug.Log("client");
     }
