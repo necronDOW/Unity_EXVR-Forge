@@ -281,11 +281,9 @@ namespace MeshCutter
 
             right_HalfMesh.SetIndices(right_side.indices.ToArray(), MeshTopology.Triangles, 0);
 
-            // assign the game objects
-            victim.GetComponent<MeshFilter>().sharedMesh = left_HalfMesh;
-
-			GameObject leftSideObj = victim;
-            leftSideObj.GetComponent<MeshCollider>().sharedMesh = victim.GetComponent<MeshFilter>().sharedMesh;
+            GameObject leftSideObj = GameObject.Instantiate(victim);
+            leftSideObj.GetComponent<MeshFilter>().mesh = left_HalfMesh;
+            leftSideObj.GetComponent<MeshCollider>().sharedMesh = left_HalfMesh;
             leftSideObj.GetComponent<MeshStateHandler>().ChangeState(false);
 
             GameObject rightSideObj = GameObject.Instantiate(leftSideObj);
@@ -295,6 +293,8 @@ namespace MeshCutter
             rightSideObj.GetComponent<MeshFilter>().mesh = right_HalfMesh;
             rightSideObj.GetComponent<MeshCollider>().sharedMesh = right_HalfMesh;
             rightSideObj.GetComponent<MeshStateHandler>().ChangeState(false);
+
+            GameObject.Destroy(victim);
 
             Debug.Log(Time.realtimeSinceStartup - timer);
 

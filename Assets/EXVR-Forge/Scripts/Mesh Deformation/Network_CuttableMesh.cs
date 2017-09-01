@@ -19,7 +19,7 @@ public class Network_CuttableMesh : NetworkBehaviour
 
         GameObject iObject = NetworkServer.FindLocalObject(objectId);
         GameObject[] halves = MeshCutter.MeshCut.Cut(iObject, v1, v2, f);
-        Debug.Log(iObject.name);
+        Debug.Log(halves[0].name + "," + halves[1].name);
     }
 
     [ClientRpc]
