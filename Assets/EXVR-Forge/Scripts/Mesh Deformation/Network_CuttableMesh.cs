@@ -16,9 +16,8 @@ public class Network_CuttableMesh : NetworkBehaviour
     public void CmdOnCut(NetworkInstanceId objectId, Vector3 anchorPoint, Vector3 normalDirection, float distanceLimit)
     {
         RpcOnCut();
-
-        GameObject iObject = NetworkServer.FindLocalObject(objectId);
-        GameObject[] halves = MeshCutter.MeshCut.Cut(iObject, anchorPoint, normalDirection, distanceLimit);
+        
+        GameObject[] halves = MeshCutter.MeshCut.Cut(gameObject, anchorPoint, normalDirection, distanceLimit);
         NetworkServer.Spawn(halves[1]);
     }
 
