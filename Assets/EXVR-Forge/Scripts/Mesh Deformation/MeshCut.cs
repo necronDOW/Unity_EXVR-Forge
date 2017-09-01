@@ -295,7 +295,6 @@ namespace MeshCutter
             rightSideObj.GetComponent<MeshFilter>().mesh = right_HalfMesh;
             rightSideObj.GetComponent<MeshCollider>().sharedMesh = right_HalfMesh;
             rightSideObj.GetComponent<MeshStateHandler>().ChangeState(false);
-            UnityEngine.Networking.NetworkServer.Spawn(rightSideObj);
 
             Debug.Log(Time.realtimeSinceStartup - timer);
 

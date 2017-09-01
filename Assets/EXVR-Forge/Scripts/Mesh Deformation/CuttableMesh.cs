@@ -35,7 +35,6 @@ public class CuttableMesh : MonoBehaviour
                 Debug.Log(hits);
                 if (hits++ >= hitsToCut)
                 {
-                    Debug.Log("cut");
                     PerformCut();
                     DisableCut();
                 }
@@ -43,9 +42,13 @@ public class CuttableMesh : MonoBehaviour
         }
     }
 
-    public void PerformCut()
+    public virtual void PerformCut(bool allowNetworking = true)
     {
-        MeshCutter.MeshCut.Cut(gameObject, cuttingSrc.transform.position, cuttingSrc.transform.right, cuttingSrc.cuttingDiameter);
+        Network_CuttableMesh ncm = GetComponent<Network_CuttableMesh>();
+
+        if (ncm && allowNetworking)
+            ncm.CmdOnCut(GetComponent<UnityEngine.Networking.NetworkIdentity>().netId);
+        else MeshCutter.MeshCut.Cut(gameObject, cuttingSrc.transform.position, cuttingSrc.transform.right, cuttingSrc.cuttingDiameter);
     }
 
     public void EnableCut(Transform cuttingSrc, Collider cuttingSrcCollider)
