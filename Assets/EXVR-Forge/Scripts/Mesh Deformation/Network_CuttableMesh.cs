@@ -13,15 +13,13 @@ public class Network_CuttableMesh : NetworkBehaviour
     }
 
     [Command]
-    public void CmdOnCut(GameObject[] halves)
+    public void CmdOnCut(NetworkInstanceId objectId, Vector3 v1, Vector3 v2, float f)
     {
         RpcOnCut();
 
-        for (int i = 0; i < halves.Length; i++) {
-            GameObject serverInstance = GameObject.Instantiate(halves[i]);
-            Destroy(serverInstance, 1.0f);
-            NetworkServer.Spawn(serverInstance);
-        }
+        GameObject iObject = NetworkServer.FindLocalObject(objectId);
+        GameObject[] halves = MeshCutter.MeshCut.Cut(iObject, v1, v2, f);
+        Debug.Log(iObject.name);
     }
 
     [ClientRpc]
