@@ -10,6 +10,7 @@ public class Network_CuttableMesh : NetworkBehaviour
     {
         GameObject iObject = NetworkServer.FindLocalObject(objectId);
         iObject.GetComponent<Network_CuttableMesh>().test();
+        RpcOnCut(objectId);
     }
 
     [ClientRpc]
