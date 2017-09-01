@@ -18,6 +18,7 @@ public class Network_CuttableMesh : NetworkBehaviour
         RpcOnCut();
         
         GameObject[] halves = MeshCutter.MeshCut.Cut(gameObject, anchorPoint, normalDirection, distanceLimit);
+        Destroy(halves[1], 2.0f);
         NetworkServer.Spawn(halves[1]);
     }
 
