@@ -5,11 +5,15 @@ using UnityEngine;
 public class Heating : MonoBehaviour {
 
     public Color startColor;
+    public GameObject HeatSoruce;
     private Color[] colors;
     private Mesh mesh;
     private Vector3[] vertices;
+    private Vector3[] worldPositions;
+    private float minX, maxX;
+    private float R, G, B;
 
-    void Start ()
+    void Awake ()
     {
         mesh = GetComponent<MeshFilter>().mesh;
         vertices = mesh.vertices;
@@ -19,16 +23,31 @@ public class Heating : MonoBehaviour {
         for (int i = 0; i < vertices.Length; i++)
             colors[i] = startColor;
 
-        mesh.colors = colors;       
+        mesh.colors = colors;
+
+        minX = HeatSoruce.transform.position.x - 0.5f;
+        maxX = HeatSoruce.transform.position.x + 0.5f;
     }
 
-    private void Update()
+
+    void Update()
     {
-        for (int i = 0; i < vertices.Length/2; i++)
+        if (vertices.Length == 0)
+            Awake();
+
+        for (int i = 0; i < vertices.Length; i++)
         {
-            colors[i] = new Color(Fire.temperature, 0,0);
+            vertices[i] = transform.TransformPoint(mesh.vertices[i]);
+            if (vertices[i].x > minX && vertices[i].x < maxX)
+            {
+                colors[i] = new Color((R += Fire.temperature), 0, 0);
+            }
+            else
+            {
+                if (R < 0)
+                colors[i] = new Color((R -= 0.0001f), 0, 0);
+            }
         }
-           
         mesh.colors = colors;
     }
 
