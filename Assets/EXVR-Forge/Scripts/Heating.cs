@@ -34,6 +34,7 @@ public class Heating : MonoBehaviour {
 
         HeatRod();
 
+        //update colours
         mesh.colors = colors;
     }
 
@@ -41,34 +42,27 @@ public class Heating : MonoBehaviour {
     {
         //only check every 100 points on the rod for fire collision
         int Length = (vertices.Length / Heat_Detection_Accuracy);
-
         for (int i = Length; i < vertices.Length; i+= Length)
         {
             //Get world space location of this point
             vertices[i] = transform.TransformPoint(mesh.vertices[i]);
-
             //check fire distance
             float dist = Vector3.Distance(HeatSoruce.transform.position, vertices[i]);
           
-            if (dist < 0.8f)
+            if (dist <= 1.2f)
             {
                 for (int j = 0; j < Length; j++)
                 {
-                    colors[i-j] = new Color(Fire.temperature/10, 0, 0);
+                    if (colors[i - j].r < 255)
+                        colors[i-j] = new Color(colors[i-j].r += Fire.temperature/255, colors[i - j].g += Fire.temperature/(255*15), 0);
                 }        
-            }
-            if (dist > 0.8f && dist < 1.2f)
-            {
-                for (int j = 0; j < Length; j++)
-                {
-                    colors[i - j] = new Color(Fire.temperature/100, 0, 0);
-                }
-            }
+            }          
             if (dist > 1.2f)
             {
                 for (int j = 0; j < Length; j++)
                 {
-                    colors[i - j] = new Color(0, 0, 0);
+                    if (colors[i - j].r > 0)
+                        colors[i-j] = new Color(colors[i-j].r -= 0.1f,0, 0);
                 }
             }
             //switch statment for multiiple colours
