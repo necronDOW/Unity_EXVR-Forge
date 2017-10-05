@@ -54,7 +54,6 @@ public class Heating : MonoBehaviour {
                 for (int j = 0; j < Length; j++)
                 {
                     if (colors[i - j].r < 255)
-                        colors[i-j] = new Color(colors[i-j].r += Fire.temperature/255, colors[i - j].g += Fire.temperature/(255*15), 0);
                 }        
             }          
             if (dist > 1.2f)
@@ -62,7 +61,6 @@ public class Heating : MonoBehaviour {
                 for (int j = 0; j < Length; j++)
                 {
                     if (colors[i - j].r > 0)
-                        colors[i-j] = new Color(colors[i-j].r -= 0.1f,0, 0);
                 }
             }
             //switch statment for multiiple colours
