@@ -6,12 +6,11 @@ public class Heating : MonoBehaviour {
 
     public Color startColor;
     public GameObject HeatSoruce;
+    public int Heat_Detection_Accuracy;
     private Color[] colors;
     private Mesh mesh;
     private Vector3[] vertices;
     private Vector3[] worldPositions;
-    private float minX, maxX;
-    private float R, G, B;
 
     void Awake ()
     {
@@ -24,33 +23,58 @@ public class Heating : MonoBehaviour {
             colors[i] = startColor;
 
         mesh.colors = colors;
-
-        minX = HeatSoruce.transform.position.x - 0.5f;
-        maxX = HeatSoruce.transform.position.x + 0.5f;
     }
 
 
     void Update()
     {
+        //Initialize rod
         if (vertices.Length == 0)
             Awake();
 
-        for (int i = 0; i < vertices.Length; i++)
-        {
-            vertices[i] = transform.TransformPoint(mesh.vertices[i]);
-            if (vertices[i].x > minX && vertices[i].x < maxX)
-            {
-                colors[i] = new Color((R += Fire.temperature), 0, 0);
-            }
-            else
-            {
-                if (R < 0)
-                colors[i] = new Color((R -= 0.0001f), 0, 0);
-            }
-        }
+        HeatRod();
+
         mesh.colors = colors;
     }
 
+    void HeatRod()
+    {
+        //only check every 100 points on the rod for fire collision
+        int Length = (vertices.Length / Heat_Detection_Accuracy);
+
+        for (int i = Length; i < vertices.Length; i+= Length)
+        {
+            //Get world space location of this point
+            vertices[i] = transform.TransformPoint(mesh.vertices[i]);
+
+            //check fire distance
+            float dist = Vector3.Distance(HeatSoruce.transform.position, vertices[i]);
+          
+            if (dist < 0.8f)
+            {
+                for (int j = 0; j < Length; j++)
+                {
+                    colors[i-j] = new Color(Fire.temperature/10, 0, 0);
+                }        
+            }
+            if (dist > 0.8f && dist < 1.2f)
+            {
+                for (int j = 0; j < Length; j++)
+                {
+                    colors[i - j] = new Color(Fire.temperature/100, 0, 0);
+                }
+            }
+            if (dist > 1.2f)
+            {
+                for (int j = 0; j < Length; j++)
+                {
+                    colors[i - j] = new Color(0, 0, 0);
+                }
+            }
+            //switch statment for multiiple colours
+        }
+        //only check every 100 points on the rod for fire collision
+    }
 }
 //For performance reasons, consider using colors32 instead. 
 //This will avoid byte-to-float conversions in colors, and use less temporary memory.
