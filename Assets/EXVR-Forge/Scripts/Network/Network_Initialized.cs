@@ -1,33 +1,21 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Networking;
 
-public class Network_Initialized : MonoBehaviour
+public class Network_Initialized : NetworkBehaviour
 {
-    [System.Serializable]
-    public struct SpawnableObject
+    public GameObject prefab;
+
+    public override void OnStartServer()
     {
-        public GameObject prefab;
-        public Vector3 position;
-        public Vector3 rotation;
-        public Vector3 scale;
-    }
+        if (isServer) {
+            GameObject g = Instantiate(prefab);
 
-    public SpawnableObject[] initialSpawn;
+            g.transform.position = transform.position;
+            g.transform.rotation = transform.rotation;
+            g.transform.localScale = transform.localScale;
+            g.name = prefab.name;
 
-    private void Awake()
-    {
-        if (Network.isServer) {
-            foreach (SpawnableObject o in initialSpawn) {
-                GameObject g = Instantiate(o.prefab);
-
-                g.transform.position = o.position;
-                g.transform.eulerAngles = o.rotation;
-                g.transform.localScale = o.scale;
-
-                NetworkServer.Spawn(g);
-            }
+            NetworkServer.Spawn(g);
         }
     }
 }

@@ -13,11 +13,11 @@ public class Network_CuttableMesh : NetworkBehaviour
 
         NetworkServer.Destroy(gameObject);
 
-        //if (halves != null) {
-        //    for (int i = 0; i < halves.Length; i++) {
-        //        NetworkServer.Spawn(halves[i]);
-        //    }
-        //}
+        if (halves != null) {
+            for (int i = 0; i < halves.Length; i++) {
+                NetworkServer.Spawn(halves[i]);
+            }
+        }
     }
 
     [ClientRpc]
