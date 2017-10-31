@@ -45,7 +45,7 @@ public class CuttingTool : AnvilTool
         }
     }
 
-    public void ReEnableCutTool()
+    public void ReEnableTool()
     {
         //foreach (Collider c in colliders)
         //    c.enabled = true;

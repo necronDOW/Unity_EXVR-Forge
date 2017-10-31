@@ -6,7 +6,7 @@ using Valve.VR.InteractionSystem;
 public class AnvilTool : MonoBehaviour
 {
     public string lookupTag = "";
-    protected Collider[] colliders; // 0 = parent, 1 = this.
+    public Collider[] colliders; // 0 = parent, 1 = this.
 
     protected virtual void Start()
     {
@@ -56,5 +56,17 @@ public class AnvilTool : MonoBehaviour
         if ((t && t.attached) || (nio && nio.isAttached))
             return true;
         else return false;
+    }
+    
+    public void SetAttachState(bool state)
+    {
+        colliders[0].enabled = !state;
+        colliders[1].enabled = state;
+    }
+
+    public void ReEnableTool()
+    {
+        colliders[0].enabled = true;
+        colliders[1].enabled = true;
     }
 }

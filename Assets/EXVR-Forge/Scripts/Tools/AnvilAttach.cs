@@ -32,6 +32,10 @@ public class AnvilAttach : MonoBehaviour {
                     other.transform.position = transform.position;
                     other.transform.rotation = transform.rotation;// * other.transform.rotation;
                     isAttached = true;
+
+                    AnvilTool toolScript = attachedRb.GetComponent<AnvilTool>();
+                    if (toolScript)
+                        toolScript.colliders[1].enabled = true;
                 }
                 else
                 {
@@ -49,9 +53,10 @@ public class AnvilAttach : MonoBehaviour {
 
     public void Highlight()
     {
-        if(!isAttached)
-        GetComponent<Renderer>().material = highlight;
+        if (!isAttached)
+            GetComponent<Renderer>().material = highlight;
     }
+
     public void UnHighlight()
     {
         GetComponent<Renderer>().material = normal;

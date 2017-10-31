@@ -125,6 +125,8 @@ public class DeformableMesh : DeformableBase
 
     private void Deform(Transform otherObject, Vector3[] hitPoints)
     {
+        UpdateComponents();
+
         thread_vertices = mFilter.mesh.vertices;
 
         for (int i = 0; i < hitPoints.Length; i++)
@@ -143,6 +145,8 @@ public class DeformableMesh : DeformableBase
     
     private void Deform(Transform otherObject, Vector3 hitPoint)
     {
+        UpdateComponents();
+
         thread_vertices = mFilter.sharedMesh.vertices;
 
         DeformVectors vectors = new DeformVectors(transform, otherObject.transform.up, otherObject.transform.position);

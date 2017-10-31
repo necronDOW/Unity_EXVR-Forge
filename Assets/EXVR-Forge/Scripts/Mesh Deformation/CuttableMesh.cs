@@ -15,6 +15,7 @@ public class CuttableMesh : MonoBehaviour
     private bool canCut = false;
     private CuttingTool cuttingSrc;
     private float cuttingSrcExtents;
+    private DeformableMesh deformableMesh;
 
     private void Start()
     {
@@ -22,6 +23,8 @@ public class CuttableMesh : MonoBehaviour
 
         Collider c = GetComponent<Collider>();
         minImpactDistance = Mathf.Min(c.bounds.extents.x, Mathf.Min(c.bounds.extents.y, c.bounds.extents.z)) * 2.0f;
+
+        deformableMesh = GetComponent<DeformableMesh>();
     }
 
     private void OnTriggerEnter(Collider other)
@@ -56,11 +59,17 @@ public class CuttableMesh : MonoBehaviour
         cuttingSrcExtents = cuttingSrcCollider.bounds.extents.magnitude;
         this.cuttingSrc = cuttingSrc.GetComponent<CuttingTool>();
         hits = 0;
+
+        if (deformableMesh)
+            deformableMesh.enabled = false;
     }
 
     public void DisableCut()
     {
         canCut = false;
         hits = 0;
+
+        if (deformableMesh)
+            deformableMesh.enabled = true;
     }
 }

@@ -8,7 +8,8 @@ public class Network_CuttableMesh : NetworkBehaviour
     [Command]
     public void CmdOnCut(Vector3 v1, Vector3 v2, float f)
     {
-        Debug.Log("OnCutCmd");
+        RpcOnCut();
+
         GameObject[] halves = MeshCutter.MeshCut.Cut(gameObject, v1, v2, GetComponent<CuttableMesh>().rodPrefab, f);
 
         NetworkServer.Destroy(gameObject);

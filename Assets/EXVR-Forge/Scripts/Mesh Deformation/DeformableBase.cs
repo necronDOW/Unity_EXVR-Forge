@@ -13,10 +13,7 @@ public class DeformableBase : MonoBehaviour
 
     protected virtual void Start()
     {
-        mFilter = GetComponent<MeshFilter>();
-        mCollider = GetComponent<MeshCollider>();
-        originalTriangles = mFilter.sharedMesh.triangles;
-        originalVertices = mFilter.sharedMesh.vertices;
+        UpdateComponents();
     }
 
     protected virtual void OnApplicationQuit()
@@ -35,5 +32,16 @@ public class DeformableBase : MonoBehaviour
         mFilter.sharedMesh.vertices = originalVertices;
         mFilter.sharedMesh.RecalculateBounds();
         mCollider.sharedMesh = mFilter.sharedMesh;
+    }
+
+    protected void UpdateComponents()
+    {
+        if (!mFilter || !mCollider)
+        {
+            mFilter = GetComponent<MeshFilter>();
+            mCollider = GetComponent<MeshCollider>();
+            originalTriangles = mFilter.sharedMesh.triangles;
+            originalVertices = mFilter.sharedMesh.vertices;
+        }
     }
 }
