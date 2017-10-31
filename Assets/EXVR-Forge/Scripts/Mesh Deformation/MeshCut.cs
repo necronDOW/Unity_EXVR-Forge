@@ -283,7 +283,6 @@ namespace MeshCutter
 
             GameObject leftSideObj = Duplicate(rodPrefab, victim.transform, left_HalfMesh);
             GameObject rightSideObj = Duplicate(rodPrefab, victim.transform, right_HalfMesh);
-            GameObject.Destroy(victim);
 
             Debug.Log(Time.realtimeSinceStartup - timer);
 
