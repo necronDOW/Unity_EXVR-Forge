@@ -97,8 +97,6 @@ public class Heating : MonoBehaviour {
             {
                 rodTemprature[i] += Fire.temperature/1000;
 
-
-
                 for (int j = 0; j < Length; j++)
                 {
                     //if (colors[i - j].r <= 255)
@@ -107,11 +105,7 @@ public class Heating : MonoBehaviour {
             }          
             if (dist > 1.2f)
             {
-                for (int j = 0; j < Length; j++)
-                {
-                    if (colors[i - j].r >= 0)
-                        colors[i-j] -= new Color(1.0f, 1.0f, 1.0f);
-                }
+             
             }
             //switch statment for multiiple colours
         }
