@@ -11,13 +11,13 @@ public class Network_CuttableMesh : NetworkBehaviour
         Debug.Log("OnCutCmd");
         GameObject[] halves = MeshCutter.MeshCut.Cut(gameObject, v1, v2, GetComponent<CuttableMesh>().rodPrefab, f);
 
-        Network.Destroy(gameObject);
+        NetworkServer.Destroy(gameObject);
 
-        if (halves != null) {
-            for (int i = 0; i < halves.Length; i++) {
-                NetworkServer.Spawn(halves[i]);
-            }
-        }
+        //if (halves != null) {
+        //    for (int i = 0; i < halves.Length; i++) {
+        //        NetworkServer.Spawn(halves[i]);
+        //    }
+        //}
     }
 
     [ClientRpc]
