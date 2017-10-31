@@ -4,18 +4,23 @@ using UnityEngine.Networking;
 public class Network_Initialized : NetworkBehaviour
 {
     public GameObject prefab;
+    protected GameObject instantiated;
 
     public override void OnStartServer()
     {
         if (isServer) {
-            GameObject g = Instantiate(prefab);
-
-            g.transform.position = transform.position;
-            g.transform.rotation = transform.rotation;
-            g.transform.localScale = transform.localScale;
-            g.name = prefab.name;
-
-            NetworkServer.Spawn(g);
+            InstantiatePrefab();
+            NetworkServer.Spawn(instantiated);
         }
+    }
+
+    public virtual void InstantiatePrefab()
+    {
+        instantiated = Instantiate(prefab);
+
+        instantiated.transform.position = transform.position;
+        instantiated.transform.rotation = transform.rotation;
+        instantiated.transform.localScale = transform.localScale;
+        instantiated.name = prefab.name;
     }
 }
