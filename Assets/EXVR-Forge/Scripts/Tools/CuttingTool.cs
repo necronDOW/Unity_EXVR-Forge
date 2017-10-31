@@ -45,18 +45,6 @@ public class CuttingTool : AnvilTool
         }
     }
 
-    public void ReEnableTool()
-    {
-        //foreach (Collider c in colliders)
-        //    c.enabled = true;
-
-        //if (cutTarget)
-        //{
-        //    cutTarget.DisableCut();
-        //    cutTarget = null;
-        //}
-    }
-
     private void DrawDebug()
     {
         Vector3 topRight = transform.position + (transform.forward + transform.up).normalized * cuttingDiameter;

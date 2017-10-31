@@ -26,8 +26,13 @@ public class AnvilTool : MonoBehaviour
         if (other.tag == lookupTag)
         {
             if (IsAttached(other.gameObject))
+            {
                 Unfreeze(other.gameObject);
-            else Freeze(other.gameObject);
+            }
+            else
+            {
+                Freeze(other.gameObject);
+            }
         }
     }
 
@@ -39,6 +44,7 @@ public class AnvilTool : MonoBehaviour
             Unfreeze(other.gameObject);
         }
     }
+
 
     protected virtual void Freeze(GameObject o)
     {
@@ -56,19 +62,5 @@ public class AnvilTool : MonoBehaviour
         Network_InteractableObject nio = other.GetComponent<Network_InteractableObject>();
 
         return ((t && t.attached) || (nio && nio.isAttached));
-        //    return true;
-        //else return false;
-    }
-    
-    public void SetAttachState(bool state)
-    {
-        colliders[0].enabled = !state;
-        colliders[1].enabled = state;
-    }
-
-    public void ReEnableTool()
-    {
-        colliders[0].enabled = true;
-        colliders[1].enabled = false;
     }
 }
