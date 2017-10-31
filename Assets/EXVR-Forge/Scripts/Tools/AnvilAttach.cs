@@ -33,13 +33,14 @@ public class AnvilAttach : MonoBehaviour {
                     other.transform.rotation = transform.rotation;// * other.transform.rotation;
                     isAttached = true;
 
-                    AnvilTool toolScript = attachedRb.GetComponent<AnvilTool>();
-                    if (toolScript)
-                        toolScript.colliders[1].enabled = true;
+                    // Needs to use the transform otherwise it doesn't work.
+                    // The first Collider it gets is not the AttachPoint. So we need to get the second one it returns ( a child ).
+                    other.transform.GetComponentsInChildren<BoxCollider>()[1].enabled = true; 
                 }
                 else
                 {
                     other.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
+                    other.transform.GetComponentsInChildren<BoxCollider>()[1].enabled = false;
                     Highlight();
                 }
             }

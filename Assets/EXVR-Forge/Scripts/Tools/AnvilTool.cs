@@ -16,7 +16,9 @@ public class AnvilTool : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         if (other.tag == lookupTag)
+        {
             colliders[0].enabled = false;
+        }
     }
 
     private void OnTriggerStay(Collider other)
@@ -53,9 +55,9 @@ public class AnvilTool : MonoBehaviour
         Throwable t = other.GetComponent<Throwable>();
         Network_InteractableObject nio = other.GetComponent<Network_InteractableObject>();
 
-        if ((t && t.attached) || (nio && nio.isAttached))
-            return true;
-        else return false;
+        return ((t && t.attached) || (nio && nio.isAttached));
+        //    return true;
+        //else return false;
     }
     
     public void SetAttachState(bool state)
@@ -67,6 +69,6 @@ public class AnvilTool : MonoBehaviour
     public void ReEnableTool()
     {
         colliders[0].enabled = true;
-        colliders[1].enabled = true;
+        colliders[1].enabled = false;
     }
 }
