@@ -9,7 +9,7 @@ public class Network_CuttableMesh : NetworkBehaviour
     public void CmdOnCut(Vector3 v1, Vector3 v2, float f)
     {
         RpcOnCut();
-        
+
         GameObject[] halves = MeshCutter.MeshCut.Cut(gameObject, v1, v2, GetComponent<CuttableMesh>().rodPrefab, f);
 
         if (halves != null) {
