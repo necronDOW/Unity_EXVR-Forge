@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -8,21 +9,39 @@ public class Network_CuttableMesh : NetworkBehaviour
     [Command]
     public void CmdOnCut(Vector3 v1, Vector3 v2, float f)
     {
-        //RpcOnCut();
-
-        GameObject[] halves = MeshCutter.MeshCut.Cut(gameObject, v1, v2, GetComponent<CuttableMesh>().rodPrefab, f);
-        
-        if (halves != null) {
-            for (int i = 0; i < halves.Length; i++) {
-                Mesh m = halves[i].GetComponent<MeshFilter>().mesh;
-                byte[] serializeMesh = SerializeMesh(m.name, m);
-
-                NetworkServer.Spawn(halves[i]);
-                halves[i].GetComponent<Network_CuttableMesh>().RpcReceiveMesh(serializeMesh);
-            }
+        GameObject[] halves = new GameObject[2];
+        for (int i = 0; i < halves.Length; i++) {
+            halves[i] = InstantiateCutInstance(GetComponent<CuttableMesh>().rodPrefab, transform);
+            NetworkServer.Spawn(halves[i]);
         }
 
+        NetworkInstanceId[] nids = halves.Select(h => h.GetComponent<NetworkIdentity>().netId).ToArray();
+        RpcOnCut(nids, v1, v2, f);
+
         NetworkServer.Destroy(gameObject);
+    }
+
+    [ClientRpc]
+    private void RpcOnCut(NetworkInstanceId[] halfIds, Vector3 v1, Vector3 v2, float f)
+    {
+        GameObject[] halfObjects = new GameObject[halfIds.Length];
+        for (int i = 0; i < halfObjects.Length; i++)
+            halfObjects[i] = ClientScene.FindLocalObject(halfIds[i]);
+
+        Mesh[] halves = MeshCutter.MeshCut.Cut(gameObject, v1, v2, f);
+        for (int i = 0; i < halfObjects.Length; i++) {
+            halfObjects[i].GetComponent<MeshFilter>().mesh = halves[i];
+            halfObjects[i].GetComponent<MeshCollider>().sharedMesh = halves[i];
+            halfObjects[i].GetComponent<MeshStateHandler>().ChangeState(false);
+        }
+    }
+
+    private GameObject InstantiateCutInstance(GameObject original, Transform transform)
+    {
+        GameObject obj = GameObject.Instantiate(original, transform.position, transform.rotation);
+        obj.transform.localScale = transform.localScale;
+
+        return obj;
     }
 
     [ClientRpc]
@@ -35,9 +54,9 @@ public class Network_CuttableMesh : NetworkBehaviour
         Mesh mesh = new Mesh {
             triangles = md.triangles,
             vertices = DeserializeVector3(md.vertices),
-            normals = DeserializeVector3(md.normals),
+            //normals = DeserializeVector3(md.normals),
             uv = DeserializeVector2(md.uv),
-            uv2 = DeserializeVector2(md.uv2),
+            //uv2 = DeserializeVector2(md.uv2),
             name = md.name
         };
 
@@ -53,9 +72,9 @@ public class Network_CuttableMesh : NetworkBehaviour
         fmt.Serialize(mem, new MeshData {
             triangles = mesh.triangles,
             vertices = SerializeVector3(mesh.vertices),
-            normals = SerializeVector3(mesh.normals),
+            //normals = SerializeVector3(mesh.normals),
             uv = SerializeVector2(mesh.uv),
-            uv2 = SerializeVector2(mesh.uv2),
+            //uv2 = SerializeVector2(mesh.uv2),
             name = name
         });
 
@@ -68,9 +87,9 @@ public class Network_CuttableMesh : NetworkBehaviour
         public string name;
         public int[] triangles;
         public float[,] vertices;
-        public float[,] normals;
+        //public float[,] normals;
         public float[,] uv;
-        public float[,] uv2;
+        //public float[,] uv2;
     }
 
     private float[,] SerializeVector3(Vector3[] v)
