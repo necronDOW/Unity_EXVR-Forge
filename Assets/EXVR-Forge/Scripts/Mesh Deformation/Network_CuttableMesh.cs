@@ -22,20 +22,20 @@ public class Network_CuttableMesh : NetworkBehaviour
         }
 
         NetworkInstanceId[] nids = halves.Select(h => h.GetComponent<NetworkIdentity>().netId).ToArray();
-        RpcOnCut(nids, v1, v2, f);
+        RpcOnCut(transform.position, transform.rotation, nids, v1, v2, f);
 
         NetworkServer.Destroy(gameObject);
     }
     
     [ClientRpc]
-    private void RpcOnCut(NetworkInstanceId[] halfIds, Vector3 v1, Vector3 v2, float f)
+    private void RpcOnCut(Vector3 syncPosition, Quaternion syncRotation, NetworkInstanceId[] halfIds, Vector3 v1, Vector3 v2, float f)
     {
-        int objectCount = GameObject.FindGameObjectsWithTag("Rod").Length;
-        Debug.Log(objectCount);
-
         GameObject[] halfObjects = new GameObject[halfIds.Length];
         for (int i = 0; i < halfObjects.Length; i++)
             halfObjects[i] = ClientScene.FindLocalObject(halfIds[i]);
+
+        gameObject.transform.position = syncPosition;
+        gameObject.transform.rotation = syncRotation;
 
         Mesh[] halves = MeshCutter.MeshCut.Cut(gameObject, v1, v2, f);
 
