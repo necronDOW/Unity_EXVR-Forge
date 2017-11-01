@@ -13,22 +13,30 @@ public class Network_Initialized_Tool : Network_Initialized
         base.InstantiatePrefab();
 
         Throwable throwableScript = instantiated.GetComponent<Throwable>();
+        
+        throwableScript.onPickUp.AddListener(OnPickUp);
+        throwableScript.onDetachFromHand.AddListener(OnDetachFromHand);
+    }
 
-        throwableScript.onPickUp.AddListener(onPickUp.Invoke);
-        throwableScript.onDetachFromHand.AddListener(onDetachFromHand.Invoke);
+    private void OnPickUp()
+    {
+        RpcOnPickUp();
+    }
+
+    private void OnDetachFromHand()
+    {
+        RpcOnDetachFromHand();
     }
     
     [ClientRpc]
     private void RpcOnPickUp()
     {
-        Throwable throwableScript = instantiated.GetComponent<Throwable>();
-        throwableScript.onPickUp.Invoke();
+        onPickUp.Invoke();
     }
 
     [ClientRpc]
     private void RpcOnDetachFromHand()
     {
-        Throwable throwableScript = instantiated.GetComponent<Throwable>();
-        throwableScript.onDetachFromHand.Invoke();
+        onDetachFromHand.Invoke();
     }
 }
