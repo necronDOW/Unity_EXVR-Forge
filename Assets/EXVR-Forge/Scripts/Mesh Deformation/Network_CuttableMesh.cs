@@ -9,9 +9,15 @@ public class Network_CuttableMesh : NetworkBehaviour
     [Command]
     public void CmdOnCut(Vector3 v1, Vector3 v2, float f)
     {
+        Mesh[] mHalves = MeshCutter.MeshCut.Cut(gameObject, v1, v2, f);
+
         GameObject[] halves = new GameObject[2];
         for (int i = 0; i < halves.Length; i++) {
             halves[i] = InstantiateCutInstance(GetComponent<CuttableMesh>().rodPrefab, transform);
+            halves[i].GetComponent<MeshFilter>().mesh = mHalves[i];
+            halves[i].GetComponent<MeshCollider>().sharedMesh = mHalves[i];
+            halves[i].GetComponent<MeshStateHandler>().ChangeState(false);
+
             NetworkServer.Spawn(halves[i]);
         }
 
@@ -20,15 +26,19 @@ public class Network_CuttableMesh : NetworkBehaviour
 
         NetworkServer.Destroy(gameObject);
     }
-
+    
     [ClientRpc]
     private void RpcOnCut(NetworkInstanceId[] halfIds, Vector3 v1, Vector3 v2, float f)
     {
+        int objectCount = GameObject.FindGameObjectsWithTag("Rod").Length;
+        Debug.Log(objectCount);
+
         GameObject[] halfObjects = new GameObject[halfIds.Length];
         for (int i = 0; i < halfObjects.Length; i++)
             halfObjects[i] = ClientScene.FindLocalObject(halfIds[i]);
 
         Mesh[] halves = MeshCutter.MeshCut.Cut(gameObject, v1, v2, f);
+
         for (int i = 0; i < halfObjects.Length; i++) {
             halfObjects[i].GetComponent<MeshFilter>().mesh = halves[i];
             halfObjects[i].GetComponent<MeshCollider>().sharedMesh = halves[i];
@@ -36,7 +46,7 @@ public class Network_CuttableMesh : NetworkBehaviour
         }
     }
 
-    private GameObject InstantiateCutInstance(GameObject original, Transform transform)
+    private GameObject InstantiateCutInstance(GameObject original, Transform transform, Mesh mesh = null)
     {
         GameObject obj = GameObject.Instantiate(original, transform.position, transform.rotation);
         obj.transform.localScale = transform.localScale;
