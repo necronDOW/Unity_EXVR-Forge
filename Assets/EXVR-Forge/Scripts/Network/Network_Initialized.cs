@@ -20,7 +20,6 @@ public class Network_Initialized : NetworkBehaviour
 
         instantiated.transform.position = transform.position;
         instantiated.transform.rotation = transform.rotation;
-        instantiated.transform.localScale = transform.localScale;
         instantiated.name = prefab.name;
     }
 }
