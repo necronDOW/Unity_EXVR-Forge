@@ -14,21 +14,21 @@ public class Network_InteractableObject : NetworkBehaviour
     private void Start()
     {
         nid = GetComponent<NetworkIdentity>().netId;
-        GetComponent<InteractableHoverEvents>().onAttachedToHand.AddListener(OnGrab);
+        GetComponent<InteractableHoverEvents>().onAttachedToHand.AddListener(OnPickup);
         GetComponent<InteractableHoverEvents>().onDetachedFromHand.AddListener(OnRelease);
     }
 
-    public void OnGrab()
+    public void OnPickup()
     {
         Network_PlayerController npc = GetLocalPlayerController();
         npc.CmdOnGrab(nid, npc.gameObject.GetComponent<NetworkIdentity>());
-
-        CmdOnGrab();
+        npc.CmdOnPickup(nid);
     }
 
     public void OnRelease()
     {
-        CmdOnRelease();
+        Network_PlayerController npc = GetLocalPlayerController();
+        npc.CmdOnRelease(nid);
     }
 
     public Network_PlayerController GetLocalPlayerController()
@@ -39,14 +39,8 @@ public class Network_InteractableObject : NetworkBehaviour
         else return null;
     }
 
-    [Command]
-    public void CmdOnGrab() { RpcOnGrab(); }
-
-    [Command]
-    public void CmdOnRelease() { RpcOnRelease(); }
-
     [ClientRpc]
-    public void RpcOnGrab()
+    public void RpcOnPickup()
     {
         isAttached = true;
         GetComponent<Collider>().isTrigger = true;

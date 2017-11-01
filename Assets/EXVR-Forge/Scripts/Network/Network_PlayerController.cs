@@ -27,15 +27,13 @@ public class Network_PlayerController : NetworkBehaviour
     public void CmdOnPickup(NetworkInstanceId objectId)
     {
         GameObject iObject = NetworkServer.FindLocalObject(objectId);
-        iObject.GetComponent<Network_InteractableObject>().isAttached = true;
-        iObject.GetComponent<Collider>().isTrigger = true;
+        iObject.GetComponent<Network_InteractableObject>().RpcOnPickup();
     }
 
     [Command]
     public void CmdOnRelease(NetworkInstanceId objectId)
     {
         GameObject iObject = NetworkServer.FindLocalObject(objectId);
-        iObject.GetComponent<Network_InteractableObject>().isAttached = false;
-        iObject.GetComponent<Collider>().isTrigger = false;
+        iObject.GetComponent<Network_InteractableObject>().RpcOnRelease();
     }
 }
