@@ -23,12 +23,12 @@ public class Network_InteractableObject : NetworkBehaviour
         Network_PlayerController npc = GetLocalPlayerController();
         npc.CmdOnGrab(nid, npc.gameObject.GetComponent<NetworkIdentity>());
 
-        RpcOnGrab();
+        CmdOnGrab();
     }
 
     public void OnRelease()
     {
-        RpcOnRelease();
+        CmdOnRelease();
     }
 
     public Network_PlayerController GetLocalPlayerController()
@@ -38,6 +38,12 @@ public class Network_InteractableObject : NetworkBehaviour
         if (player) return player.GetComponent<Network_PlayerController>();
         else return null;
     }
+
+    [Command]
+    public void CmdOnGrab() { RpcOnGrab(); }
+
+    [Command]
+    public void CmdOnRelease() { RpcOnRelease(); }
 
     [ClientRpc]
     public void RpcOnGrab()
