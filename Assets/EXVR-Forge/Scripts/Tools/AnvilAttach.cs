@@ -25,7 +25,11 @@ public class AnvilAttach : MonoBehaviour {
         {
             if (!isAttached)
             {
-                if (!other.GetComponent<Throwable>().attached)
+                bool attached = other.GetComponent<Throwable>().attached;
+                Network_InteractableObject nio = other.GetComponent<Network_InteractableObject>();
+                if (nio) attached = nio.isAttached;
+
+                if (!attached)
                 {
                     attachedRb = other.GetComponent<Rigidbody>();
                     attachedRb.constraints = RigidbodyConstraints.FreezeAll;
