@@ -20,6 +20,9 @@ public class Network_InteractableObject : NetworkBehaviour
 
     public void OnGrab()
     {
+        Network_PlayerController npc = GetLocalPlayerController();
+        npc.CmdOnGrab(nid, npc.gameObject.GetComponent<NetworkIdentity>());
+
         RpcOnGrab();
     }
 
