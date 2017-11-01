@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Networking;
 using UnityEngine.Events;
 using Valve.VR.InteractionSystem;
 
@@ -15,5 +16,19 @@ public class Network_Initialized_Tool : Network_Initialized
 
         throwableScript.onPickUp.AddListener(onPickUp.Invoke);
         throwableScript.onDetachFromHand.AddListener(onDetachFromHand.Invoke);
+    }
+    
+    [ClientRpc]
+    private void RpcOnPickUp()
+    {
+        Throwable throwableScript = instantiated.GetComponent<Throwable>();
+        throwableScript.onPickUp.Invoke();
+    }
+
+    [ClientRpc]
+    private void RpcOnDetachFromHand()
+    {
+        Throwable throwableScript = instantiated.GetComponent<Throwable>();
+        throwableScript.onDetachFromHand.Invoke();
     }
 }
