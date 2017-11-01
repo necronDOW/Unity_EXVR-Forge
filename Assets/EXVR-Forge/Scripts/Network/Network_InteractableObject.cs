@@ -20,15 +20,19 @@ public class Network_InteractableObject : NetworkBehaviour
 
     public void OnGrab()
     {
-        Network_PlayerController npc = GetLocalPlayerController();
-        npc.CmdOnGrab(nid, npc.gameObject.GetComponent<NetworkIdentity>());
-        npc.CmdOnPickup(nid);
+        RpcOnGrab();
+
+        //Network_PlayerController npc = GetLocalPlayerController();
+        //npc.CmdOnGrab(nid, npc.gameObject.GetComponent<NetworkIdentity>());
+        //npc.CmdOnPickup(nid);
     }
 
     public void OnRelease()
     {
-        Network_PlayerController npc = GetLocalPlayerController();
-        npc.CmdOnRelease(nid);
+        RpcOnRelease();
+
+        //Network_PlayerController npc = GetLocalPlayerController();
+        //npc.CmdOnRelease(nid);
     }
 
     public Network_PlayerController GetLocalPlayerController()
@@ -37,5 +41,19 @@ public class Network_InteractableObject : NetworkBehaviour
 
         if (player) return player.GetComponent<Network_PlayerController>();
         else return null;
+    }
+
+    [ClientRpc]
+    public void RpcOnGrab()
+    {
+        isAttached = true;
+        GetComponent<Collider>().isTrigger = true;
+    }
+
+    [ClientRpc]
+    public void RpcOnRelease()
+    {
+        isAttached = false;
+        GetComponent<Collider>().isTrigger = false;
     }
 }
