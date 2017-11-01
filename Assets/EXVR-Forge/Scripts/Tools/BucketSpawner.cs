@@ -8,10 +8,13 @@ public class BucketSpawner : MonoBehaviour
     public Object prefab;
     public float spawnRate = 1;
     private Rigidbody rb;
+    private GameObject Coal;
 
     private void Start()
     {
         rb = this.GetComponentInParent<Rigidbody>();
+        Coal = new GameObject();
+        Coal.name = "Coal Spawner";
     }
     void Update()
     {
@@ -35,7 +38,7 @@ public class BucketSpawner : MonoBehaviour
             float rand = Random.Range(-0.1f, 0.1f);
             Vector3 offset = new Vector3(rand, rand, rand);
 
-            GameObject instance = (GameObject)Instantiate(prefab, transform.position + offset, transform.rotation, gameObject.transform);
+            GameObject instance = (GameObject)Instantiate(prefab, transform.position + offset, transform.rotation, Coal.transform);
             instance.GetComponentInParent<Rigidbody>().AddForce(instance.transform.up * 100f, ForceMode.Force);
             ticks = 0;
         }
