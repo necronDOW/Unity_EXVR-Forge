@@ -53,19 +53,19 @@ public class DeformableMesh : DeformableBase
         currentHitPoint = Vector3.zero;
     }
 
-    private void OnCollisionExit(Collision collision)
-    {
-        DeformableAgent da = collision.gameObject.GetComponent<DeformableAgent>();
+    //private void OnCollisionExit(Collision collision)
+    //{
+    //    DeformableAgent da = collision.gameObject.GetComponent<DeformableAgent>();
 
-        if (da) {
-            Vector3 centralContact = Vector3.zero;
-            for (int i = 0; i < collision.contacts.Length; i++)
-                centralContact += collision.contacts[i].point;
-            centralContact /= collision.contacts.Length;
+    //    if (da) {
+    //        Vector3 centralContact = Vector3.zero;
+    //        for (int i = 0; i < collision.contacts.Length; i++)
+    //            centralContact += collision.contacts[i].point;
+    //        centralContact /= collision.contacts.Length;
 
-            Deform(collision.transform, centralContact);
-        }
-    }
+    //        Deform(collision.transform, centralContact);
+    //    }
+    //}
     
     private void OnTriggerEnter(Collider other)
     {
@@ -73,35 +73,43 @@ public class DeformableMesh : DeformableBase
         float dispersion = (da) ? da.dispersion : 1.0f;
 
         if (!currentImpactCollider && da) {
+            Debug.Log("deform");
             currentImpactCollider = other;
-            RaycastHit hitInfo;
-            float rayLength = other.bounds.extents.magnitude;
-
-            if (Physics.Raycast(other.transform.position, other.transform.forward, out hitInfo, rayLength)
-                || Physics.Raycast(other.transform.position, -other.transform.forward, out hitInfo, rayLength))
-            {
-                if (hitInfo.transform.gameObject == gameObject)
-                {
-                    Vector3[] pts = new Vector3[9];
-                    Vector3 otherRight = other.transform.right * other.bounds.extents.x * dispersion;
-                    Vector3 otherUp = other.transform.up * other.bounds.extents.y * dispersion;
-
-                    int p = 0;
-                    for (int i = -1; i <= 1; i += 1)
-                    {
-                        for (int j = -1; j <= 1; j += 1)
-                            pts[p++] = hitInfo.point + (otherRight * i) + (otherUp * j);
-                    }
-                    Deform(other.transform, pts);
-
-                    currentHitPoint = hitInfo.point;
-                    return;
-                }
-            }
 
             Deform(other.transform, other.transform.position);
             currentHitPoint = other.transform.position;
         }
+
+        //if (!currentImpactCollider && da) {
+        //    currentImpactCollider = other;
+        //    RaycastHit hitInfo;
+        //    float rayLength = other.bounds.extents.magnitude;
+
+        //    if (Physics.Raycast(other.transform.position, other.transform.forward, out hitInfo, rayLength)
+        //        || Physics.Raycast(other.transform.position, -other.transform.forward, out hitInfo, rayLength))
+        //    {
+        //        if (hitInfo.transform.gameObject == gameObject)
+        //        {
+        //            Vector3[] pts = new Vector3[9];
+        //            Vector3 otherRight = other.transform.right * other.bounds.extents.x * dispersion;
+        //            Vector3 otherUp = other.transform.up * other.bounds.extents.y * dispersion;
+
+        //            int p = 0;
+        //            for (int i = -1; i <= 1; i += 1)
+        //            {
+        //                for (int j = -1; j <= 1; j += 1)
+        //                    pts[p++] = hitInfo.point + (otherRight * i) + (otherUp * j);
+        //            }
+        //            Deform(other.transform, pts);
+
+        //            currentHitPoint = hitInfo.point;
+        //            return;
+        //        }
+        //    }
+
+        //    Deform(other.transform, other.transform.position);
+        //    currentHitPoint = other.transform.position;
+        //}
     }
 
     private void Update()
