@@ -9,16 +9,18 @@ public class BucketSpawner : MonoBehaviour
     public float spawnRate = 1;
     private Rigidbody rb;
     private GameObject Coal;
+    private Network_InteractableObject nio;
 
     private void Start()
     {
         rb = this.GetComponentInParent<Rigidbody>();
+        nio = this.GetComponentInParent<Network_InteractableObject>();
         Coal = new GameObject();
         Coal.name = "Coal Spawner";
     }
     void Update()
     {
-        if (rb.isKinematic == true)
+        if (rb.isKinematic || (!nio || nio.isAttached) )
         {
         if ((transform.up.y * 2f) < (transform.position.y - 1f))
             SpawnPrefab();
