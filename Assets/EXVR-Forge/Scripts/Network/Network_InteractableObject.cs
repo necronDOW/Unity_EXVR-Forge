@@ -43,13 +43,13 @@ public class Network_InteractableObject : NetworkBehaviour
     public void RpcOnPickup()
     {
         isAttached = true;
-        GetComponent<Collider>().isTrigger = true;
+        GetComponent<Rigidbody>().isKinematic = true;
     }
 
     [ClientRpc]
     public void RpcOnRelease()
     {
         isAttached = false;
-        GetComponent<Collider>().isTrigger = false;
+        GetComponent<Rigidbody>().isKinematic = false;
     }
 }
