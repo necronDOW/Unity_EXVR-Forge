@@ -38,9 +38,9 @@ public class DeformableMesh : DeformableBase
 
     private List<Thread> threads = new List<Thread>();
 
-    private Thread StartThread(int iStart, int iEnd, DeformVectors vectors, float force)
+    private Thread StartThread(int iStart, int iEnd, Vector3 impactVector, Vector3 simplifiedVector, float force)
     {
-        Thread t = new Thread(() => DisplaceVertices(iStart, iEnd, vectors.impact, vectors.simplified, force));
+        Thread t = new Thread(() => DisplaceVertices(iStart, iEnd, impactVector, simplifiedVector, force));
         t.Start();
         return t;
     }
@@ -70,13 +70,18 @@ public class DeformableMesh : DeformableBase
     private void OnTriggerEnter(Collider other)
     {
         DeformableAgent da = other.GetComponent<DeformableAgent>();
-        float dispersion = (da) ? da.dispersion : 1.0f;
+        //float dispersion = (da) ? da.dispersion : 1.0f;
 
         if (!currentImpactCollider && da) {
-            Debug.Log("deform");
             currentImpactCollider = other;
 
-            Deform(other.transform, other.transform.position);
+            DeformVectors vectors = new DeformVectors(transform, other.transform.up, other.transform.position);
+            Network_DeformableMesh ndm = GetComponent<Network_DeformableMesh>();
+
+            if (ndm)
+                ndm.CmdOnDeform(vectors.impact, vectors.simplified);
+            else Deform(vectors.impact, vectors.simplified);
+
             currentHitPoint = other.transform.position;
         }
 
@@ -143,7 +148,7 @@ public class DeformableMesh : DeformableBase
             {
                 DeformVectors vectors = new DeformVectors(transform, otherObject.transform.up, hitPoints[i]);
                 int workgroupSize = (j + maxWorkGroupSize < thread_vertices.Length) ? maxWorkGroupSize : thread_vertices.Length - j;
-                threads.Add(StartThread(j, j + workgroupSize, vectors, forceFactor / hitPoints.Length));
+                threads.Add(StartThread(j, j + workgroupSize, vectors.impact, vectors.simplified, forceFactor / hitPoints.Length));
             }
         }
 
@@ -151,18 +156,16 @@ public class DeformableMesh : DeformableBase
         UpdateMesh(thread_vertices);
     }
     
-    private void Deform(Transform otherObject, Vector3 hitPoint)
+    public void Deform(Vector3 impactVector, Vector3 simplifiedVector)
     {
         UpdateComponents();
 
         thread_vertices = mFilter.sharedMesh.vertices;
 
-        DeformVectors vectors = new DeformVectors(transform, otherObject.transform.up, otherObject.transform.position);
-
         for (int i = 0; i < thread_vertices.Length; i += maxWorkGroupSize)
         {
             int workgroupSize = (i + maxWorkGroupSize < thread_vertices.Length) ? maxWorkGroupSize : thread_vertices.Length - i;
-            threads.Add(StartThread(i, i + workgroupSize, vectors, forceFactor));
+            threads.Add(StartThread(i, i + workgroupSize, impactVector, simplifiedVector, forceFactor));
         }
 
         ThreadTools.WaitForThreads(ref threads);
