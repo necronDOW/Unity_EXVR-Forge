@@ -23,8 +23,6 @@ public class AnvilAttach : MonoBehaviour {
     {
         if (other.tag == tooltag)
         {
-            if (!isAttached)
-            {
                 bool handAttached = other.GetComponent<Throwable>().attached;
                 Network_InteractableObject nio = other.GetComponent<Network_InteractableObject>();
                 if (nio) handAttached = nio.isAttached;
@@ -47,8 +45,7 @@ public class AnvilAttach : MonoBehaviour {
                     other.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
                     other.transform.GetComponentsInChildren<BoxCollider>()[1].enabled = false;
                     Highlight();
-                }
-            }
+                } 
         }
     }
 
