@@ -7,6 +7,7 @@ public class AnvilTool : MonoBehaviour
 {
     public string lookupTag = "";
     public Collider[] colliders; // 0 = parent, 1 = this.
+    public GameObject attachedRod { get; private set; }
 
     protected virtual void Start()
     {
@@ -49,11 +50,13 @@ public class AnvilTool : MonoBehaviour
     protected virtual void Freeze(GameObject o)
     {
         o.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
+        attachedRod = o;
     }
 
     protected virtual void Unfreeze(GameObject o)
     {
         o.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
+        attachedRod = null;
     }
 
     private bool IsAttached(GameObject other)
