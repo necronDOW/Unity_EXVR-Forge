@@ -34,6 +34,7 @@ public class AnvilAttach : MonoBehaviour {
                 other.transform.position = transform.position;
                 other.transform.rotation = transform.rotation;// * other.transform.rotation;
                 isAttached = true;
+                UnHighlight();
 
                 // Needs to use the transform otherwise it doesn't work.
                 // The first Collider it gets is not the AttachPoint. So we need to get the second one it returns ( a child ).
