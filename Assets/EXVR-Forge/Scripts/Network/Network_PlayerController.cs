@@ -36,4 +36,22 @@ public class Network_PlayerController : NetworkBehaviour
         GameObject iObject = NetworkServer.FindLocalObject(objectId);
         iObject.GetComponent<Network_InteractableObject>().RpcOnRelease();
     }
+
+    [Command]
+    public void CmdOnBend(NetworkInstanceId bendId, float curvature, float length, float amount, bool direction)
+    {
+        RpcOnBend(bendId, curvature, length, amount, direction);
+    }
+
+    [ClientRpc]
+    public void RpcOnBend(NetworkInstanceId bendId, float curvature, float length, float amount, bool direction)
+    {
+        GameObject bendInstanceLocal = ClientScene.FindLocalObject(bendId);
+        BendInstance bendInstanceScript = bendInstanceLocal.GetComponent<BendInstance>();
+
+        bendInstanceScript.curvature = curvature;
+        bendInstanceScript.length = length;
+        bendInstanceScript.amount = amount;
+        bendInstanceScript.direction = direction;
+    }
 }

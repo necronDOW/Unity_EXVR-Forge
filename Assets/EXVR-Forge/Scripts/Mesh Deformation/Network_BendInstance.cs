@@ -23,23 +23,10 @@ public class Network_BendInstance : NetworkBehaviour
 
             if (timeSinceLastRpc >= minimumTimeBetweenRpc) {
                 timeSinceLastRpc = 0.0f;
-                CmdOnBend(bendInstance.curvature, bendInstance.length, bendInstance.amount, bendInstance.direction);
+
+                Network_PlayerController npc = Network_InteractableObject.GetLocalPlayerController();
+                npc.CmdOnBend(GetComponent<NetworkIdentity>().netId, bendInstance.curvature, bendInstance.length, bendInstance.amount, bendInstance.direction);
             }
         }
-    }
-
-    [Command]
-    public void CmdOnBend(float curvature, float length, float amount, bool direction)
-    {
-        RpcOnBend(curvature, length, amount, direction);
-    }
-
-    [ClientRpc]
-    public void RpcOnBend(float curvature, float length, float amount, bool direction)
-    {
-        bendInstance.curvature = curvature;
-        bendInstance.length = length;
-        bendInstance.amount = amount;
-        bendInstance.direction = direction;
     }
 }
