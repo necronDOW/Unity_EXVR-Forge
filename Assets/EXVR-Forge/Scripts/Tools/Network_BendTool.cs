@@ -18,7 +18,7 @@ public class Network_BendTool : NetworkBehaviour
     public void CmdOnAttachToAnvil()
     {
         if (bendTool && !hasSpawned) {
-            GameObject bendInstance = Instantiate(bendTool.bendPrefab);
+            GameObject bendInstance = Instantiate(bendTool.bendPrefab, bendTool.attachedRod.transform);
             NetworkServer.Spawn(bendInstance);
             RpcOnAttachToAnvil(bendInstance.GetComponent<NetworkIdentity>().netId);
         }
@@ -28,9 +28,6 @@ public class Network_BendTool : NetworkBehaviour
     public void RpcOnAttachToAnvil(NetworkInstanceId bendInstanceId)
     {
         GameObject bendInstanceLocal = ClientScene.FindLocalObject(bendInstanceId);
-
-        NetworkIdentity ni = bendInstanceLocal.GetComponent<NetworkIdentity>();
-        ni.AssignClientAuthority(ni.connectionToClient);
 
         lastBendInstance = bendInstanceLocal;
         BendInstance bendInstanceScript = lastBendInstance.GetComponent<BendInstance>();

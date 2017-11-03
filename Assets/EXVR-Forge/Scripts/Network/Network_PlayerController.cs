@@ -47,11 +47,15 @@ public class Network_PlayerController : NetworkBehaviour
     public void RpcOnBend(NetworkInstanceId bendId, float curvature, float length, float amount, bool direction)
     {
         GameObject bendInstanceLocal = ClientScene.FindLocalObject(bendId);
-        BendInstance bendInstanceScript = bendInstanceLocal.GetComponent<BendInstance>();
 
-        bendInstanceScript.curvature = curvature;
-        bendInstanceScript.length = length;
-        bendInstanceScript.amount = amount;
-        bendInstanceScript.direction = direction;
+        if (bendInstanceLocal)
+        {
+            BendInstance bendInstanceScript = bendInstanceLocal.GetComponent<BendInstance>();
+
+            bendInstanceScript.curvature = curvature;
+            bendInstanceScript.length = length;
+            bendInstanceScript.amount = amount;
+            bendInstanceScript.direction = direction;
+        }
     }
 }
