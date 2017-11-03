@@ -43,6 +43,9 @@ public class BendInstance : MonoBehaviour
     // Use this for initialization
     private void Start()
     {
+        if (!target)
+            target = transform.parent.gameObject;
+
         ProjectTarget();
         
         ts_transform = new ts_Transform(transform);
