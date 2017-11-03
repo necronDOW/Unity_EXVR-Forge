@@ -31,7 +31,7 @@ public class Network_InteractableObject : NetworkBehaviour
         npc.CmdOnRelease(nid);
     }
 
-    public Network_PlayerController GetLocalPlayerController()
+    public static Network_PlayerController GetLocalPlayerController()
     {
         GameObject player = GameObject.FindGameObjectWithTag("VRLocalPlayer");
 

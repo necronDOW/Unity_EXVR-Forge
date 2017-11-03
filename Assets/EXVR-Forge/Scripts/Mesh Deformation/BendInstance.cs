@@ -2,6 +2,7 @@
 using System.Threading;
 using UnityEngine;
 using UnityThreading;
+using Valve.VR.InteractionSystem;
 
 public class BendInstance : MonoBehaviour
 {
@@ -20,6 +21,7 @@ public class BendInstance : MonoBehaviour
     public bool showGizmo = true;
     public GameObject target;
     public bool direction = false;
+    public bool isInteracting { get; private set; }
 
     private Mesh mesh;
     private Vector3[] origVerts;
@@ -43,6 +45,8 @@ public class BendInstance : MonoBehaviour
     // Use this for initialization
     private void Start()
     {
+        isInteracting = false;
+
         if (!target)
             target = transform.parent.gameObject;
 
@@ -252,5 +256,13 @@ public class BendInstance : MonoBehaviour
     {
         if (showGizmo)
             DrawBend();
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        Hand handScript = other.GetComponent<Hand>();
+
+        if (handScript)
+            isInteracting = handScript.controller.GetPressDown(Valve.VR.EVRButtonId.k_EButton_Grip);
     }
 }
