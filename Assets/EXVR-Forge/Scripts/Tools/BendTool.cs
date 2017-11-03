@@ -6,26 +6,33 @@ using Valve.VR.InteractionSystem;
 [RequireComponent(typeof(Collider))]
 public class BendTool : AnvilTool
 {
+    public GameObject bendPrefab;
+    private Network_BendTool nbt;
 
     protected override void Start()
     {
         GetComponent<BoxCollider>().isTrigger = true;
+        nbt = GetComponentInParent<Network_BendTool>();
+
         base.Start();
     }
 
     protected override void Freeze(GameObject o)
     {
         base.Freeze(o);
-
-   
+        
+        if (nbt && !nbt.hasSpawned)
+            nbt.CmdOnAttachToAnvil();
     }
 
     protected override void Unfreeze(GameObject o)
     {
-        base.Unfreeze(o);
+        if (nbt && nbt.hasSpawned)
+            nbt.CmdDestroyAllBendInstances();
 
- 
+        base.Unfreeze(o);
     }
+
     public void UnfreezePublic()
     {
         gameObject.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
