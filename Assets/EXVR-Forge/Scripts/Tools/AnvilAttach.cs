@@ -23,28 +23,31 @@ public class AnvilAttach : MonoBehaviour {
     {
         if (other.tag == tooltag)
         {
-            bool attached = other.GetComponent<Throwable>().attached;
-            Network_InteractableObject nio = other.GetComponent<Network_InteractableObject>();
-            if (nio) attached = nio.isAttached;
-
-            if (!attached)
+            if (!isAttached)
             {
-                attachedRb = other.GetComponent<Rigidbody>();
-                attachedRb.constraints = RigidbodyConstraints.FreezeAll;
-                other.transform.position = transform.position;
-                other.transform.rotation = transform.rotation * other.transform.rotation;
-                isAttached = true;
-                UnHighlight();
+                bool handAttached = other.GetComponent<Throwable>().attached;
+                Network_InteractableObject nio = other.GetComponent<Network_InteractableObject>();
+                if (nio) handAttached = nio.isAttached;
 
-                // Needs to use the transform otherwise it doesn't work.
-                // The first Collider it gets is not the AttachPoint. So we need to get the second one it returns ( a child ).
-                other.transform.GetComponentsInChildren<BoxCollider>()[1].enabled = true;
-            }
-            else
-            {
-                other.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
-                other.transform.GetComponentsInChildren<BoxCollider>()[1].enabled = false;
-                Highlight();
+                if (!handAttached)
+                {
+                    attachedRb = other.GetComponent<Rigidbody>();
+                    attachedRb.constraints = RigidbodyConstraints.FreezeAll;
+                    other.transform.position = transform.position;
+                    other.transform.rotation = transform.rotation; //* other.transform.rotation;
+                    isAttached = true;
+                    UnHighlight();
+
+                    // Needs to use the transform otherwise it doesn't work.
+                    // The first Collider it gets is not the AttachPoint. So we need to get the second one it returns ( a child ).
+                    other.transform.GetComponentsInChildren<BoxCollider>()[1].enabled = true;
+                }
+                else
+                {
+                    other.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
+                    other.transform.GetComponentsInChildren<BoxCollider>()[1].enabled = false;
+                    Highlight();
+                }
             }
         }
     }
