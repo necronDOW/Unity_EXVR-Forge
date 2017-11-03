@@ -42,8 +42,14 @@ public class BendInstance : MonoBehaviour
         return t;
     }
 
-    // Use this for initialization
     private void Start()
+    {
+        if (!GetComponent<Network_BendInstance>())
+            Initialize();
+    }
+
+    // Use this for initialization
+    public void Initialize()
     {
         isInteracting = false;
 

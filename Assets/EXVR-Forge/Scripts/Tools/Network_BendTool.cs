@@ -17,17 +17,37 @@ public class Network_BendTool : NetworkBehaviour
     [Command]
     public void CmdOnAttachToAnvil()
     {
-        if (bendTool) {
-            lastBendInstance = Instantiate(bendTool.bendPrefab, bendTool.attachedRod.transform);
-            lastBendInstance.GetComponent<BendInstance>().target = bendTool.attachedRod;
+        if (bendTool && !hasSpawned) {
+            GameObject bendInstance = Instantiate(bendTool.bendPrefab, bendTool.attachedRod.transform);
             NetworkServer.Spawn(lastBendInstance);
+            RpcOnAttachToAnvil(bendInstance.GetComponent<NetworkIdentity>().netId);
         }
+    }
+
+    [ClientRpc]
+    public void RpcOnAttachToAnvil(NetworkInstanceId bendInstanceId)
+    {
+        GameObject bendInstanceLocal = ClientScene.FindLocalObject(bendInstanceId);
+
+        lastBendInstance = bendInstanceLocal;
+
+        BendInstance bendInstanceScript = GetComponent<BendInstance>();
+        bendInstanceScript.target = bendTool.attachedRod;
+        bendInstanceScript.Initialize();
     }
 
     [Command]
     public void CmdDestroyAllBendInstances()
     {
-        if (lastBendInstance)
+        if (lastBendInstance && hasSpawned) {
+            RpcDestroyAllBendInstances();
             NetworkServer.Destroy(lastBendInstance);
+        }
+    }
+
+    [ClientRpc]
+    public void RpcDestroyAllBendInstances()
+    {
+        lastBendInstance = null;
     }
 }

@@ -21,13 +21,13 @@ public class BendTool : AnvilTool
     {
         base.Freeze(o);
         
-        if (nbt && !nbt.hasSpawned)
+        if (nbt)
             nbt.CmdOnAttachToAnvil();
     }
 
     protected override void Unfreeze(GameObject o)
     {
-        if (nbt && nbt.hasSpawned)
+        if (nbt)
             nbt.CmdDestroyAllBendInstances();
 
         base.Unfreeze(o);
