@@ -32,7 +32,7 @@ public class AnvilAttach : MonoBehaviour {
                 attachedRb = other.GetComponent<Rigidbody>();
                 attachedRb.constraints = RigidbodyConstraints.FreezeAll;
                 other.transform.position = transform.position;
-                other.transform.rotation = transform.rotation;// * other.transform.rotation;
+                other.transform.rotation = transform.rotation * other.transform.rotation;
                 isAttached = true;
                 UnHighlight();
 

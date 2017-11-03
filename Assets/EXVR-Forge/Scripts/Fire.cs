@@ -15,6 +15,7 @@ public class Fire : MonoBehaviour
     private static ParticleSystem[] flames;
     private static float[] startValues;
     private static AudioSource sound;
+    private Light Fire_Light; 
 
     private void Start()
     {
@@ -24,6 +25,9 @@ public class Fire : MonoBehaviour
         extraTime = coalLifetimeIncriment;
         flames = GetComponentsInChildren<ParticleSystem>();
         startValues = new float[flames.Length];
+
+        Fire_Light = GetComponentInChildren<Light>();
+        Fire_Light.enabled = false;
 
         for (int i = 0; i < flames.Length; i++)
         {
@@ -37,7 +41,10 @@ public class Fire : MonoBehaviour
 
     private void Update()
     {
-        
+        if (coalsInFire <= 0.0f)
+        {
+            Fire_Light.enabled = false;
+        }
     }
 
     private void OnTriggerEnter(Collider other)
@@ -50,6 +57,7 @@ public class Fire : MonoBehaviour
                 coalsInFire += 1.0f;
                 temperature = coalsInFire;
                 SetEmissionRate(coalsInFire);
+                Fire_Light.enabled = true; 
             }
         }  
     }
