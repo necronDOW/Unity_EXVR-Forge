@@ -4,20 +4,6 @@ using UnityEngine;
 
 public class Heating : MonoBehaviour {
 
-    [System.Serializable]
-    public struct ColorRange
-    {
-        public Color color;
-        public float maxValue;
-
-        public ColorRange(Color c, float mV)
-        {
-            color = c;
-            maxValue = mV;
-        }
-    }
-
-    public ColorRange[] colorRanges;
     public Color startColor;
     public GameObject HeatSoruce;
     public int Heat_Detection_Accuracy;
@@ -36,6 +22,10 @@ public class Heating : MonoBehaviour {
 
         for (int i = 0; i < vertices.Length; i++)
             colors[i] = startColor;
+
+        HeatSoruce = GameObject.Find("FireLocation");
+
+        rodTemprature = new float[Heat_Detection_Accuracy];
 
         mesh.colors = colors;
     }
@@ -57,7 +47,7 @@ public class Heating : MonoBehaviour {
     {
         mesh = GetComponent<MeshFilter>().mesh;
         vertices = mesh.vertices;
-        colors = new Color[vertices.Length];
+        //colors = new Color[vertices.Length];
     }
 
    // Initlaise colours when rod is cut
@@ -67,32 +57,48 @@ public class Heating : MonoBehaviour {
         InitRod();
         //only check every 100 points on the rod for fire collision
         int Length = (vertices.Length / Heat_Detection_Accuracy);
-        rodTemprature = new float[Heat_Detection_Accuracy];
-        for (int i = Length; i < vertices.Length; i+= Length)
+       
+        for (int i = Length; i < vertices.Length; i += Length)
         {
-
             //Get world space location of this point
             vertices[i] = transform.TransformPoint(mesh.vertices[i]);
             //check fire distance
-            float dist = Vector3.Distance(HeatSoruce.transform.position, vertices[i]);
-            
-            //If in the fire
-            if (dist <= 1.2f)
-            {
-                rodTemprature[i] += Fire.temperature/1000;
+            float FireDistance = Vector3.Distance(HeatSoruce.transform.position, vertices[i]);
+            //float OilDistance = Vector3.Distance(HeatSoruce.transform.position, vertices[i]);
+            //float WaterDistance = Vector3.Distance(HeatSoruce.transform.position, vertices[i]);
 
-                for (int j = 0; j < Length; j++)
-                {
-                    //if (colors[i - j].r <= 255)
-                        //colors[i - j] = GetColorFromCurve(Fire.temperature);
-                }        
-            }          
-            if (dist > 1.2f)
+            //If in the fire
+            if (FireDistance <= 0.55f)
             {
-             
+                if (rodTemprature[(i - Length) / Length] < 100)
+                    rodTemprature[(i - Length) / Length] += Fire.temperature / 10000;                                  
+            }          
+            else
+            {
+                if (rodTemprature[(i - Length) / Length] > 0)
+                    rodTemprature[(i - Length) / Length] -= Fire.temperature / 10000;
             }
             //switch statment for multiiple colours
         }
+
+        //loop over temprature array 
+        for (int i = 0; i < rodTemprature.Length ; i++)
+        {
+            //update colours for each temprature point
+            for (int j = 0; j < Length; j++)
+            {
+                if (colors[i * Length].r <= 255)
+                {
+                    colors[i * Length + j].r = rodTemprature[i];
+                }
+                if (colors[i * Length].g <= 125)
+                {
+                    colors[i * Length + j].g = rodTemprature[i] / 10;
+                }
+            }
+        }
+
+
         //only check every 100 points on the rod for fire collision
     }
 }
