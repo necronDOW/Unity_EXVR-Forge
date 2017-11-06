@@ -5,6 +5,7 @@ using UnityEngine;
 public class Heating : MonoBehaviour {
 
     public Color startColor;
+    public Color EndColor;
     public GameObject HeatSoruce;
     public int Heat_Detection_Accuracy;
     private Color[] colors;
@@ -71,7 +72,7 @@ public class Heating : MonoBehaviour {
             if (FireDistance <= 0.55f)
             {
                 if (rodTemprature[(i - Length) / Length] < 100)
-                    rodTemprature[(i - Length) / Length] += Fire.temperature / 10000;                                  
+                    rodTemprature[(i - Length) / Length] += Fire.temperature / 1000;                                  
             }          
             else
             {
@@ -87,14 +88,15 @@ public class Heating : MonoBehaviour {
             //update colours for each temprature point
             for (int j = 0; j < Length; j++)
             {
-                if (colors[i * Length].r <= 255)
-                {
-                    colors[i * Length + j].r = rodTemprature[i];
-                }
-                if (colors[i * Length].g <= 125)
-                {
-                    colors[i * Length + j].g = rodTemprature[i] / 10;
-                }
+                colors[i * Length + j] = Color.Lerp(startColor, EndColor, (rodTemprature[i] / 100));
+                //if (colors[i * Length].r <= 255)
+                //{
+                //    colors[i * Length + j].r = rodTemprature[i];
+                //}
+                //if (colors[i * Length].g <= 125)
+                //{
+                //    colors[i * Length + j].g = rodTemprature[i] / 10;
+                //}
             }
         }
 
