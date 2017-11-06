@@ -12,7 +12,7 @@ public class Heating : MonoBehaviour {
     private Mesh mesh;
     private Vector3[] vertices;
     private Vector3[] worldPositions;
-    public float[] rodTemprature;
+    public float[] rodLoopTemprature;
 
     void Awake ()
     {
@@ -26,7 +26,10 @@ public class Heating : MonoBehaviour {
 
         HeatSoruce = GameObject.Find("FireLocation");
 
-        rodTemprature = new float[Heat_Detection_Accuracy];
+        rodLoopTemprature = new float[Heat_Detection_Accuracy];
+
+        for (int i = 0; i < rodLoopTemprature.Length; i++)
+            rodLoopTemprature[i] = 0;
 
         mesh.colors = colors;
     }
@@ -48,7 +51,7 @@ public class Heating : MonoBehaviour {
     {
         mesh = GetComponent<MeshFilter>().mesh;
         vertices = mesh.vertices;
-        //colors = new Color[vertices.Length];
+        colors = new Color[vertices.Length];
     }
 
    // Initlaise colours when rod is cut
@@ -71,39 +74,37 @@ public class Heating : MonoBehaviour {
             //If in the fire
             if (FireDistance <= 0.55f)
             {
-                if (rodTemprature[(i - Length) / Length] < 100)
-                    rodTemprature[(i - Length) / Length] += Fire.temperature / 1000;                                  
+                if (rodLoopTemprature[(i - Length) / Length] < 100)
+                    rodLoopTemprature[(i - Length) / Length] += Fire.temperature / 1000;                                  
             }          
             else
             {
-                if (rodTemprature[(i - Length) / Length] > 0)
-                    rodTemprature[(i - Length) / Length] -= Fire.temperature / 10000;
+                if (rodLoopTemprature[(i - Length) / Length] > 0)
+                    rodLoopTemprature[(i - Length) / Length] -= Fire.temperature / 10000;
             }
             //switch statment for multiiple colours
         }
 
         //loop over temprature array 
-        for (int i = 0; i < rodTemprature.Length ; i++)
+        for (int i = 0; i < rodLoopTemprature.Length ; i++)
         {
             //update colours for each temprature point
             for (int j = 0; j < Length; j++)
             {
-                colors[i * Length + j] = Color.Lerp(startColor, EndColor, (rodTemprature[i] / 100));
-                //if (colors[i * Length].r <= 255)
-                //{
-                //    colors[i * Length + j].r = rodTemprature[i];
-                //}
-                //if (colors[i * Length].g <= 125)
-                //{
-                //    colors[i * Length + j].g = rodTemprature[i] / 10;
-                //}
+                colors[(i * Length) + j] = Color.Lerp(startColor, EndColor, (rodLoopTemprature[i] / 100));
             }
         }
-
-
-        //only check every 100 points on the rod for fire collision
     }
 }
+
+//if (colors[i * Length].r <= 255)
+//{
+//    colors[i * Length + j].r = rodTemprature[i];
+//}
+//if (colors[i * Length].g <= 125)
+//{
+//    colors[i * Length + j].g = rodTemprature[i] / 10;
+//}
 
 //Color GetColorFromCurve(float temperature)
 //{
