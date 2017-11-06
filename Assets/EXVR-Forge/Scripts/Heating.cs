@@ -6,7 +6,7 @@ public class Heating : MonoBehaviour {
 
     public Color startColor;
     public Color EndColor;
-    public GameObject HeatSoruce;
+    public GameObject HeatSource, WaterSource, OilSource;
     public int Heat_Detection_Accuracy;
     private Color[] colors;
     private Mesh mesh;
@@ -24,7 +24,9 @@ public class Heating : MonoBehaviour {
         for (int i = 0; i < vertices.Length; i++)
             colors[i] = startColor;
 
-        HeatSoruce = GameObject.Find("FireLocation");
+        HeatSource = GameObject.Find("FireLocation");
+        WaterSource = GameObject.Find("WaterLocation");
+        OilSource = GameObject.Find("OilLocation");
 
         rodLoopTemprature = new float[Heat_Detection_Accuracy];
 
@@ -61,28 +63,32 @@ public class Heating : MonoBehaviour {
         InitRod();
         //only check every 100 points on the rod for fire collision
         int Length = (vertices.Length / Heat_Detection_Accuracy);
-       
+
         for (int i = Length; i < vertices.Length; i += Length)
         {
             //Get world space location of this point
             vertices[i] = transform.TransformPoint(mesh.vertices[i]);
             //check fire distance
-            float FireDistance = Vector3.Distance(HeatSoruce.transform.position, vertices[i]);
-            //float OilDistance = Vector3.Distance(HeatSoruce.transform.position, vertices[i]);
-            //float WaterDistance = Vector3.Distance(HeatSoruce.transform.position, vertices[i]);
+            float FireDistance = Vector3.Distance(HeatSource.transform.position, vertices[i]);
+            float OilDistance = Vector3.Distance(OilSource.transform.position, vertices[i]);
+            float WaterDistance = Vector3.Distance(WaterSource.transform.position, vertices[i]);
 
             //If in the fire
             if (FireDistance <= 0.55f)
             {
                 if (rodLoopTemprature[(i - Length) / Length] < 100)
-                    rodLoopTemprature[(i - Length) / Length] += Fire.temperature / 1000;                                  
-            }          
+                    rodLoopTemprature[(i - Length) / Length] += Fire.temperature / 1000;
+            }
             else
             {
                 if (rodLoopTemprature[(i - Length) / Length] > 0)
                     rodLoopTemprature[(i - Length) / Length] -= Fire.temperature / 10000;
             }
-            //switch statment for multiiple colours
+            if (WaterDistance <= 0.2f || OilDistance <= 0.2f)
+            {
+                if (rodLoopTemprature[(i - Length) / Length] > 0)
+                    rodLoopTemprature[(i - Length) / Length] -= Fire.temperature / 100;
+            }
         }
 
         //loop over temprature array 
