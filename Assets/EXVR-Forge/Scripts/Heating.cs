@@ -64,7 +64,7 @@ public class Heating : MonoBehaviour {
         //only check every 100 points on the rod for fire collision
         int Length = (vertices.Length / Heat_Detection_Accuracy);
 
-        for (int i = Length; i < vertices.Length; i += Length)
+        for (int i = 0, j = 0; i < vertices.Length - Length && j < rodLoopTemprature.Length; i += Length, j++)
         {
             //Get world space location of this point
             vertices[i] = transform.TransformPoint(mesh.vertices[i]);
@@ -76,18 +76,18 @@ public class Heating : MonoBehaviour {
             //If in the fire
             if (FireDistance <= 0.55f)
             {
-                if (rodLoopTemprature[(i - Length) / Length] < 100)
-                    rodLoopTemprature[(i - Length) / Length] += Fire.temperature / 1000;
+                if (rodLoopTemprature[j] < 100)
+                    rodLoopTemprature[j] += Fire.temperature / 1000;
             }
             else
             {
-                if (rodLoopTemprature[(i - Length) / Length] > 0)
-                    rodLoopTemprature[(i - Length) / Length] -= Fire.temperature / 10000;
+                if (rodLoopTemprature[j] > 0)
+                    rodLoopTemprature[j] -= Fire.temperature / 10000;
             }
             if (WaterDistance <= 0.2f || OilDistance <= 0.2f)
             {
-                if (rodLoopTemprature[(i - Length) / Length] > 0)
-                    rodLoopTemprature[(i - Length) / Length] -= Fire.temperature / 100;
+                if (rodLoopTemprature[j] > 0)
+                    rodLoopTemprature[j] -= Fire.temperature / 100;
             }
         }
 
