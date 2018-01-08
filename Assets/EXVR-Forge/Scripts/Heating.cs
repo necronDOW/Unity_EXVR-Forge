@@ -6,7 +6,8 @@ public class Heating : MonoBehaviour {
 
     public Color startColor;
     public Color EndColor;
-    public GameObject HeatSource, WaterSource, OilSource;
+    public GameObject HeatSource;
+    public Collider WaterSource, OilSource;
     public int Heat_Detection_Accuracy;
     private Color[] colors;
     private Mesh mesh;
@@ -25,8 +26,8 @@ public class Heating : MonoBehaviour {
             colors[i] = startColor;
 
         HeatSource = GameObject.Find("FireLocation");
-        WaterSource = GameObject.Find("WaterLocation");
-        OilSource = GameObject.Find("OilLocation");
+        WaterSource = GameObject.Find("WaterSource").GetComponent<Collider>();
+        OilSource = GameObject.Find("OilSource").GetComponent<Collider>();
 
         rodLoopTemprature = new float[Heat_Detection_Accuracy];
 
@@ -70,8 +71,8 @@ public class Heating : MonoBehaviour {
             vertices[i] = transform.TransformPoint(mesh.vertices[i]);
             //check fire distance
             float FireDistance = Vector3.Distance(HeatSource.transform.position, vertices[i]);
-            float OilDistance = Vector3.Distance(OilSource.transform.position, vertices[i]);
-            float WaterDistance = Vector3.Distance(WaterSource.transform.position, vertices[i]);
+            bool isInOil = OilSource.bounds.Contains(vertices[i]);
+            bool isInWater = WaterSource.bounds.Contains(vertices[i]);
 
             //If in the fire
             if (FireDistance <= 0.55f)
@@ -84,7 +85,7 @@ public class Heating : MonoBehaviour {
                 if (rodLoopTemprature[j] > 0)
                     rodLoopTemprature[j] -= Fire.temperature / 10000;
             }
-            if (WaterDistance <= 0.2f || OilDistance <= 0.2f)
+            if (isInOil || isInWater)
             {
                 if (rodLoopTemprature[j] > 0)
                     rodLoopTemprature[j] -= Fire.temperature / 100;
