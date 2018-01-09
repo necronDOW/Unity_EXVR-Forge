@@ -47,7 +47,7 @@ public class CubeMeshGenerator : MonoBehaviour
 
         if (mCollider)
             mCollider.sharedMesh = mesh;
-
+        
         return true;
     }
 

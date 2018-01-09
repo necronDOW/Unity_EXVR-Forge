@@ -19,7 +19,35 @@ public class MeshInfo : MonoBehaviour
 
     public int GetClosestVertexIndex(Vector3 pt)
     {
-        return 0;
+        pt = transform.InverseTransformPoint(pt);
+        mFilter = GetComponent<MeshFilter>();
+        Vector3[] vertices = mFilter.sharedMesh.vertices;
+
+        return GetClosestVertexIndex_recursive(pt, vertices, 0, vertices.Length, vertices.Length / 10);
+    }
+
+    private int GetClosestVertexIndex_recursive(Vector3 localizedPt, Vector3[] vertices, int start, int end, int step)
+    {
+        if (step >= end - start || step == 0)
+            step = 1;
+
+        int currentMinIndex = start;
+        float currentMinDistance = Vector3.Distance(vertices[currentMinIndex], localizedPt);
+
+        for (int i = start + step; i <= end - step; i += step) {
+            float thisDistance = Vector3.Distance(vertices[i], localizedPt);
+            if (thisDistance < currentMinDistance) {
+                currentMinIndex = i;
+                currentMinDistance = thisDistance;
+            }
+        }
+
+        start = Mathf.Clamp(currentMinIndex - step, 0, vertices.Length);
+        end = Mathf.Clamp(currentMinIndex + step, 0, vertices.Length);
+
+        if (step == 1)
+            return currentMinIndex;
+        else return GetClosestVertexIndex_recursive(localizedPt, vertices, start, end, (step * 2) / 10);
     }
 
     private Thread SearchThread(int iStart, int iEnd, Vector3 pt, ref int resultIndex, out float resultDistance)
