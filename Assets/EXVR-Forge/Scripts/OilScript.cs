@@ -20,7 +20,7 @@ public class OilScript : MonoBehaviour
 
             if (target.GetComponent<MeshFilter>())
             {
-                exportTarget = target.GetComponent<GameObject>();
+                exportTarget = target;
                 proSkaterScript.SetActive(true);
             }
         }
