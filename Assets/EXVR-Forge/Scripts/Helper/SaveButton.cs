@@ -15,7 +15,11 @@ public class SaveButton : MonoBehaviour
         {
             if (oilTarget && oilTarget.exportTarget != null)
             {
-                STL.ExportBinary(oilTarget.exportTarget.GetComponent<MeshFilter>(), Application.dataPath + "/Exports/", "object_" + System.DateTime.Now);
+                System.DateTime timeNow = System.DateTime.Now;
+                string dtString = timeNow.Day + "-" + timeNow.Month + "-" + timeNow.Year + "_" 
+                    + timeNow.Hour + "-" + timeNow.Minute + "-" + timeNow.Second;
+                
+                STL.ExportBinary(oilTarget.exportTarget.GetComponent<MeshFilter>(), Application.dataPath + "/Exports/", "object_" + dtString);
                 Destroy(oilTarget.exportTarget);
                 Debug.Log("Object Exported");
                 //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex, LoadSceneMode.Single);

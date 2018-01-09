@@ -18,7 +18,7 @@
 	
 		string ExportBinary(MeshFilter filter)
 			exports one mesh to a binary STL file 
-			on your desktop and returns the path 
+			on your desktop and returns th path 
 			to the file.
 		
 		string ExportBinary(MeshFilter[] filters)

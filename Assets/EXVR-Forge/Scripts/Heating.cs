@@ -108,33 +108,6 @@ public class Heating : MonoBehaviour {
     }
 }
 
-//if (colors[i * Length].r <= 255)
-//{
-//    colors[i * Length + j].r = rodTemprature[i];
-//}
-//if (colors[i * Length].g <= 125)
-//{
-//    colors[i * Length + j].g = rodTemprature[i] / 10;
-//}
-
-//Color GetColorFromCurve(float temperature)
-//{
-//    temperature = Mathf.Clamp(temperature, 0, 100);
-
-//    for (int i = 0; i < colorRanges.Length; i++)
-//    {
-//        if (temperature <= colorRanges[i].maxValue)
-//        {
-//            float lower = (i == 0 ? 0 : colorRanges[i - 1].maxValue);
-//            float upper = colorRanges[i].maxValue;
-//            float lerp = (temperature - lower) / (upper - lower);
-
-//            return Color.Lerp((i == 0 ? Color.black : colorRanges[i - 1].color), colorRanges[i].color, lerp);
-//        }
-//    }
-
-//    return Color.magenta;
-//}
 
 //For performance reasons, consider using colors32 instead. 
 //This will avoid byte-to-float conversions in colors, and use less temporary memory.
