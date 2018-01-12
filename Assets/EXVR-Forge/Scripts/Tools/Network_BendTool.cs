@@ -6,7 +6,7 @@ using UnityEngine.Networking;
 public class Network_BendTool : NetworkBehaviour
 {
     private BendTool bendTool;
-    public BendInstance initializedInstance;
+    public BendInstance bendInstance = null;
 
     private void Start()
     {
@@ -29,13 +29,16 @@ public class Network_BendTool : NetworkBehaviour
     public void RpcOnAttachToAnvil(NetworkInstanceId bendInstanceId)
     {
         GameObject bendInstanceLocal = ClientScene.FindLocalObject(bendInstanceId);
-        while (!bendInstanceLocal)
-            bendInstanceLocal = ClientScene.FindLocalObject(bendInstanceId);
-        
-        bendInstanceLocal.transform.parent = bendTool.attachedRod.transform;
 
-        BendInstance bendInstance = bendInstanceLocal.GetComponent<BendInstance>();
-        bendInstance.target = bendTool.attachedRod;
-        bendInstance.Initialize();
+        if (bendInstanceLocal) {
+            bendInstanceLocal.transform.parent = bendTool.attachedRod.transform;
+
+            bendInstance = bendInstanceLocal.GetComponent<BendInstance>();
+            bendInstance.target = bendTool.attachedRod;
+            bendInstance.Initialize();
+        }
+        else  {
+            Debug.Log("Local 'Bend Instance' not found.");
+        }
     }
 }
