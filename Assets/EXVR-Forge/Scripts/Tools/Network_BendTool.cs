@@ -17,7 +17,8 @@ public class Network_BendTool : NetworkBehaviour
     {
         if (bendTool.attachedRod) {
             RodGripScript rgs = bendTool.attachedRod.GetComponent<RodGripScript>();
-            RpcBendInstanceLookAtGrip(rgs.isGripped, rgs.target.position);
+            if (rgs.target)
+                RpcBendInstanceLookAtGrip(rgs.isGripped, rgs.target.position);
         }
     }
 
