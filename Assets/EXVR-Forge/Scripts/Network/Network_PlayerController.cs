@@ -73,14 +73,13 @@ public class Network_PlayerController : NetworkBehaviour
     {
         GameObject bendInstanceLocal = ClientScene.FindLocalObject(bendId);
 
-        if (bendInstanceLocal)
-        {
+        if (bendInstanceLocal) {
             BendInstance bendInstanceScript = bendInstanceLocal.GetComponent<BendInstance>();
 
-            //bendInstanceScript.curvature = curvature;
-            //bendInstanceScript.length = length;
-            //bendInstanceScript.amount = amount;
-            //bendInstanceScript.direction = direction;
+            bendInstanceScript.curvature = curvature;
+            bendInstanceScript.length = length;
+            bendInstanceScript.amount = amount;
+            bendInstanceScript.direction = direction;
         }
     }
 }
