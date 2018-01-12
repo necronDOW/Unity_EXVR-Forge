@@ -38,8 +38,11 @@ public class Network_BendTool : NetworkBehaviour
     }
 
     [ClientRpc]
-    public void RpcRecalculateBounds()
+    public void RpcDestroyAllBendInstances()
     {
-        bendTool.attachedRod.GetComponent<MeshFilter>().sharedMesh.RecalculateBounds();
+        Debug.Log("HEY");
+        bendInstance = null;
+        bendTool.attachedRod.GetComponent<DeformableMesh>().RecalculateBounds();
+        
     }
 }

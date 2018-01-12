@@ -65,7 +65,7 @@ public class Network_PlayerController : NetworkBehaviour
 
         if (netBendTool.bendInstance) { 
             //update colliders
-            netBendTool.RpcRecalculateBounds();
+            netBendTool.RpcDestroyAllBendInstances();
             NetworkServer.Destroy(netBendTool.bendInstance.gameObject);    
         }
     }
