@@ -28,6 +28,8 @@ public class Network_BendTool : NetworkBehaviour
     [ClientRpc]
     public void RpcOnAttachToAnvil(NetworkInstanceId bendInstanceId)
     {
-        Debug.Log("RpcOnAttachToAnvil")
+        GameObject bendInstanceLocal = ClientScene.FindLocalObject(bendInstanceId);
+        bendInstance = bendInstanceLocal.GetComponent<BendInstance>();
+        Debug.Log(bendInstance);
     }
 }

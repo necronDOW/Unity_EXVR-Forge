@@ -50,8 +50,11 @@ public class Network_PlayerController : NetworkBehaviour
             GameObject netBendToolObj = ClientScene.FindLocalObject(netBendToolId);
             Network_BendTool netBendTool = netBendToolObj.GetComponent<Network_BendTool>();
 
-            GameObject bendInstance = Instantiate(netBendTool.bendTool.bendPrefab);
-            NetworkServer.Spawn(bendInstance);
+            if (!netBendTool.bendInstance)
+            {
+                GameObject bendInstance = Instantiate(netBendTool.bendTool.bendPrefab);
+                NetworkServer.Spawn(bendInstance);
+            }
 
             netBendTool.RpcOnAttachToAnvil(netBendTool.netId);
         }
