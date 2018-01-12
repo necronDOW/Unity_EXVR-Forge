@@ -19,6 +19,12 @@ public class Network_BendTool : NetworkBehaviour
         npc.CmdOnAttachBendTool(netId);
     }
 
+    public void DestroyAllBendInstances()
+    {
+        Network_PlayerController npc = Network_InteractableObject.GetLocalPlayerController();
+        npc.CmdDestroyAllBendInstances(netId);
+    }
+
     [ClientRpc]
     public void RpcOnAttachToAnvil(NetworkInstanceId bendInstanceId)
     {
@@ -31,13 +37,5 @@ public class Network_BendTool : NetworkBehaviour
         BendInstance bendInstance = bendInstanceLocal.GetComponent<BendInstance>();
         bendInstance.target = bendTool.attachedRod;
         bendInstance.Initialize();
-    }
-
-    [Command]
-    public void CmdDestroyAllBendInstances()
-    {
-        if (initializedInstance) {
-            NetworkServer.Destroy(initializedInstance.gameObject);
-        }
     }
 }

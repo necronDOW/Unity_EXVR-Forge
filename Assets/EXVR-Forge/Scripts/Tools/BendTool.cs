@@ -28,7 +28,7 @@ public class BendTool : AnvilTool
     protected override void Unfreeze(GameObject o)
     {
         if (nbt)
-            nbt.CmdDestroyAllBendInstances();
+            nbt.DestroyAllBendInstances();
 
         base.Unfreeze(o);
     }

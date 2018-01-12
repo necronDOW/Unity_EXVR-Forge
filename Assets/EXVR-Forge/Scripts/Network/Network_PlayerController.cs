@@ -59,6 +59,16 @@ public class Network_PlayerController : NetworkBehaviour
         }
     }
 
+    [Command]
+    public void CmdDestroyAllBendInstances(NetworkInstanceId netBendToolId)
+    {
+        Network_BendTool netBendTool = ClientScene.FindLocalObject(netBendToolId).GetComponent<Network_BendTool>();
+
+        if (netBendTool.initializedInstance) {
+            NetworkServer.Destroy(netBendTool.initializedInstance.gameObject);
+        }
+    }
+
     [ClientRpc]
     public void RpcOnBend(NetworkInstanceId bendId, float curvature, float length, float amount, bool direction)
     {
