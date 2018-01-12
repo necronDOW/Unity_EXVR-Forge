@@ -11,7 +11,8 @@ public class LookAtScript : MonoBehaviour
         Z
     }
 
-    public Transform target;
+    public static Vector3 nullTarget = new Vector3(int.MinValue, int.MinValue, int.MinValue);
+    public Vector3 target = nullTarget;
     public bool xAxis = true;
     public bool yAxis = true;
     public bool zAxis = true;
@@ -19,8 +20,8 @@ public class LookAtScript : MonoBehaviour
 
     private void Update()
     {
-        if (target) {
-            Vector3 relativePosition = target.position - transform.position;
+        if (target != nullTarget) {
+            Vector3 relativePosition = target - transform.position;
             relativePosition = new Vector3(
                 xAxis ? 0 : relativePosition.x,
                 yAxis ? 0 : relativePosition.y,

@@ -12,7 +12,15 @@ public class Network_BendTool : NetworkBehaviour
     {
         bendTool = GetComponentInChildren<BendTool>();
     }
-    
+
+    private void Update()
+    {
+        if (bendTool.attachedRod) {
+            RodGripScript rgs = bendTool.attachedRod.GetComponent<RodGripScript>();
+            RpcBendInstanceLookAtGrip(rgs.isGripped, rgs.target.position);
+        }
+    }
+
     public void OnAttachToAnvil()
     {
         Network_PlayerController npc = Network_InteractableObject.GetLocalPlayerController();
@@ -40,9 +48,13 @@ public class Network_BendTool : NetworkBehaviour
     [ClientRpc]
     public void RpcDestroyAllBendInstances()
     {
-        Debug.Log("HEY");
         bendInstance = null;
-        bendTool.attachedRod.GetComponent<DeformableMesh>().RecalculateBounds();
-        
+    }
+
+    [ClientRpc]
+    public void RpcBendInstanceLookAtGrip(bool isGripped, Vector3 targetPosition)
+    {
+        LookAtScript las = bendInstance.GetComponent<LookAtScript>();
+        las.target = isGripped ? targetPosition : LookAtScript.nullTarget;
     }
 }

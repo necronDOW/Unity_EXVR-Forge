@@ -8,6 +8,7 @@ public class AnvilTool : MonoBehaviour
     public string lookupTag = "";
     public Collider[] colliders; // 0 = parent, 1 = this.
     public GameObject attachedRod { get; private set; }
+    private Coroutine lastRanCoroutine;
 
     protected virtual void Start()
     {
@@ -16,36 +17,43 @@ public class AnvilTool : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.tag == lookupTag)
-        {
+        if (other.tag == lookupTag) {
             colliders[0].enabled = false;
+            lastRanCoroutine = StartCoroutine(FreezeCheck(other));
         }
     }
 
-    private void OnTriggerStay(Collider other)
+    private IEnumerator FreezeCheck(Collider other)
     {
-        if (other.tag == lookupTag)
-        {
-            if (IsAttached(other.gameObject))
-            {
-                Unfreeze(other.gameObject);
-            }
-            else
-            {
-                Freeze(other.gameObject);
-            }
-        }
+        if (lastRanCoroutine != null)
+            StopCoroutine(lastRanCoroutine);
+
+        while (IsAttached(other.gameObject))
+            yield return null;
+
+        Debug.Log("freeze");
+        Freeze(other.gameObject);
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.tag == lookupTag)
-        {
+        if (other.tag == lookupTag) {
             colliders[0].enabled = true;
-            Unfreeze(other.gameObject);
+            lastRanCoroutine = StartCoroutine(UnfreezeCheck(other));
         }
     }
 
+    private IEnumerator UnfreezeCheck(Collider other)
+    {
+        if (lastRanCoroutine != null)
+            StopCoroutine(lastRanCoroutine);
+
+        while (!IsAttached(other.gameObject))
+            yield return null;
+
+        Debug.Log("unfreeze");
+        Unfreeze(other.gameObject);
+    }
 
     protected virtual void Freeze(GameObject o)
     {
