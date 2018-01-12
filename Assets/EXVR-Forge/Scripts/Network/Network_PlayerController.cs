@@ -52,10 +52,10 @@ public class Network_PlayerController : NetworkBehaviour
         {
             BendInstance bendInstanceScript = bendInstanceLocal.GetComponent<BendInstance>();
 
-            bendInstanceScript.curvature = curvature;
-            bendInstanceScript.length = length;
-            bendInstanceScript.amount = amount;
-            bendInstanceScript.direction = direction;
+            //bendInstanceScript.curvature = curvature;
+            //bendInstanceScript.length = length;
+            //bendInstanceScript.amount = amount;
+            //bendInstanceScript.direction = direction;
         }
     }
 }

@@ -37,9 +37,4 @@ public class BendTool : AnvilTool
     {
         gameObject.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
     }
-    //on collide and side button press
-
-    //spawn bend prefab
-
-
 }
