@@ -22,7 +22,7 @@ public class BendTool : AnvilTool
         base.Freeze(o);
         
         if (nbt)
-            nbt.CmdOnAttachToAnvil();
+            nbt.OnAttachToAnvil();
     }
 
     protected override void Unfreeze(GameObject o)

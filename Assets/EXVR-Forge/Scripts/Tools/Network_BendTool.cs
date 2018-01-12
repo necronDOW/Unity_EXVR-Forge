@@ -6,32 +6,33 @@ using UnityEngine.Networking;
 public class Network_BendTool : NetworkBehaviour
 {
     private BendTool bendTool;
-    private BendInstance initializedInstance;
+    public BendInstance initializedInstance;
 
     private void Start()
     {
         bendTool = GetComponentInChildren<BendTool>();
     }
     
-    [Command]
-    public void CmdOnAttachToAnvil()
+    public void OnAttachToAnvil()
     {
-        if (bendTool && !initializedInstance && isServer) {
-            GameObject bendInstance = Instantiate(bendTool.bendPrefab);
-            NetworkServer.Spawn(bendInstance);
-
-            initializedInstance = bendInstance.GetComponent<BendInstance>();
-
-            SetupBendInstance(bendInstance, bendTool.attachedRod);
-            RpcOnAttachToAnvil(bendInstance.GetComponent<NetworkIdentity>().netId);
-        }
+        Network_PlayerController npc = Network_InteractableObject.GetLocalPlayerController();
+        npc.CmdOnAttachBendTool(netId);
     }
 
     [ClientRpc]
     public void RpcOnAttachToAnvil(NetworkInstanceId bendInstanceId)
     {
-        GameObject bendInstanceLocal = ClientScene.FindLocalObject(bendInstanceId);
-        SetupBendInstance(bendInstanceLocal, bendTool.attachedRod);
+        GameObject bendInstanceLocal = null;
+        while (!bendInstanceLocal)
+            bendInstanceLocal = ClientScene.FindLocalObject(bendInstanceId);
+
+        Debug.Log(bendTool);
+        Debug.Log(bendTool.attachedRod);
+        bendInstanceLocal.transform.parent = bendTool.attachedRod.transform;
+
+        BendInstance bendInstance = bendInstanceLocal.GetComponent<BendInstance>();
+        bendInstance.target = bendTool.attachedRod;
+        bendInstance.Initialize();
     }
 
     [Command]
@@ -40,14 +41,5 @@ public class Network_BendTool : NetworkBehaviour
         if (initializedInstance) {
             NetworkServer.Destroy(initializedInstance.gameObject);
         }
-    }
-
-    private void SetupBendInstance(GameObject bendInstanceObject, GameObject parentObject)
-    {
-        bendInstanceObject.transform.parent = parentObject.transform;
-
-        BendInstance bendInstance = bendInstanceObject.GetComponent<BendInstance>();
-        bendInstance.target = bendTool.attachedRod;
-        bendInstance.Initialize();
     }
 }

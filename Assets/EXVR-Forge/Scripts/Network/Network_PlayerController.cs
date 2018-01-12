@@ -43,6 +43,22 @@ public class Network_PlayerController : NetworkBehaviour
         RpcOnBend(bendId, curvature, length, amount, direction);
     }
 
+    [Command]
+    public void CmdOnAttachBendTool(NetworkInstanceId bendToolId)
+    {
+        BendTool bendTool = ClientScene.FindLocalObject(bendToolId).GetComponent<BendTool>();
+        Network_BendTool netBendTool = bendTool.GetComponentInParent<Network_BendTool>();
+
+        if (bendTool && !netBendTool.initializedInstance)
+        {
+            GameObject bendInstance = Instantiate(bendTool.bendPrefab);
+            NetworkServer.Spawn(bendInstance);
+
+            netBendTool.initializedInstance = bendInstance.GetComponent<BendInstance>();
+            netBendTool.RpcOnAttachToAnvil(bendInstance.GetComponent<NetworkIdentity>().netId);
+        }
+    }
+
     [ClientRpc]
     public void RpcOnBend(NetworkInstanceId bendId, float curvature, float length, float amount, bool direction)
     {
