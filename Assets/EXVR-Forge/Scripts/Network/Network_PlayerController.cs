@@ -63,8 +63,10 @@ public class Network_PlayerController : NetworkBehaviour
     {
         Network_BendTool netBendTool = ClientScene.FindLocalObject(netBendToolId).GetComponent<Network_BendTool>();
 
-        if (netBendTool.bendInstance) {
-            NetworkServer.Destroy(netBendTool.bendInstance.gameObject);
+        if (netBendTool.bendInstance) { 
+            //update colliders
+            netBendTool.RpcRecalculateBounds();
+            NetworkServer.Destroy(netBendTool.bendInstance.gameObject);    
         }
     }
 

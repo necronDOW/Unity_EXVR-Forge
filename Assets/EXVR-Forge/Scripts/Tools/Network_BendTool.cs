@@ -36,4 +36,10 @@ public class Network_BendTool : NetworkBehaviour
         bendInstanceLocal.transform.rotation = bendTool.attachedRod.transform.rotation;
         bendInstance.Initialize();
     }
+
+    [ClientRpc]
+    public void RpcRecalculateBounds()
+    {
+        bendTool.attachedRod.GetComponent<MeshFilter>().sharedMesh.RecalculateBounds();
+    }
 }
