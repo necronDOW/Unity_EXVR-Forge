@@ -31,7 +31,9 @@ public class Network_BendTool : NetworkBehaviour
         GameObject bendInstanceLocal = ClientScene.FindLocalObject(bendInstanceId);
         bendInstance = bendInstanceLocal.GetComponent<BendInstance>();
 
-        bendInstance.target = bendTool.attachedRod;
+        bendInstanceLocal.transform.parent = bendTool.attachedRod.transform;
+        bendInstanceLocal.transform.position = bendTool.transform.position;
+        bendInstanceLocal.transform.rotation = bendTool.attachedRod.transform.rotation;
         bendInstance.Initialize();
     }
 }
