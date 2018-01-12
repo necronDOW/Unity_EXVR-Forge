@@ -12,13 +12,15 @@ public class Network_BendTool : NetworkBehaviour
     {
         bendTool = GetComponentInChildren<BendTool>();
     }
-
+    
     [Command]
     public void CmdOnAttachToAnvil()
     {
-        if (isServer && bendTool && !initializedInstance) {
+        if (bendTool && !initializedInstance && isServer) {
             GameObject bendInstance = Instantiate(bendTool.bendPrefab);
             NetworkServer.Spawn(bendInstance);
+
+            initializedInstance = bendInstance.GetComponent<BendInstance>();
 
             RpcOnAttachToAnvil(bendInstance.GetComponent<NetworkIdentity>().netId, 
                 bendTool.attachedRod.GetComponent<NetworkIdentity>().netId);
@@ -29,13 +31,12 @@ public class Network_BendTool : NetworkBehaviour
     public void RpcOnAttachToAnvil(NetworkInstanceId bendInstanceId, NetworkInstanceId rodInstanceId)
     {
         GameObject bendInstanceLocal = ClientScene.FindLocalObject(bendInstanceId);
-
         GameObject rodInstanceLocal = ClientScene.FindLocalObject(rodInstanceId);
         bendInstanceLocal.transform.parent = rodInstanceLocal.transform;
 
-        initializedInstance = bendInstanceLocal.GetComponent<BendInstance>();
-        initializedInstance.target = bendTool.attachedRod;
-        initializedInstance.Initialize();
+        BendInstance bendInstance = bendInstanceLocal.GetComponent<BendInstance>();
+        bendInstance.target = bendTool.attachedRod;
+        bendInstance.Initialize();
 
         Debug.Log("initialized bend instance");
     }
@@ -45,13 +46,6 @@ public class Network_BendTool : NetworkBehaviour
     {
         if (initializedInstance) {
             NetworkServer.Destroy(initializedInstance.gameObject);
-            RpcDestroyAllBendInstances();
         }
-    }
-
-    [ClientRpc]
-    public void RpcDestroyAllBendInstances()
-    {
-        initializedInstance = null;
     }
 }
