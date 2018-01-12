@@ -22,12 +22,10 @@ public class Network_BendTool : NetworkBehaviour
     [ClientRpc]
     public void RpcOnAttachToAnvil(NetworkInstanceId bendInstanceId)
     {
-        GameObject bendInstanceLocal = null;
+        GameObject bendInstanceLocal = ClientScene.FindLocalObject(bendInstanceId);
         while (!bendInstanceLocal)
             bendInstanceLocal = ClientScene.FindLocalObject(bendInstanceId);
-
-        Debug.Log(bendTool);
-        Debug.Log(bendTool.attachedRod);
+        
         bendInstanceLocal.transform.parent = bendTool.attachedRod.transform;
 
         BendInstance bendInstance = bendInstanceLocal.GetComponent<BendInstance>();

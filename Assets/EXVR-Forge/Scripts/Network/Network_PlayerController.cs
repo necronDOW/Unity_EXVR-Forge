@@ -44,10 +44,10 @@ public class Network_PlayerController : NetworkBehaviour
     }
 
     [Command]
-    public void CmdOnAttachBendTool(NetworkInstanceId bendToolId)
+    public void CmdOnAttachBendTool(NetworkInstanceId netBendToolId)
     {
-        BendTool bendTool = ClientScene.FindLocalObject(bendToolId).GetComponent<BendTool>();
-        Network_BendTool netBendTool = bendTool.GetComponentInParent<Network_BendTool>();
+        Network_BendTool netBendTool = ClientScene.FindLocalObject(netBendToolId).GetComponent<Network_BendTool>();
+        BendTool bendTool = netBendTool.GetComponentInChildren<BendTool>();
 
         if (bendTool && !netBendTool.initializedInstance)
         {

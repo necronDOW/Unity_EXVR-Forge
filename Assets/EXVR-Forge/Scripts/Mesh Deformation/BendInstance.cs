@@ -45,7 +45,7 @@ public class BendInstance : MonoBehaviour
     private void Start()
     {
         //if (!GetComponent<Network_BendInstance>())
-            Initialize();
+            //Initialize();
     }
 
     // Use this for initialization
