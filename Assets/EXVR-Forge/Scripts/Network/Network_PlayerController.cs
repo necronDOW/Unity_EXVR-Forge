@@ -46,17 +46,15 @@ public class Network_PlayerController : NetworkBehaviour
     [Command]
     public void CmdOnAttachBendTool(NetworkInstanceId netBendToolId)
     {
-        if (isServer) {
-            GameObject netBendToolObj = ClientScene.FindLocalObject(netBendToolId);
-            Network_BendTool netBendTool = netBendToolObj.GetComponent<Network_BendTool>();
+        GameObject netBendToolObj = ClientScene.FindLocalObject(netBendToolId);
+        Network_BendTool netBendTool = netBendToolObj.GetComponent<Network_BendTool>();
 
-            if (!netBendTool.bendInstance)
-            {
-                GameObject bendInstance = Instantiate(netBendTool.bendTool.bendPrefab);
-                NetworkServer.Spawn(bendInstance);
-            }
+        if (!netBendTool.bendInstance) {
+            GameObject bendInstance = Instantiate(netBendTool.bendTool.bendPrefab);
+            NetworkServer.Spawn(bendInstance);
 
-            netBendTool.RpcOnAttachToAnvil(netBendTool.netId);
+            netBendTool.bendInstance = bendInstance.GetComponent<BendInstance>();
+            netBendTool.RpcOnAttachToAnvil(bendInstance.GetComponent<NetworkIdentity>().netId);
         }
     }
 
