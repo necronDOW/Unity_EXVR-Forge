@@ -21,6 +21,7 @@ public class Network_BendTool : NetworkBehaviour
                 bendInstance.rodGripScriptReference = rgs;
 
                 Network_PlayerController npc = Network_InteractableObject.GetLocalPlayerController();
+                npc.CmdBendInstanceLookAtGrip(bendInstance.GetComponent<NetworkIdentity>().netId, rgs.target.position);
             }
             else bendInstance.rodGripScriptReference = null;
         }
