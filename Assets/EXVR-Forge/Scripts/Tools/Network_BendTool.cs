@@ -19,7 +19,8 @@ public class Network_BendTool : NetworkBehaviour
             RodGripScript rgs = bendTool.attachedRod.GetComponent<RodGripScript>();
             if (rgs.isGripped) {
                 bendInstance.rodGripScriptReference = rgs;
-                RpcBendInstanceLookAtGrip(rgs.target.position);
+
+                Network_PlayerController npc = Network_InteractableObject.GetLocalPlayerController();
             }
             else bendInstance.rodGripScriptReference = null;
         }
@@ -53,12 +54,5 @@ public class Network_BendTool : NetworkBehaviour
     public void RpcDestroyAllBendInstances()
     {
         bendInstance = null;
-    }
-
-    [ClientRpc]
-    public void RpcBendInstanceLookAtGrip(Vector3 targetPosition)
-    {
-        LookAtScript las = bendInstance.GetComponent<LookAtScript>();
-        las.target = targetPosition;
     }
 }

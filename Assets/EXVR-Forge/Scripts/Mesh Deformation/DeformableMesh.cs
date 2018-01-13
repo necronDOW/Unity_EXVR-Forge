@@ -183,4 +183,5 @@ public class DeformableMesh : DeformableBase
         mFilter.sharedMesh.RecalculateBounds();
         mCollider.sharedMesh = mFilter.sharedMesh;
     }
+
 }

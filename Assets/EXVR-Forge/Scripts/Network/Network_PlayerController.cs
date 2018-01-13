@@ -44,6 +44,12 @@ public class Network_PlayerController : NetworkBehaviour
     }
 
     [Command]
+    public void CmdBendInstanceLookAtGrip(NetworkInstanceId bendInstanceId, Vector3 targetPosition)
+    {
+        RpcBendInstanceLookAtGrip(bendInstanceId, targetPosition);
+    }
+
+    [Command]
     public void CmdOnAttachBendTool(NetworkInstanceId netBendToolId)
     {
         GameObject netBendToolObj = ClientScene.FindLocalObject(netBendToolId);
@@ -71,9 +77,9 @@ public class Network_PlayerController : NetworkBehaviour
     }
 
     [ClientRpc]
-    public void RpcOnBend(NetworkInstanceId bendId, float curvature, float length, float amount, bool direction)
+    public void RpcOnBend(NetworkInstanceId bendInstanceId, float curvature, float length, float amount, bool direction)
     {
-        GameObject bendInstanceLocal = ClientScene.FindLocalObject(bendId);
+        GameObject bendInstanceLocal = ClientScene.FindLocalObject(bendInstanceId);
 
         if (bendInstanceLocal) {
             BendInstance bendInstanceScript = bendInstanceLocal.GetComponent<BendInstance>();
@@ -84,5 +90,13 @@ public class Network_PlayerController : NetworkBehaviour
             bendInstanceScript.direction = direction;
             bendInstanceScript.Deform();
         }
+    }
+
+    [ClientRpc]
+    public void RpcBendInstanceLookAtGrip(NetworkInstanceId bendInstanceId, Vector3 targetPosition)
+    {
+        GameObject bendInstanceLocal = ClientScene.FindLocalObject(bendInstanceId);
+        LookAtScript las = bendInstanceLocal.GetComponent<LookAtScript>();
+        las.target = targetPosition;
     }
 }

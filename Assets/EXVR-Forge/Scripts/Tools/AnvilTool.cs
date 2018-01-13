@@ -58,12 +58,16 @@ public class AnvilTool : MonoBehaviour
     protected virtual void Freeze(GameObject o)
     {
         o.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
+        //make kinematic
+        //make non convex mesh collider for accurate collisions
         attachedRod = o;
     }
 
     protected virtual void Unfreeze(GameObject o)
     {
         o.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
+        //make non kinematic
+        //make convex mesh collider for accurate collisions
         attachedRod = null;
     }
 
