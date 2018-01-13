@@ -17,8 +17,11 @@ public class Network_BendTool : NetworkBehaviour
     {
         if (bendTool.attachedRod) {
             RodGripScript rgs = bendTool.attachedRod.GetComponent<RodGripScript>();
-            if (rgs.target)
-                RpcBendInstanceLookAtGrip(rgs.isGripped, rgs.target.position);
+            if (rgs.isGripped) {
+                bendInstance.rodGripScriptReference = rgs;
+                RpcBendInstanceLookAtGrip(rgs.target.position);
+            }
+            else bendInstance.rodGripScriptReference = null;
         }
     }
 
@@ -53,9 +56,9 @@ public class Network_BendTool : NetworkBehaviour
     }
 
     [ClientRpc]
-    public void RpcBendInstanceLookAtGrip(bool isGripped, Vector3 targetPosition)
+    public void RpcBendInstanceLookAtGrip(Vector3 targetPosition)
     {
         LookAtScript las = bendInstance.GetComponent<LookAtScript>();
-        las.target = isGripped ? targetPosition : LookAtScript.nullTarget;
+        las.target = targetPosition;
     }
 }

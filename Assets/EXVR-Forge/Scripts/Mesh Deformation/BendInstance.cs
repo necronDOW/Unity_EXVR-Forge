@@ -21,7 +21,6 @@ public class BendInstance : MonoBehaviour
     public bool showGizmo = true;
     public GameObject target;
     public bool direction = false;
-    public bool isInteracting { get; private set; }
 
     private Mesh mesh;
     private Vector3[] origVerts;
@@ -35,6 +34,9 @@ public class BendInstance : MonoBehaviour
     private ts_Transform ts_transform, ts_targetTransform;
     private int seperatingIndex = 0;
 
+    public RodGripScript rodGripScriptReference;
+    private Network_BendInstance networkBendInstance;
+
     private Thread StartThread(int iStart, int iEnd, ts_Transform thisT, ts_Transform otherT, BendParameters bp)
     {
         Thread t = new Thread(() => DeformThread(iStart, iEnd, thisT, otherT, bp));
@@ -44,15 +46,12 @@ public class BendInstance : MonoBehaviour
 
     private void Start()
     {
-        //if (!GetComponent<Network_BendInstance>())
-            //Initialize();
+        networkBendInstance = GetComponent<Network_BendInstance>();
     }
 
     // Use this for initialization
     public void Initialize()
     {
-        isInteracting = false;
-
         if (!target)
             target = transform.parent.gameObject;
 
@@ -68,7 +67,10 @@ public class BendInstance : MonoBehaviour
         ts_transform.CopyValues(transform);
         ts_targetTransform.CopyValues(target.transform);
 
-        Deform();
+        if (rodGripScriptReference && rodGripScriptReference.isGripped) {
+            Deform();
+            networkBendInstance.UpdateNetworkDeform(this);
+        }
     }
 
     private void ProjectTarget()
@@ -104,7 +106,7 @@ public class BendInstance : MonoBehaviour
     }
 
     Vector3[] thread_pts;
-    private void Deform()
+    public void Deform()
     {
         thread_pts = new Vector3[origVerts.Length];
 
@@ -262,13 +264,5 @@ public class BendInstance : MonoBehaviour
     {
         if (showGizmo)
             DrawBend();
-    }
-
-    private void OnTriggerStay(Collider other)
-    {
-        Hand handScript = other.GetComponent<Hand>();
-
-        if (handScript)
-            isInteracting = handScript.controller.GetPressDown(Valve.VR.EVRButtonId.k_EButton_Grip);
     }
 }
