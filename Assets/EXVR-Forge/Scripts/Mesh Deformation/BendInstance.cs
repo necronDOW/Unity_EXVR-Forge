@@ -266,8 +266,10 @@ public class BendInstance : MonoBehaviour
     {
         float angularMultiplier = 0.0548311372f;
 
-        curvature = AngleBetween(rodGripScriptReference.grippedPoint, 
-            rodGripScriptReference.target.transform.position, transform.forward) * angularMultiplier;
+        Vector3 localizedP = rodGripScriptReference.grippedPoint - transform.position;
+        Vector3 localizedQ = rodGripScriptReference.target.transform.position - transform.position;
+
+        curvature = AngleBetween(localizedP, localizedQ, -transform.forward) * angularMultiplier;
     }
 
     public static float AngleBetween(Vector3 P, Vector2 Q, Vector3 up)

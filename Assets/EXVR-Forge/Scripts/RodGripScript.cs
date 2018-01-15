@@ -5,6 +5,7 @@ using Valve.VR.InteractionSystem;
 
 public class RodGripScript : MonoBehaviour
 {
+    public Transform initialTarget;
     public Transform target { get; private set; }
     public Vector3 grippedPoint { get; private set; }
     public bool isGripped { get { return target != null; } }
@@ -12,8 +13,8 @@ public class RodGripScript : MonoBehaviour
 
     private void Awake()
     {
-        target = null;
-        grippedPoint = LookAtScript.nullTarget;
+        target = initialTarget;
+        grippedPoint = initialTarget.transform.position;
     }
 
     private void OnHandHoverBegin(Hand hand) { lastRanCoroutine = StartCoroutine(e_OnHandHoverBegin(hand)); }
@@ -25,8 +26,8 @@ public class RodGripScript : MonoBehaviour
         while (!((hand.controller != null) && hand.controller.GetPress(Valve.VR.EVRButtonId.k_EButton_Grip)))
             yield return null;
 
-        target = hand.transform;
-        grippedPoint = hand.transform.position;
+        //target = hand.transform;
+        //grippedPoint = hand.transform.position;
     }
 
     private void OnHandHoverEnd(Hand hand) { lastRanCoroutine = StartCoroutine(e_OnHandHoverEnd(hand)); }
@@ -38,7 +39,7 @@ public class RodGripScript : MonoBehaviour
         while (((hand.controller != null) && hand.controller.GetPress(Valve.VR.EVRButtonId.k_EButton_Grip)))
             yield return null;
 
-        target = null;
-        grippedPoint = LookAtScript.nullTarget;
+        //target = null;
+        //grippedPoint = LookAtScript.nullTarget;
     }
 }
