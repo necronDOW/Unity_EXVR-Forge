@@ -68,7 +68,9 @@ public class BendInstance : MonoBehaviour
         ts_targetTransform.CopyValues(target.transform);
 
         if (rodGripScriptReference && rodGripScriptReference.isGripped) {
+            UpdateCurvature();
             Deform();
+
             networkBendInstance.UpdateNetworkDeform(this);
         }
     }
@@ -258,6 +260,27 @@ public class BendInstance : MonoBehaviour
 
         if (target.transform.GetComponent<MeshCollider>() != null)
             target.transform.GetComponent<MeshCollider>().sharedMesh = mesh;
+    }
+
+    private void UpdateCurvature()
+    {
+        float angularMultiplier = 0.0548311372f;
+
+        curvature = AngleBetween(rodGripScriptReference.grippedPoint, 
+            rodGripScriptReference.target.transform.position, transform.forward) * angularMultiplier;
+    }
+
+    public static float AngleBetween(Vector3 P, Vector2 Q, Vector3 up)
+    {
+        Vector3 cross = Vector3.Cross(P, Q);
+        float dot = Vector3.Dot(P, Q);
+        float angle = Mathf.Atan2(cross.magnitude, dot);
+
+        float test = Vector3.Dot(up, cross);
+        if (test < 0.0f)
+            angle = -angle;
+
+        return angle * Mathf.Rad2Deg;
     }
 
     private void OnDrawGizmos()

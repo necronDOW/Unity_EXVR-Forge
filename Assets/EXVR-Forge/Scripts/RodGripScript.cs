@@ -6,8 +6,15 @@ using Valve.VR.InteractionSystem;
 public class RodGripScript : MonoBehaviour
 {
     public Transform target { get; private set; }
+    public Vector3 grippedPoint { get; private set; }
     public bool isGripped { get { return target != null; } }
     private Coroutine lastRanCoroutine;
+
+    private void Awake()
+    {
+        target = null;
+        grippedPoint = LookAtScript.nullTarget;
+    }
 
     private void OnHandHoverBegin(Hand hand) { lastRanCoroutine = StartCoroutine(e_OnHandHoverBegin(hand)); }
     private IEnumerator e_OnHandHoverBegin(Hand hand)
@@ -19,6 +26,7 @@ public class RodGripScript : MonoBehaviour
             yield return null;
 
         target = hand.transform;
+        grippedPoint = hand.transform.position;
     }
 
     private void OnHandHoverEnd(Hand hand) { lastRanCoroutine = StartCoroutine(e_OnHandHoverEnd(hand)); }
@@ -31,5 +39,6 @@ public class RodGripScript : MonoBehaviour
             yield return null;
 
         target = null;
+        grippedPoint = LookAtScript.nullTarget;
     }
 }
