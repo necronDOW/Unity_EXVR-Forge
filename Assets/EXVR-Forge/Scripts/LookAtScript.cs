@@ -26,7 +26,7 @@ public class LookAtScript : MonoBehaviour
             Quaternion targetRotation = Quaternion.LookRotation(-targetPoint, Vector3.right);
 
             transform.rotation = originalRotation;
-            transform.rotation *= Quaternion.Euler(0, 0, 90) * Quaternion.Euler(90, 0, 0);
+            transform.rotation *= Quaternion.Euler(0, 0, 90);// * Quaternion.Euler(90, 0, 0);
             transform.rotation *= targetRotation;
         }
     }

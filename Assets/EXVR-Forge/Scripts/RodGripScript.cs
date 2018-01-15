@@ -22,7 +22,7 @@ public class RodGripScript : MonoBehaviour
         if (lastRanCoroutine != null)
             StopCoroutine(lastRanCoroutine);
 
-        while (!((hand.controller != null) && hand.controller.GetPress(Valve.VR.EVRButtonId.k_EButton_Grip)))
+        while (!((hand.controller != null) && hand.controller.GetPressDown(Valve.VR.EVRButtonId.k_EButton_Grip)))
             yield return null;
 
         target = hand.transform;

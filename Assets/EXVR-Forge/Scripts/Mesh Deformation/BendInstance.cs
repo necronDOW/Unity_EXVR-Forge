@@ -60,18 +60,34 @@ public class BendInstance : MonoBehaviour
         ts_transform = new ts_Transform(transform);
         ts_targetTransform = new ts_Transform(target.transform);
     }
-    
+
     // LateUpdate happens after all Update functions
+    private float lastCurvature = 0;
     private void LateUpdate()
     {
         ts_transform.CopyValues(transform);
         ts_targetTransform.CopyValues(target.transform);
 
-        if (rodGripScriptReference && rodGripScriptReference.isGripped) {
-            UpdateCurvature();
-            Deform();
+        if (rodGripScriptReference) {
+            if (rodGripScriptReference.isGripped) {
+                UpdateCurvature();
+                Deform();
+                networkBendInstance.UpdateNetworkDeform(this);
+            }
+            else {
+                if (lastCurvature != curvature) {
+                    MeshFilter meshFilter = target.GetComponent<MeshFilter>();
+                    if (meshFilter) {
+                        meshFilter.mesh.RecalculateBounds();
 
-            networkBendInstance.UpdateNetworkDeform(this);
+                        MeshCollider meshCollider = target.GetComponent<MeshCollider>();
+                        if (meshCollider)
+                            meshCollider.sharedMesh = meshFilter.mesh;
+                    }
+
+                    lastCurvature = curvature;
+                }
+            }
         }
     }
 
@@ -262,29 +278,20 @@ public class BendInstance : MonoBehaviour
             target.transform.GetComponent<MeshCollider>().sharedMesh = mesh;
     }
 
+    Vector3 lastLocalizedQ;
     private void UpdateCurvature()
     {
-        //float angularMultiplier = 0.0548311372f;
+        float angularMultiplier = 0.0548311372f;
 
-        //Vector3 localizedP = rodGripScriptReference.grippedPoint - transform.position;
-        //Vector3 localizedQ = rodGripScriptReference.target.transform.position - transform.position;
+        Vector3 localizedP = rodGripScriptReference.grippedPoint - transform.position;
+        Vector3 localizedQ = rodGripScriptReference.target.transform.position - transform.position;
+        
+        if (Vector3.Angle(localizedP, localizedQ) < 175)
+            lastLocalizedQ = localizedQ;
 
-        //curvature = Mathf.Abs(AngleBetween(localizedP, localizedQ, -transform.forward) * angularMultiplier);
+        curvature = -Mathf.Abs(Vector3.Angle(localizedP, lastLocalizedQ) * angularMultiplier);
     }
-
-    public static float AngleBetween(Vector3 P, Vector2 Q, Vector3 up)
-    {
-        Vector3 cross = Vector3.Cross(P, Q);
-        float dot = Vector3.Dot(P, Q);
-        float angle = Mathf.Atan2(cross.magnitude, dot);
-
-        float test = Vector3.Dot(up, cross);
-        if (test < 0.0f)
-            angle = -angle;
-
-        return angle * Mathf.Rad2Deg;
-    }
-
+    
     private void OnDrawGizmos()
     {
         if (showGizmo)

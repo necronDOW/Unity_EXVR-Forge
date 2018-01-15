@@ -23,7 +23,8 @@ public class Network_BendTool : NetworkBehaviour
                 Network_PlayerController npc = Network_InteractableObject.GetLocalPlayerController();
                 npc.CmdBendInstanceLookAtGrip(bendInstance.GetComponent<NetworkIdentity>().netId, rgs.target.position);
             }
-            else bendInstance.rodGripScriptReference = null;
+            else if (bendInstance)
+                bendInstance.rodGripScriptReference = null;
         }
     }
 

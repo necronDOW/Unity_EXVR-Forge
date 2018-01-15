@@ -175,13 +175,7 @@ public class DeformableMesh : DeformableBase
     private void UpdateMesh(Vector3[] vertices)
     {
         mFilter.sharedMesh.vertices = vertices;
-        RecalculateBounds();
-    }
-
-    public void RecalculateBounds()
-    {
         mFilter.sharedMesh.RecalculateBounds();
         mCollider.sharedMesh = mFilter.sharedMesh;
     }
-
 }
