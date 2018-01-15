@@ -8,8 +8,13 @@ public class Network_BendInstance : NetworkBehaviour
 {
     public void UpdateNetworkDeform(BendInstance bendInstance)
     {
-        Debug.Log("sending bend command");
         Network_PlayerController npc = Network_InteractableObject.GetLocalPlayerController();
-        npc.CmdOnBend(GetComponent<NetworkIdentity>().netId, bendInstance.curvature, bendInstance.length, bendInstance.amount, bendInstance.direction);
+        npc.CmdOnBend(netId, bendInstance.curvature, bendInstance.length, bendInstance.amount, bendInstance.direction);
+    }
+
+    public void NetworkUpdateMeshCollider()
+    {
+        Network_PlayerController npc = Network_InteractableObject.GetLocalPlayerController();
+        npc.CmdUpdateBendColliders(netId);
     }
 }

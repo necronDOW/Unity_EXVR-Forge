@@ -38,18 +38,6 @@ public class Network_PlayerController : NetworkBehaviour
     }
 
     [Command]
-    public void CmdOnBend(NetworkInstanceId bendId, float curvature, float length, float amount, bool direction)
-    {
-        RpcOnBend(bendId, curvature, length, amount, direction);
-    }
-
-    [Command]
-    public void CmdBendInstanceLookAtGrip(NetworkInstanceId bendInstanceId, Vector3 targetPosition)
-    {
-        RpcBendInstanceLookAtGrip(bendInstanceId, targetPosition);
-    }
-
-    [Command]
     public void CmdOnAttachBendTool(NetworkInstanceId netBendToolId)
     {
         GameObject netBendToolObj = ClientScene.FindLocalObject(netBendToolId);
@@ -76,12 +64,19 @@ public class Network_PlayerController : NetworkBehaviour
         }
     }
 
+    [Command]
+    public void CmdOnBend(NetworkInstanceId bendId, float curvature, float length, float amount, bool direction)
+    {
+        RpcOnBend(bendId, curvature, length, amount, direction);
+    }
+
     [ClientRpc]
     public void RpcOnBend(NetworkInstanceId bendInstanceId, float curvature, float length, float amount, bool direction)
     {
         GameObject bendInstanceLocal = ClientScene.FindLocalObject(bendInstanceId);
 
-        if (bendInstanceLocal) {
+        if (bendInstanceLocal)
+        {
             BendInstance bendInstanceScript = bendInstanceLocal.GetComponent<BendInstance>();
 
             bendInstanceScript.curvature = curvature;
@@ -92,11 +87,31 @@ public class Network_PlayerController : NetworkBehaviour
         }
     }
 
+    [Command]
+    public void CmdBendInstanceLookAtGrip(NetworkInstanceId bendInstanceId, Vector3 targetPosition)
+    {
+        RpcBendInstanceLookAtGrip(bendInstanceId, targetPosition);
+    }
+
     [ClientRpc]
     public void RpcBendInstanceLookAtGrip(NetworkInstanceId bendInstanceId, Vector3 targetPosition)
     {
         GameObject bendInstanceLocal = ClientScene.FindLocalObject(bendInstanceId);
         LookAtScript las = bendInstanceLocal.GetComponent<LookAtScript>();
         las.target = targetPosition;
+    }
+
+    [Command]
+    public void CmdUpdateBendColliders(NetworkInstanceId bendInstanceId)
+    {
+        RpcUpdateBendColliders(bendInstanceId);
+    }
+
+    [ClientRpc]
+    public void RpcUpdateBendColliders(NetworkInstanceId bendInstanceId)
+    {
+        GameObject bendInstanceLocal = ClientScene.FindLocalObject(bendInstanceId);
+        BendInstance bi = bendInstanceLocal.GetComponent<BendInstance>();
+        bi.UpdateMeshCollider();
     }
 }

@@ -76,15 +76,7 @@ public class BendInstance : MonoBehaviour
             }
             else {
                 if (lastCurvature != curvature) {
-                    MeshFilter meshFilter = target.GetComponent<MeshFilter>();
-                    if (meshFilter) {
-                        meshFilter.mesh.RecalculateBounds();
-
-                        MeshCollider meshCollider = target.GetComponent<MeshCollider>();
-                        if (meshCollider)
-                            meshCollider.sharedMesh = meshFilter.mesh;
-                    }
-
+                    networkBendInstance.NetworkUpdateMeshCollider();
                     lastCurvature = curvature;
                 }
             }
@@ -276,6 +268,19 @@ public class BendInstance : MonoBehaviour
 
         if (target.transform.GetComponent<MeshCollider>() != null)
             target.transform.GetComponent<MeshCollider>().sharedMesh = mesh;
+    }
+
+    public void UpdateMeshCollider()
+    {
+        MeshFilter meshFilter = target.GetComponent<MeshFilter>();
+        if (meshFilter)
+        {
+            meshFilter.mesh.RecalculateBounds();
+
+            MeshCollider meshCollider = target.GetComponent<MeshCollider>();
+            if (meshCollider)
+                meshCollider.sharedMesh = meshFilter.mesh;
+        }
     }
 
     Vector3 lastLocalizedQ;
