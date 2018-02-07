@@ -6,10 +6,43 @@ using Valve.VR.InteractionSystem;
 
 public class BendInstance : MonoBehaviour
 {
-    struct BendParameters
-    {
+    struct BendParameters {
         public Vector3 P, N, BiN, T;
         public Vector3 bendEnd;
+    }
+
+    class BendableMesh {
+        public Vector3[] origPts = new Vector3[numBendSegments];
+        public Vector3[] pts = new Vector3[numBendSegments];
+        public Vector3[] normals = new Vector3[numBendSegments];
+        public Vector3[] binormals = new Vector3[numBendSegments];
+        public Vector3[] tangents = new Vector3[numBendSegments];
+
+        public Mesh mesh {
+            get;
+            private set;
+        }
+
+        public Vector3[] origVerts {
+            get;
+            private set;
+        }
+
+        public int seperatingIndex {
+            get;
+            private set;
+        }
+
+        public BendableMesh(Mesh _mesh, Transform _meshTransform, Transform _bendTransform) {
+            mesh = _mesh;
+            origVerts = _mesh.vertices;
+            seperatingIndex = closestVertex(_meshTransform.InverseTransformPoint(_bendTransform.position), origVerts);
+        }
+
+        public void UpdatePts()
+        {
+            origVerts = mesh.vertices;
+        }
     }
 
     private static int maxWorkGroupSize = 1024;
@@ -22,24 +55,17 @@ public class BendInstance : MonoBehaviour
     public GameObject target;
     public bool direction = false;
 
-    private Mesh mesh;
-    private Vector3[] origVerts;
-    private Vector3[] origPts = new Vector3[numBendSegments];
-    private Vector3[] pts = new Vector3[numBendSegments];
-    private Vector3[] normals = new Vector3[numBendSegments];
-    private Vector3[] binormals = new Vector3[numBendSegments];
-    private Vector3[] tangents = new Vector3[numBendSegments];
+    private BendableMesh[] bMeshes;
 
     private List<Thread> threads = new List<Thread>();
     private ts_Transform ts_transform, ts_targetTransform;
-    private int seperatingIndex = 0;
 
     public RodGripScript rodGripScriptReference;
     private Network_BendInstance networkBendInstance;
 
-    private Thread StartThread(int iStart, int iEnd, ts_Transform thisT, ts_Transform otherT, BendParameters bp)
+    private Thread StartThread(int iStart, int iEnd, ts_Transform thisT, ts_Transform otherT, BendParameters bp, int meshIndex)
     {
-        Thread t = new Thread(() => DeformThread(iStart, iEnd, thisT, otherT, bp));
+        Thread t = new Thread(() => DeformThread(iStart, iEnd, thisT, otherT, bp, meshIndex));
         t.Start();
         return t;
     }
@@ -71,7 +97,7 @@ public class BendInstance : MonoBehaviour
         if (rodGripScriptReference) {
             if (rodGripScriptReference.isGripped) {
                 UpdateCurvature();
-                Deform();
+                DeformAll();
                 networkBendInstance.UpdateNetworkDeform(this);
             }
             else {
@@ -85,14 +111,27 @@ public class BendInstance : MonoBehaviour
 
     private void ProjectTarget()
     {
-        mesh = target.GetComponent<MeshFilter>().sharedMesh;
-        origVerts = mesh.vertices;
+        List<Mesh> foundMeshes = new List<Mesh>();
+        MeshFilter targetFilter = target.GetComponent<MeshFilter>();
+        if (targetFilter) {
+            foundMeshes.Add(targetFilter.sharedMesh);
+        }
 
-        seperatingIndex = closestVertex(target.transform.InverseTransformPoint(transform.position), origVerts);
-        direction = (closestVertex(target.transform.InverseTransformPoint(transform.position + (transform.up * 0.1f)), origVerts) < seperatingIndex);
+        MeshCollider targetMeshCollider = target.GetComponent<MeshCollider>();
+        if (targetMeshCollider) {
+            foundMeshes.Add(targetMeshCollider.sharedMesh);
+        }
+
+        if (foundMeshes.Count > 0) {
+            bMeshes = new BendableMesh[foundMeshes.Count];
+            for (int i = 0; i < foundMeshes.Count; i++)
+                bMeshes[i] = new BendableMesh(foundMeshes[i], target.transform, transform);
+            
+            direction = closestVertex(target.transform.InverseTransformPoint(transform.position + (transform.up * 0.1f)), bMeshes[bMeshes.Length - 1].origVerts) < bMeshes[bMeshes.Length - 1].seperatingIndex;
+        }
     }
 
-    private int closestVertex(Vector3 pt, Vector3[] verts)
+    private static int closestVertex(Vector3 pt, Vector3[] verts)
     {
         int closestIndex = 0;
         float minDist = Mathf.Infinity;
@@ -110,15 +149,25 @@ public class BendInstance : MonoBehaviour
         return closestIndex;
     }
 
-    private void UpdatePts()
+    private void UpdatePts(int meshIndex)
     {
-        origVerts = mesh.vertices;
+        bMeshes[meshIndex].UpdatePts();
+    }
+
+    public void DeformAll()
+    {
+        for (int i = 0; i < bMeshes.Length; i++) {
+            Deform(i);
+        }
     }
 
     Vector3[] thread_pts;
-    public void Deform()
+    private void Deform(int meshIndex)
     {
-        thread_pts = new Vector3[origVerts.Length];
+        if (meshIndex > bMeshes.Length-1)
+            return;
+
+        thread_pts = new Vector3[bMeshes[meshIndex].origVerts.Length];
 
         BendParameters bp = new BendParameters();
         bp.N = ts_transform.TransformDirection(1, 0, 0);
@@ -126,32 +175,32 @@ public class BendInstance : MonoBehaviour
         bp.T = ts_transform.TransformDirection(0, 1, 0);
         bp.bendEnd = ts_targetTransform.TransformPoint(0, length, 0);
 
-        int start = (direction) ? 0 : seperatingIndex;
-        int end = (direction) ? seperatingIndex : origVerts.Length;
+        int start = (direction) ? 0 : bMeshes[meshIndex].seperatingIndex;
+        int end = (direction) ? bMeshes[meshIndex].seperatingIndex : bMeshes[meshIndex].origVerts.Length;
 
         for (int i = start; i < end; i += maxWorkGroupSize) {
-            int workgroupSize = (i + maxWorkGroupSize < origVerts.Length) ? maxWorkGroupSize : origVerts.Length - i;
-            threads.Add(StartThread(i, i + workgroupSize, ts_transform, ts_targetTransform, bp));
+            int workgroupSize = (i + maxWorkGroupSize < bMeshes[meshIndex].origVerts.Length) ? maxWorkGroupSize : bMeshes[meshIndex].origVerts.Length - i;
+            threads.Add(StartThread(i, i + workgroupSize, ts_transform, ts_targetTransform, bp, meshIndex));
         }
 
-        start = (direction) ? seperatingIndex : 0;
-        end = (direction) ? origVerts.Length : seperatingIndex;
+        start = (direction) ? bMeshes[meshIndex].seperatingIndex : 0;
+        end = (direction) ? bMeshes[meshIndex].origVerts.Length : bMeshes[meshIndex].seperatingIndex;
 
         for (int i = start; i < end; i++)
-            thread_pts[i] = origVerts[i];
+            thread_pts[i] = bMeshes[meshIndex].origVerts[i];
 
         ThreadTools.WaitForThreads(ref threads);
-        mesh.vertices = thread_pts;
+        bMeshes[meshIndex].mesh.vertices = thread_pts;
     }
 
-    private void DeformThread(int iStart, int iEnd, ts_Transform thisT, ts_Transform otherT, BendParameters bp)
+    private void DeformThread(int iStart, int iEnd, ts_Transform thisT, ts_Transform otherT, BendParameters bp, int meshIndex)
     {
         Vector3 v;
         Vector3 P2, N2, T2;
 
         for (int i = iStart; i < iEnd; i++)
         {
-            Vector3 wsPt = otherT.TransformPoint(origVerts[i]);
+            Vector3 wsPt = otherT.TransformPoint(bMeshes[meshIndex].origVerts[i]);
 
             float u = PtLineProject(wsPt, thisT.TransformPoint(Vector3.zero), thisT.TransformPoint(0, 1 * length, 0));
             u = Mathf.Min(1.0F, Mathf.Max(u, 0.0F));
@@ -187,18 +236,18 @@ public class BendInstance : MonoBehaviour
                 T2 = bp.T;
             }
 
-            thread_pts[i] = Vector3.Lerp(origVerts[i], otherT.InverseTransformPoint(P2 + dN * N2 + dBiN * bp.BiN + dT * T2), amount);
+            thread_pts[i] = Vector3.Lerp(bMeshes[meshIndex].origVerts[i], otherT.InverseTransformPoint(P2 + dN * N2 + dBiN * bp.BiN + dT * T2), amount);
         }
     }
 
-    private void PlotPoints()
+    private void PlotPoints(int meshIndex)
     {
-        for (int i = 0; i < origPts.Length; i++)
+        for (int i = 0; i < bMeshes[meshIndex].origPts.Length; i++)
         {
-            float u = (float)i / (float)(origPts.Length - 1);
+            float u = (float)i / (float)(bMeshes[meshIndex].origPts.Length - 1);
             //Puts the bend in the same space as the mesh
-            origPts[i] = transform.TransformPoint(new Vector3(0, u * length, 0));
-            normals[i] = transform.TransformDirection(new Vector3(0, 1, 0));
+            bMeshes[meshIndex].origPts[i] = transform.TransformPoint(new Vector3(0, u * length, 0));
+            bMeshes[meshIndex].normals[i] = transform.TransformDirection(new Vector3(0, 1, 0));
 
             float x, y, z;
             Vector3 pt, normal, binormal, tangent;
@@ -218,37 +267,37 @@ public class BendInstance : MonoBehaviour
             }
             else
             {
-                pt = origPts[i];
+                pt = bMeshes[meshIndex].origPts[i];
                 normal = transform.TransformDirection(new Vector3(1, 0, 0));
             }
 
             binormal = transform.TransformDirection(new Vector3(0, 0, -1));
             tangent = Vector3.Cross(normal, binormal);
 
-            pts[i] = pt;
-            normals[i] = normal;
-            binormals[i] = binormal;
-            tangents[i] = tangent;
+            bMeshes[meshIndex].pts[i] = pt;
+            bMeshes[meshIndex].normals[i] = normal;
+            bMeshes[meshIndex].binormals[i] = binormal;
+            bMeshes[meshIndex].tangents[i] = tangent;
         }
     }
 
-    private void DrawBend()
+    private void DrawBend(int meshIndex)
     {
-        PlotPoints();
+        PlotPoints(meshIndex);
 
-        for (int i = 0; i < pts.Length; i++) {
+        for (int i = 0; i < bMeshes[meshIndex].pts.Length; i++) {
             Gizmos.color = Color.red;
-            Gizmos.DrawLine(pts[i], pts[i] + .1F * normals[i] * length);
+            Gizmos.DrawLine(bMeshes[meshIndex].pts[i], bMeshes[meshIndex].pts[i] + .1F * bMeshes[meshIndex].normals[i] * length);
 
             Gizmos.color = Color.green;
-            Gizmos.DrawLine(pts[i], pts[i] + .1F * tangents[i] * length);
+            Gizmos.DrawLine(bMeshes[meshIndex].pts[i], bMeshes[meshIndex].pts[i] + .1F * bMeshes[meshIndex].tangents[i] * length);
 
             Gizmos.color = Color.blue;
-            Gizmos.DrawLine(pts[i], pts[i] + .1F * binormals[i] * length);
+            Gizmos.DrawLine(bMeshes[meshIndex].pts[i], bMeshes[meshIndex].pts[i] + .1F * bMeshes[meshIndex].binormals[i] * length);
 
             Gizmos.color = new Color(1, 1, 1, .5F);
-            if (i < pts.Length - 1)
-                Gizmos.DrawLine(pts[i], pts[i + 1]);
+            if (i < bMeshes[meshIndex].pts.Length - 1)
+                Gizmos.DrawLine(bMeshes[meshIndex].pts[i], bMeshes[meshIndex].pts[i + 1]);
         }
     }
 
@@ -262,12 +311,12 @@ public class BendInstance : MonoBehaviour
         return u;
     }
 
-    public void Finish()
+    public void Finish(int meshIndex)
     {
-        mesh.RecalculateNormals();
+        bMeshes[meshIndex].mesh.RecalculateNormals();
 
         if (target.transform.GetComponent<MeshCollider>() != null)
-            target.transform.GetComponent<MeshCollider>().sharedMesh = mesh;
+            target.transform.GetComponent<MeshCollider>().sharedMesh = bMeshes[meshIndex].mesh;
     }
 
     public void UpdateMeshCollider()
@@ -299,7 +348,9 @@ public class BendInstance : MonoBehaviour
     
     private void OnDrawGizmos()
     {
-        if (showGizmo)
-            DrawBend();
+        if (showGizmo) {
+            if (bMeshes.Length > 0)
+                DrawBend(0);
+        }
     }
 }

@@ -30,8 +30,9 @@ public class BendTool : AnvilTool
         if (nbt)
             nbt.DestroyAllBendInstances();
 
-        attachedRod.GetComponent<MeshFilter>().mesh.RecalculateBounds();
-        attachedRod.GetComponent<MeshCollider>().sharedMesh = attachedRod.GetComponent<MeshFilter>().mesh;
+        if (attachedRod) {
+            attachedRod.GetComponent<DeformableBase>().UpdateMeshCollider(true);
+        }
 
         base.Unfreeze(o);
     }

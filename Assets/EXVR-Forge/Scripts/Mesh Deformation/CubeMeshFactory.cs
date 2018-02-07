@@ -119,10 +119,10 @@ public class CubeMeshFactory
     private void CreateTriangles()
     {
         int quads = (xSize * ySize + xSize * zSize + ySize * zSize) * 2;
+
         int[] triangles = new int[quads * 6];
         int ring = (xSize + zSize) * 2;
         int t = 0, v = (xSize - 1) * (zSize - 1);
-
         t = CreateBottomFace(result.vertexCount, triangles, t, ring);
 
         for (int y = 0; y < ySize; y++, v++)

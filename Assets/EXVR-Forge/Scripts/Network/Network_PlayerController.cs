@@ -83,7 +83,7 @@ public class Network_PlayerController : NetworkBehaviour
             bendInstanceScript.length = length;
             bendInstanceScript.amount = amount;
             bendInstanceScript.direction = direction;
-            bendInstanceScript.Deform();
+            bendInstanceScript.DeformAll();
         }
     }
 

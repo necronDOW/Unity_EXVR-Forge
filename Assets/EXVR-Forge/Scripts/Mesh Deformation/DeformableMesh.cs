@@ -183,12 +183,4 @@ public class DeformableMesh : DeformableBase
         simplifiedMesh.vertices = thread_vertices;
         UpdateMeshCollider();
     }
-
-    private void UpdateMeshCollider()
-    {
-        float start = Time.realtimeSinceStartup;
-        mCollider.sharedMesh = null;
-        mCollider.sharedMesh = simplifiedMesh;
-        Debug.Log("collider update took : " + (Time.realtimeSinceStartup - start) + "s.");
-    }
 }
