@@ -10,6 +10,7 @@ public class DeformableBase : MonoBehaviour
     protected MeshCollider mCollider;
     protected int[] originalTriangles;
     protected Vector3[] originalVertices;
+    protected Mesh simplifiedMesh;
 
     protected virtual void Start()
     {
@@ -28,6 +29,7 @@ public class DeformableBase : MonoBehaviour
 
     protected void ResetMesh()
     {
+        Debug.Log("reset mesh");
         mFilter.sharedMesh.triangles = originalTriangles;
         mFilter.sharedMesh.vertices = originalVertices;
         mFilter.sharedMesh.RecalculateBounds();
@@ -42,6 +44,14 @@ public class DeformableBase : MonoBehaviour
             mCollider = GetComponent<MeshCollider>();
             originalTriangles = mFilter.sharedMesh.triangles;
             originalVertices = mFilter.sharedMesh.vertices;
+
+            GenerateLowPolyMesh();
+            simplifiedMesh = MeshColliderTools.Simplify(mFilter.sharedMesh);
         }
+    }
+
+    protected void GenerateLowPolyMesh()
+    {
+        simplifiedMesh = new CubeMeshFactory(2, 120, 2, 0.0125f, 0.0f, "simplified_").result;
     }
 }

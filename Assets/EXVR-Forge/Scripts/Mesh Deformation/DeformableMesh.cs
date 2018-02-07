@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 using UnityThreading;
@@ -136,11 +137,11 @@ public class DeformableMesh : DeformableBase
         }
     }
 
-    private void Deform(Transform otherObject, Vector3[] hitPoints)
+    private void Deform_local(Transform otherObject, Vector3[] hitPoints, Mesh targetMesh)
     {
         UpdateComponents();
-
-        thread_vertices = mFilter.mesh.vertices;
+        
+        thread_vertices = targetMesh.vertices;
 
         for (int i = 0; i < hitPoints.Length; i++)
         {
@@ -151,31 +152,43 @@ public class DeformableMesh : DeformableBase
                 threads.Add(StartThread(j, j + workgroupSize, vectors.impact, vectors.simplified, forceFactor / hitPoints.Length));
             }
         }
-
-        ThreadTools.WaitForThreads(ref threads);
-        UpdateMesh(thread_vertices);
     }
     
-    public void Deform(Vector3 impactVector, Vector3 simplifiedVector)
+    private void Deform_local(Vector3 impactVector, Vector3 simplifiedVector, Mesh targetMesh)
     {
         UpdateComponents();
 
-        thread_vertices = mFilter.sharedMesh.vertices;
+        thread_vertices = targetMesh.vertices;
 
         for (int i = 0; i < thread_vertices.Length; i += maxWorkGroupSize)
         {
             int workgroupSize = (i + maxWorkGroupSize < thread_vertices.Length) ? maxWorkGroupSize : thread_vertices.Length - i;
             threads.Add(StartThread(i, i + workgroupSize, impactVector, simplifiedVector, forceFactor));
         }
-
-        ThreadTools.WaitForThreads(ref threads);
-        UpdateMesh(thread_vertices);
     }
 
-    private void UpdateMesh(Vector3[] vertices)
+    public void Deform(Vector3 impactVector, Vector3 simplifiedVector)
     {
-        mFilter.sharedMesh.vertices = vertices;
+        Deform_local(impactVector, simplifiedVector, mFilter.sharedMesh);
+        ThreadTools.WaitForThreads(ref threads);
+        threads.Clear();
+
+        mFilter.sharedMesh.vertices = thread_vertices;
         mFilter.sharedMesh.RecalculateBounds();
-        mCollider.sharedMesh = mFilter.sharedMesh;
+
+        Deform_local(impactVector, simplifiedVector, simplifiedMesh);
+        ThreadTools.WaitForThreads(ref threads);
+        threads.Clear();
+
+        simplifiedMesh.vertices = thread_vertices;
+        UpdateMeshCollider();
+    }
+
+    private void UpdateMeshCollider()
+    {
+        float start = Time.realtimeSinceStartup;
+        mCollider.sharedMesh = null;
+        mCollider.sharedMesh = simplifiedMesh;
+        Debug.Log("collider update took : " + (Time.realtimeSinceStartup - start) + "s.");
     }
 }
