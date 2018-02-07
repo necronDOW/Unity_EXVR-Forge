@@ -6,11 +6,18 @@ using UnityEngine;
 [RequireComponent(typeof(MeshCollider))]
 public class DeformableBase : MonoBehaviour
 {
+    public float colliderSimplificationFactor = 0.4f;
+
     protected MeshFilter mFilter;
     protected MeshCollider mCollider;
     protected int[] originalTriangles;
     protected Vector3[] originalVertices;
     protected Mesh simplifiedMesh;
+
+    protected void Awake()
+    {
+
+    }
 
     protected virtual void Start()
     {

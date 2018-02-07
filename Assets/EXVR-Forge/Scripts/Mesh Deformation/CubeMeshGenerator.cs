@@ -5,15 +5,42 @@ using UnityEngine;
 [RequireComponent(typeof(MeshFilter), typeof(MeshInfo))]
 public class CubeMeshGenerator : MonoBehaviour
 {
+    [System.Serializable]
+    public class GeneratorParams
+    {
+        [SerializeField, Range(2, 10000)] public int xSize = 2;
+        [SerializeField, Range(2, 10000)] public int ySize = 2;
+        [SerializeField, Range(2, 10000)] public int zSize = 2;
+        [SerializeField, Range(0, 1)] public float roundness = 0.01f;
+        [SerializeField] public float meshScale = 1.0f;
+
+        public GeneratorParams() { }
+        public GeneratorParams(int xSize, int ySize, int zSize, float roundness, float meshScale)
+        {
+            this.xSize = xSize;
+            this.ySize = ySize;
+            this.zSize = zSize;
+            this.roundness = roundness;
+            this.meshScale = meshScale;
+        }
+
+        public void ApplySimplification(float simplificationFactor)
+        {
+            simplificationFactor = Mathf.Clamp01(simplificationFactor);
+
+            float oldXSize = (float)xSize;
+            xSize = Mathf.Clamp((int)(xSize / simplificationFactor), 0, xSize);
+            ySize = Mathf.Clamp((int)(ySize / simplificationFactor), 0, ySize);
+            zSize = Mathf.Clamp((int)(zSize / simplificationFactor), 0, zSize);
+
+            meshScale *= oldXSize / xSize;
+        }
+    }
+
     private MeshFilter mFilter;
     private MeshCollider mCollider;
-    private float xScaled, yScaled, zScaled;
-    private float roundnessReal = 0.0f;
-    private Vector3 centeringOffset;
-    
-    public int xSize = 1, ySize = 1, zSize = 1;
-    [Range(0.01f, 1)] public float roundness = 0.01f;
-    public float meshScale = 1.0f;
+
+    public GeneratorParams gParams;
 
     private void Awake()
     {
@@ -31,7 +58,7 @@ public class CubeMeshGenerator : MonoBehaviour
 
     private bool GenerateMesh()
     {
-        Mesh mesh = new CubeMeshFactory(xSize, ySize, zSize, meshScale, roundness, name).result;
+        Mesh mesh = new CubeMeshFactory(gParams.xSize, gParams.ySize, gParams.zSize, gParams.meshScale, gParams.roundness, name).result;
         if (mesh == null) {
             Debug.LogError("Mesh Generation failed! (name: " + name + ").");
             return false;
@@ -56,12 +83,5 @@ public class CubeMeshGenerator : MonoBehaviour
             mFilter.sharedMesh.RecalculateBounds();
             mCollider.sharedMesh = mFilter.sharedMesh;
         }
-    }
-
-    private void OnValidate()
-    {
-        if (xSize < 1) xSize = 1;
-        if (ySize < 1) ySize = 1;
-        if (zSize < 1) zSize = 1;
     }
 }
