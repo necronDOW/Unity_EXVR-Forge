@@ -281,7 +281,7 @@ namespace MeshCutter
 
             right_HalfMesh.SetIndices(right_side.indices.ToArray(), MeshTopology.Triangles, 0);
 
-            Debug.Log(Time.realtimeSinceStartup - timer);
+            Debug.Log("Cut time: " + (Time.realtimeSinceStartup - timer));
 
             return new Mesh[]{ left_HalfMesh, right_HalfMesh };
 		}

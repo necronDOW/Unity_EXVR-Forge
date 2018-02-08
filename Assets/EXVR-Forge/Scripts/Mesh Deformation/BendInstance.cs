@@ -36,7 +36,7 @@ public class BendInstance : MonoBehaviour
         public BendableMesh(Mesh _mesh, Transform _meshTransform, Transform _bendTransform) {
             mesh = _mesh;
             origVerts = _mesh.vertices;
-            seperatingIndex = closestVertex(_meshTransform.InverseTransformPoint(_bendTransform.position), origVerts);
+            seperatingIndex = DeformableBase.FindClosestVertex(_meshTransform.InverseTransformPoint(_bendTransform.position), origVerts);
         }
 
         public void UpdatePts()
@@ -127,26 +127,8 @@ public class BendInstance : MonoBehaviour
             for (int i = 0; i < foundMeshes.Count; i++)
                 bMeshes[i] = new BendableMesh(foundMeshes[i], target.transform, transform);
             
-            direction = closestVertex(target.transform.InverseTransformPoint(transform.position + (transform.up * 0.1f)), bMeshes[bMeshes.Length - 1].origVerts) < bMeshes[bMeshes.Length - 1].seperatingIndex;
+            direction = DeformableBase.FindClosestVertex(target.transform.InverseTransformPoint(transform.position + (transform.up * 0.1f)), bMeshes[bMeshes.Length - 1].origVerts) < bMeshes[bMeshes.Length - 1].seperatingIndex;
         }
-    }
-
-    private static int closestVertex(Vector3 pt, Vector3[] verts)
-    {
-        int closestIndex = 0;
-        float minDist = Mathf.Infinity;
-
-        for (int i = 0; i < verts.Length; i++)
-        {
-            float dist = Vector3.Distance(verts[i], pt);
-            if (dist < minDist)
-            {
-                closestIndex = i;
-                minDist = dist;
-            }
-        }
-
-        return closestIndex;
     }
 
     private void UpdatePts(int meshIndex)
@@ -162,7 +144,7 @@ public class BendInstance : MonoBehaviour
     }
 
     Vector3[] thread_pts;
-    private void Deform(int meshIndex)
+    public void Deform(int meshIndex)
     {
         if (meshIndex > bMeshes.Length-1)
             return;

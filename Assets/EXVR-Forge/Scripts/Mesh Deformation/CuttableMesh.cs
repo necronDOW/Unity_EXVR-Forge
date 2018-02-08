@@ -37,7 +37,6 @@ public class CuttableMesh : MonoBehaviour
             if (Vector3.Distance(other.transform.position, cuttingSrc.transform.position) 
                 < (minImpactDistance + cuttingSrcExtents + other.bounds.extents.magnitude) * 1.1f)
             {
-                Debug.Log(hits);
                 if (hits++ >= hitsToCut) {
                     PerformCut();
                 }

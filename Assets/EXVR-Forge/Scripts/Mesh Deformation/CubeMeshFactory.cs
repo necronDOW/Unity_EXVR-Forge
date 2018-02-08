@@ -17,18 +17,18 @@ public class CubeMeshFactory
         private set;
     }
 
-    public CubeMeshFactory(int xSize, int ySize, int zSize, float meshScale, float roundness, string meshName = "gCube")
+    public CubeMeshFactory(CubeMeshGenerator.GeneratorParams gParams, string meshName = "gCube")
     {
-        this.xSize = xSize;
-        this.ySize = ySize;
-        this.zSize = zSize;
+        this.xSize = gParams.xSize;
+        this.ySize = gParams.ySize;
+        this.zSize = gParams.zSize;
 
-        this.meshScale = meshScale;
+        this.meshScale = gParams.meshScale;
         xScaled = xSize * meshScale;
         yScaled = ySize * meshScale;
         zScaled = zSize * meshScale;
 
-        roundnessReal = (Mathf.Min(new float[] { xScaled, yScaled, zScaled }) / 2.0f) * roundness;
+        roundnessReal = (Mathf.Min(new float[] { xScaled, yScaled, zScaled }) / 2.0f) * gParams.roundness;
         centeringOffset = new Vector3(xScaled, yScaled, zScaled) * -0.5f;
 
         this.meshName = meshName;

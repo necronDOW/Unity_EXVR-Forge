@@ -24,23 +24,46 @@ public class CubeMeshGenerator : MonoBehaviour
             this.meshScale = meshScale;
         }
 
-        public void ApplySimplification(float simplificationFactor)
+        public GeneratorParams(GeneratorParams other)
         {
+            xSize = other.xSize;
+            ySize = other.ySize;
+            zSize = other.zSize;
+            roundness = other.roundness;
+            meshScale = other.meshScale;
+        }
+
+        public GeneratorParams ApplySimplification(float simplificationFactor, bool keepRoundness = false)
+        {
+            GeneratorParams sGParams = new GeneratorParams();
             simplificationFactor = Mathf.Clamp01(simplificationFactor);
 
-            float oldXSize = (float)xSize;
-            xSize = Mathf.Clamp((int)(xSize / simplificationFactor), 0, xSize);
-            ySize = Mathf.Clamp((int)(ySize / simplificationFactor), 0, ySize);
-            zSize = Mathf.Clamp((int)(zSize / simplificationFactor), 0, zSize);
+            sGParams.xSize = Mathf.Clamp((int)(xSize * simplificationFactor), 0, xSize);
+            sGParams.ySize = Mathf.Clamp((int)(ySize * simplificationFactor), 0, ySize);
+            sGParams.zSize = Mathf.Clamp((int)(zSize * simplificationFactor), 0, zSize);
+            sGParams.roundness = keepRoundness ? roundness * simplificationFactor : 0.0f;
+            sGParams.meshScale = meshScale * ((float)xSize / sGParams.xSize);
 
-            meshScale *= oldXSize / xSize;
+            if (sGParams.xSize < 2) {
+                return sGParams.ApplySimplification(2.0f / sGParams.xSize, keepRoundness);
+            }
+
+            if (sGParams.ySize < 2) {
+                return sGParams.ApplySimplification(2.0f / sGParams.ySize, keepRoundness);
+            }
+
+            if (sGParams.zSize < 2) {
+                return sGParams.ApplySimplification(2.0f / sGParams.xSize, keepRoundness);
+            }
+
+            return sGParams;
         }
     }
+    
+    public static readonly GeneratorParams gParams = new GeneratorParams(5, 300, 5, 0.25f, 0.005f);
 
     private MeshFilter mFilter;
     private MeshCollider mCollider;
-
-    public GeneratorParams gParams;
 
     private void Awake()
     {
@@ -58,7 +81,8 @@ public class CubeMeshGenerator : MonoBehaviour
 
     private bool GenerateMesh()
     {
-        Mesh mesh = new CubeMeshFactory(gParams.xSize, gParams.ySize, gParams.zSize, gParams.meshScale, gParams.roundness, name).result;
+        Debug.Log(gParams.xSize);
+        Mesh mesh = new CubeMeshFactory(gParams, name).result;
         if (mesh == null) {
             Debug.LogError("Mesh Generation failed! (name: " + name + ").");
             return false;

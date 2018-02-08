@@ -13,10 +13,11 @@ public class DeformableBase : MonoBehaviour
     protected int[] originalTriangles;
     protected Vector3[] originalVertices;
     protected Mesh simplifiedMesh;
-
-    protected void Awake()
-    {
-
+    
+    private CubeMeshGenerator.GeneratorParams simplifiedGParams {
+        get {
+            return CubeMeshGenerator.gParams.ApplySimplification(0.4f);
+        }
     }
 
     protected virtual void Start()
@@ -44,20 +45,21 @@ public class DeformableBase : MonoBehaviour
 
     protected void UpdateComponents()
     {
-        if (!mFilter || !mCollider)
-        {
+        if (!mFilter || !mCollider) {
             mFilter = GetComponent<MeshFilter>();
             mCollider = GetComponent<MeshCollider>();
             originalTriangles = mFilter.sharedMesh.triangles;
             originalVertices = mFilter.sharedMesh.vertices;
 
-            GenerateLowPolyMesh();
+            if (!simplifiedMesh) {
+                GenerateLowPolyMesh();
+            }
         }
     }
 
     protected void GenerateLowPolyMesh()
     {
-        simplifiedMesh = new CubeMeshFactory(2, 120, 2, 0.0125f, 0.0f, "simplified_").result;
+        simplifiedMesh = new CubeMeshFactory(simplifiedGParams, "simplified_").result;
 
         mCollider.sharedMesh = null;
         mCollider.sharedMesh = simplifiedMesh;
@@ -68,5 +70,39 @@ public class DeformableBase : MonoBehaviour
         mFilter.sharedMesh.RecalculateBounds();
         mCollider.sharedMesh = null;
         mCollider.sharedMesh = simplifiedMesh;
+    }
+
+    public void SplitCollider(Vector3 worldPt, int halfIndex, Vector3[] newVertices)
+    {
+        if (halfIndex < 0 || halfIndex > 1) {
+            Debug.LogWarning("Invalid half index (" + halfIndex + "). Index should be either 0 or 1, to represent one of two halves.");
+            return;
+        }
+
+        Vector3 localPt = transform.InverseTransformPoint(worldPt);
+        int closestVertex = FindClosestVertex(localPt, newVertices);
+        float percent = (closestVertex != 0 ? (closestVertex / newVertices.Length) : 0.001f);
+
+        if (halfIndex == 1) {
+            percent = 1.0f - percent;
+        }
+
+        // NEED ACCESS TO PREVIOUS DEFORMATION INFO!!
+    }
+
+    public static int FindClosestVertex(Vector3 localPt, Vector3[] verts)
+    {
+        int closestIndex = 0;
+        float minDist = Mathf.Infinity;
+
+        for (int i = 0; i < verts.Length; i++) {
+            float dist = Vector3.Distance(verts[i], localPt);
+            if (dist < minDist) {
+                closestIndex = i;
+                minDist = dist;
+            }
+        }
+
+        return closestIndex;
     }
 }
