@@ -14,7 +14,9 @@ public class Heating : MonoBehaviour {
     private Vector3[] vertices;
     private Vector3[] worldPositions;
     public float[] rodLoopTemprature;
+    private int[] rodLoopindex;
 
+    
     void Awake ()
     {
         mesh = GetComponent<MeshFilter>().mesh;
@@ -32,9 +34,19 @@ public class Heating : MonoBehaviour {
         coolingSources[1] = GameObject.Find("OilSource").GetComponent<CoolingSource>();
 
         rodLoopTemprature = new float[Heat_Detection_Accuracy];
+        rodLoopindex = new int[Heat_Detection_Accuracy];
 
         for (int i = 0; i < rodLoopTemprature.Length; i++)
             rodLoopTemprature[i] = 0;
+
+        for (int i = 0; i < rodLoopindex.Length; i++)
+            rodLoopindex[i] = 0;
+
+        for (int i = 0, j = 0; i < vertices.Length - (vertices.Length / Heat_Detection_Accuracy) && j < rodLoopindex.Length; i += (vertices.Length / Heat_Detection_Accuracy), j++)
+        {
+            rodLoopindex[j] = i;
+        }
+        
 
         mesh.colors = colors;
     }
@@ -63,6 +75,7 @@ public class Heating : MonoBehaviour {
 
     void HeatRod()
     {
+        
         InitRod();
         //only check every 100 points on the rod for fire collision
         int Length = (vertices.Length / Heat_Detection_Accuracy);
@@ -73,7 +86,7 @@ public class Heating : MonoBehaviour {
             vertices[i] = transform.TransformPoint(mesh.vertices[i]);
             //check fire distance
             float FireDistance = Vector3.Distance(HeatSource.transform.position, vertices[i]);
-            
+
             //If in the fire
             if (FireDistance <= 0.55f)
             {
@@ -105,6 +118,24 @@ public class Heating : MonoBehaviour {
                 colors[(i * Length) + j] = Color.Lerp(startColor, EndColor, (rodLoopTemprature[i] / 100));
             }
         }
+    }
+
+
+    public float ClosestHeatAtPoint(int Vertex)
+    {
+        float heat = 0.0f;
+
+        for (int i = 0; i < rodLoopindex.Length; i++)
+        {
+            if(Vertex >= rodLoopindex[i])
+            {
+                heat = rodLoopindex[i];
+                break;
+            }
+
+        }
+
+        return heat;
     }
 }
 
