@@ -16,8 +16,9 @@ public class Heating : MonoBehaviour {
     public float[] rodLoopTemprature;
     private int[] rodLoopindex;
 
+    private const int maxHeat = 100;
     
-    void Awake ()
+    void Awake()
     {
         mesh = GetComponent<MeshFilter>().mesh;
         vertices = mesh.vertices;
@@ -90,7 +91,7 @@ public class Heating : MonoBehaviour {
             //If in the fire
             if (FireDistance <= 0.55f)
             {
-                if (rodLoopTemprature[j] < 100)
+                if (rodLoopTemprature[j] < maxHeat)
                     rodLoopTemprature[j] += Fire.temperature / 1000;
             }
             else
@@ -115,27 +116,32 @@ public class Heating : MonoBehaviour {
             //update colours for each temprature point
             for (int j = 0; j < Length; j++)
             {
-                colors[(i * Length) + j] = Color.Lerp(startColor, EndColor, (rodLoopTemprature[i] / 100));
+                colors[(i * Length) + j] = Color.Lerp(startColor, EndColor, (rodLoopTemprature[i] / maxHeat));
             }
         }
     }
 
 
-    public float ClosestHeatAtPoint(int Vertex)
+    public float ClosestHeatAtPoint(Vector3 worldPoint)
     {
-        float heat = 0.0f;
+        worldPoint = transform.InverseTransformPoint(worldPoint);
+        float closestDistance = float.MaxValue;
+        int closestVertex = 0;
 
-        for (int i = 0; i < rodLoopindex.Length; i++)
-        {
-            if(Vertex >= rodLoopindex[i])
-            {
-                heat = rodLoopindex[i];
-                break;
+        for (int i = 0; i < rodLoopindex.Length; i++) {
+            float distance = Vector3.Distance(worldPoint, mesh.vertices[rodLoopindex[i]]);
+            if (distance < closestDistance) {
+                closestVertex = i;
+                closestDistance = distance;
             }
-
         }
 
-        return heat;
+        return rodLoopTemprature[closestVertex];
+    }
+
+    public float ClosestHeatAtPointNormalized(Vector3 worldPoint)
+    {
+        return Mathf.Clamp01(ClosestHeatAtPoint(worldPoint) / maxHeat);
     }
 }
 

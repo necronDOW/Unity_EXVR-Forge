@@ -22,12 +22,9 @@ public class LookAtScript : MonoBehaviour
             target = targetTransform.position;
 
         if (target != nullTarget) {
-            Vector3 targetPoint = new Vector3(transform.position.x, target.y, target.z) - transform.position;
-            Quaternion targetRotation = Quaternion.LookRotation(-targetPoint, Vector3.right);
-
-            transform.rotation = originalRotation;
-            transform.rotation *= Quaternion.Euler(0, 0, 90);// * Quaternion.Euler(90, 0, 0);
-            transform.rotation *= targetRotation;
+            Vector3 targetPos = target;
+            targetPos.x = transform.position.x;
+            transform.LookAt(targetPos);
         }
     }
 }

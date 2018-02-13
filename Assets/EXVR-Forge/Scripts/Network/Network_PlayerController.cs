@@ -47,7 +47,7 @@ public class Network_PlayerController : NetworkBehaviour
             GameObject bendInstance = Instantiate(netBendTool.bendTool.bendPrefab);
             NetworkServer.Spawn(bendInstance);
 
-            netBendTool.bendInstance = bendInstance.GetComponent<BendInstance>();
+            netBendTool.bendInstance = bendInstance.GetComponentInChildren<BendInstance>();
             netBendTool.RpcOnAttachToAnvil(bendInstance.GetComponent<NetworkIdentity>().netId);
         }
     }
@@ -60,7 +60,7 @@ public class Network_PlayerController : NetworkBehaviour
         if (netBendTool.bendInstance) { 
             //update colliders
             netBendTool.RpcDestroyAllBendInstances();
-            NetworkServer.Destroy(netBendTool.bendInstance.gameObject);    
+            NetworkServer.Destroy(netBendTool.bendInstance.transform.parent.gameObject);    
         }
     }
 
@@ -77,7 +77,7 @@ public class Network_PlayerController : NetworkBehaviour
 
         if (bendInstanceLocal)
         {
-            BendInstance bendInstanceScript = bendInstanceLocal.GetComponent<BendInstance>();
+            BendInstance bendInstanceScript = bendInstanceLocal.GetComponentInChildren<BendInstance>();
 
             bendInstanceScript.curvature = curvature;
             bendInstanceScript.length = length;
@@ -97,7 +97,7 @@ public class Network_PlayerController : NetworkBehaviour
     public void RpcBendInstanceLookAtGrip(NetworkInstanceId bendInstanceId, Vector3 targetPosition)
     {
         GameObject bendInstanceLocal = ClientScene.FindLocalObject(bendInstanceId);
-        LookAtScript las = bendInstanceLocal.GetComponent<LookAtScript>();
+        LookAtScript las = bendInstanceLocal.GetComponentInParent<LookAtScript>();
         las.target = targetPosition;
     }
 
@@ -111,7 +111,7 @@ public class Network_PlayerController : NetworkBehaviour
     public void RpcUpdateBendColliders(NetworkInstanceId bendInstanceId)
     {
         GameObject bendInstanceLocal = ClientScene.FindLocalObject(bendInstanceId);
-        BendInstance bi = bendInstanceLocal.GetComponent<BendInstance>();
+        BendInstance bi = bendInstanceLocal.GetComponentInChildren<BendInstance>();
         bi.UpdateMeshCollider();
     }
 }

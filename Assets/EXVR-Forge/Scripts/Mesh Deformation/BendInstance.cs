@@ -49,6 +49,7 @@ public class BendInstance : MonoBehaviour
     private static int numBendSegments = 3;
 
     public float curvature = 0;
+    private float heatFactor = 0.0f;
     public float length = 1;
     public float amount = 1;
     public bool showGizmo = true;
@@ -72,17 +73,20 @@ public class BendInstance : MonoBehaviour
 
     private void Start()
     {
-        networkBendInstance = GetComponent<Network_BendInstance>();
+        networkBendInstance = GetComponentInParent<Network_BendInstance>();
     }
 
     // Use this for initialization
     public void Initialize()
     {
-        if (!target)
-            target = transform.parent.gameObject;
+        if (!target) {
+            target = transform.parent.parent.gameObject;
+        }
 
         ProjectTarget();
-        
+
+        heatFactor = DeformableBase.FindClosestHeatFactor(target.GetComponent<Heating>(), target.transform.InverseTransformPoint(transform.position));
+
         ts_transform = new ts_Transform(transform);
         ts_targetTransform = new ts_Transform(target.transform);
     }
@@ -127,7 +131,7 @@ public class BendInstance : MonoBehaviour
             for (int i = 0; i < foundMeshes.Count; i++)
                 bMeshes[i] = new BendableMesh(foundMeshes[i], target.transform, transform);
             
-            direction = DeformableBase.FindClosestVertex(target.transform.InverseTransformPoint(transform.position + (transform.up * 0.1f)), bMeshes[bMeshes.Length - 1].origVerts) < bMeshes[bMeshes.Length - 1].seperatingIndex;
+            direction = DeformableBase.FindClosestVertex(target.transform.InverseTransformPoint(transform.position + (transform.up * 0.1f)), bMeshes[bMeshes.Length - 1].origVerts) > bMeshes[bMeshes.Length - 1].seperatingIndex;
         }
     }
 
@@ -138,6 +142,8 @@ public class BendInstance : MonoBehaviour
 
     public void DeformAll()
     {
+        curvature *= heatFactor;
+
         for (int i = 0; i < bMeshes.Length; i++) {
             Deform(i);
         }

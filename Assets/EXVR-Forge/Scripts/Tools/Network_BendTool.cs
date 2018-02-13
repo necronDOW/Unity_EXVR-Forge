@@ -21,7 +21,7 @@ public class Network_BendTool : NetworkBehaviour
                 bendInstance.rodGripScriptReference = rgs;
 
                 Network_PlayerController npc = Network_InteractableObject.GetLocalPlayerController();
-                npc.CmdBendInstanceLookAtGrip(bendInstance.GetComponent<NetworkIdentity>().netId, rgs.target.position);
+                npc.CmdBendInstanceLookAtGrip(bendInstance.GetComponentInParent<NetworkIdentity>().netId, rgs.target.position);
             }
             else if (bendInstance)
                 bendInstance.rodGripScriptReference = null;
@@ -44,7 +44,7 @@ public class Network_BendTool : NetworkBehaviour
     public void RpcOnAttachToAnvil(NetworkInstanceId bendInstanceId)
     {
         GameObject bendInstanceLocal = ClientScene.FindLocalObject(bendInstanceId);
-        bendInstance = bendInstanceLocal.GetComponent<BendInstance>();
+        bendInstance = bendInstanceLocal.GetComponentInChildren<BendInstance>();
 
         bendInstanceLocal.transform.parent = bendTool.attachedRod.transform;
         bendInstanceLocal.transform.position = bendTool.transform.position;

@@ -105,4 +105,13 @@ public class DeformableBase : MonoBehaviour
 
         return closestIndex;
     }
+
+    public static float FindClosestHeatFactor(Heating heatScript, Vector3 worldCheckLocation)
+    {
+        if (heatScript != null) {
+            return heatScript.ClosestHeatAtPointNormalized(worldCheckLocation);
+        }
+
+        return 1.0f;
+    }
 }

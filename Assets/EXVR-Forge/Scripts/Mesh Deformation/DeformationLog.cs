@@ -83,7 +83,7 @@ public class DeformationLog : MonoBehaviour
 
                 if (netBendTool && netBendTool.bendTool.bendPrefab != null) {
                     GameObject bendObj = Instantiate(netBendTool.bendTool.bendPrefab);
-                    BendInstance bendInstance = bendObj.GetComponent<BendInstance>();
+                    BendInstance bendInstance = bendObj.GetComponentInChildren<BendInstance>();
 
                     if (bendInstance) {
                         bendInstance.curvature = curvature;
