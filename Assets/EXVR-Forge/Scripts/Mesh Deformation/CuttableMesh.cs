@@ -16,6 +16,7 @@ public class CuttableMesh : MonoBehaviour
     private CuttingTool cuttingSrc;
     private float cuttingSrcExtents;
     private DeformableMesh deformableMesh;
+    private int defaultHitsToCut;
 
     private void Start()
     {
@@ -25,6 +26,7 @@ public class CuttableMesh : MonoBehaviour
         minImpactDistance = Mathf.Min(c.bounds.extents.x, Mathf.Min(c.bounds.extents.y, c.bounds.extents.z)) * 2.0f;
 
         deformableMesh = GetComponent<DeformableMesh>();
+        defaultHitsToCut = hitsToCut;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -59,6 +61,9 @@ public class CuttableMesh : MonoBehaviour
         this.cuttingSrc = cuttingSrc.GetComponent<CuttingTool>();
         hits = 0;
 
+        Heating heatScript = GetComponent<Heating>();
+        hitsToCut = (heatScript != null ? (int)(19.0f * (1.0f - DeformableBase.FindClosestHeatFactor(heatScript, cuttingSrc.position))) + 1 : defaultHitsToCut);
+        Debug.Log(hitsToCut);
         if (deformableMesh)
             deformableMesh.enabled = false;
     }

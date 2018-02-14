@@ -36,6 +36,7 @@ public class DeformableMesh : DeformableBase
 
     private Collider currentImpactCollider;
     private Vector3 currentHitPoint;
+    private Heating heatScript;
 
     private List<Thread> threads = new List<Thread>();
 
@@ -52,6 +53,7 @@ public class DeformableMesh : DeformableBase
 
         currentImpactCollider = null;
         currentHitPoint = Vector3.zero;
+        heatScript = GetComponent<Heating>();
     }
 
     //private void OnCollisionExit(Collision collision)
@@ -142,14 +144,14 @@ public class DeformableMesh : DeformableBase
         UpdateComponents();
         
         thread_vertices = targetMesh.vertices;
+        
+        float finalForce = (forceFactor / hitPoints.Length) * FindClosestHeatFactor(heatScript, otherObject.position);
 
-        for (int i = 0; i < hitPoints.Length; i++)
-        {
-            for (int j = 0; j < thread_vertices.Length; j += maxWorkGroupSize)
-            {
+        for (int i = 0; i < hitPoints.Length; i++) {
+            for (int j = 0; j < thread_vertices.Length; j += maxWorkGroupSize) {
                 DeformVectors vectors = new DeformVectors(transform, otherObject.transform.up, hitPoints[i]);
                 int workgroupSize = (j + maxWorkGroupSize < thread_vertices.Length) ? maxWorkGroupSize : thread_vertices.Length - j;
-                threads.Add(StartThread(j, j + workgroupSize, vectors.impact, vectors.simplified, forceFactor / hitPoints.Length));
+                threads.Add(StartThread(j, j + workgroupSize, vectors.impact, vectors.simplified, finalForce));
             }
         }
     }
@@ -159,11 +161,14 @@ public class DeformableMesh : DeformableBase
         UpdateComponents();
 
         thread_vertices = targetMesh.vertices;
+        
+        float finalForce = forceFactor * FindClosestHeatFactor(heatScript, transform.TransformPoint(simplifiedVector));
 
-        for (int i = 0; i < thread_vertices.Length; i += maxWorkGroupSize)
-        {
-            int workgroupSize = (i + maxWorkGroupSize < thread_vertices.Length) ? maxWorkGroupSize : thread_vertices.Length - i;
-            threads.Add(StartThread(i, i + workgroupSize, impactVector, simplifiedVector, forceFactor));
+        if (finalForce != 0.0f) {
+            for (int i = 0; i < thread_vertices.Length; i += maxWorkGroupSize) {
+                int workgroupSize = (i + maxWorkGroupSize < thread_vertices.Length) ? maxWorkGroupSize : thread_vertices.Length - i;
+                threads.Add(StartThread(i, i + workgroupSize, impactVector, simplifiedVector, finalForce));
+            }
         }
     }
 
