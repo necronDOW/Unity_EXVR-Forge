@@ -11,6 +11,8 @@ TagManager:
   - Anvil
   - Coal
   - VRLocalPlayer
+  - projectile
+  - FxTemporaire
   layers:
   - Default
   - TransparentFX
@@ -20,7 +22,7 @@ TagManager:
   - UI
   - 
   - 
-  - 
+  - TPArea
   - 
   - 
   - 
