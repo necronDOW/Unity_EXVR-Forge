@@ -20,11 +20,12 @@ public class Network_PlayerRepresentation : MonoBehaviour
 
         if (!identity.isLocalPlayer)
         {
-            SwitchLayer(0);
+            //SwitchLayer(0);
             enabled = false;
         }
         else
         {
+            DisableRenderers();
             gameObject.tag = "VRLocalPlayer";
         }
 
@@ -70,7 +71,16 @@ public class Network_PlayerRepresentation : MonoBehaviour
     private void SwitchLayer(int layer)
     {
         Transform[] allChildren = GetComponentsInChildren<Transform>();
-        for (int i = 0; i < allChildren.Length; i++)
+        for (int i = 0; i < allChildren.Length; i++) {
             allChildren[i].gameObject.layer = layer;
+        }
+    }
+
+    private void DisableRenderers()
+    {
+        Renderer[] allRenderers = GetComponentsInChildren<Renderer>();
+        for (int i = 0; i < allRenderers.Length; i++) {
+            allRenderers[i].enabled = false;
+        }
     }
 }
