@@ -142,7 +142,7 @@ public class BendInstance : MonoBehaviour
 
     public void DeformAll()
     {
-        curvature *= heatFactor;
+        //curvature *= heatFactor;
 
         for (int i = 0; i < bMeshes.Length; i++) {
             Deform(i);

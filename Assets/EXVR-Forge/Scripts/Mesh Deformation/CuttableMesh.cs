@@ -62,8 +62,8 @@ public class CuttableMesh : MonoBehaviour
         hits = 0;
 
         Heating heatScript = GetComponent<Heating>();
-        hitsToCut = (heatScript != null ? (int)(19.0f * (1.0f - DeformableBase.FindClosestHeatFactor(heatScript, cuttingSrc.position))) + 1 : defaultHitsToCut);
-        Debug.Log(hitsToCut);
+        hitsToCut = 4;// (heatScript != null ? (int)(19.0f * (1.0f - DeformableBase.FindClosestHeatFactor(heatScript, cuttingSrc.position))) + 1 : defaultHitsToCut);
+
         if (deformableMesh)
             deformableMesh.enabled = false;
     }

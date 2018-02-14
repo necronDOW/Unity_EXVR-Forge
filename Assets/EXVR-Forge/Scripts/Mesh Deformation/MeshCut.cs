@@ -141,8 +141,12 @@ namespace MeshCutter
 		/// <param name="victim">Victim.</param>
 		/// <param name="blade_plane">Blade plane.</param>
 		/// <param name="capMaterial">Cap material.</param>
-		public static Mesh[] Cut(GameObject victim, Vector3 anchorPoint, Vector3 normalDirection, float distanceLimit = Mathf.Infinity)
+		public static Mesh[] Cut(GameObject victim, Vector3 anchorPoint, Vector3 normalDirection, float distanceLimit = Mathf.Infinity, bool colliderMode = false)
         {
+            if (colliderMode && victim.GetComponent<MeshCollider>() == null) {
+                return null;
+            }
+
             timer = Time.realtimeSinceStartup;
             Vector3 invAnchorPoint = victim.transform.InverseTransformPoint(anchorPoint);
 
@@ -150,7 +154,7 @@ namespace MeshCutter
             blade = new Plane(victim.transform.InverseTransformDirection(-normalDirection), invAnchorPoint);
 
             // get the victims mesh
-            victim_mesh = victim.GetComponent<MeshFilter>().sharedMesh;
+            victim_mesh = colliderMode ? victim.GetComponent<MeshCollider>().sharedMesh : victim.GetComponent<MeshFilter>().sharedMesh;
             victim_verts = victim_mesh.vertices;
             victim_norms = victim_mesh.normals;
 
@@ -280,8 +284,6 @@ namespace MeshCutter
 			right_HalfMesh.normals   = right_side.normals.ToArray();
 
             right_HalfMesh.SetIndices(right_side.indices.ToArray(), MeshTopology.Triangles, 0);
-
-            Debug.Log("Cut time: " + (Time.realtimeSinceStartup - timer));
 
             return new Mesh[]{ left_HalfMesh, right_HalfMesh };
 		}

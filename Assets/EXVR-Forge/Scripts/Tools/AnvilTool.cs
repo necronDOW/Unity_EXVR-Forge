@@ -31,7 +31,7 @@ public class AnvilTool : MonoBehaviour
         while (IsAttached(other.gameObject))
             yield return null;
 
-        Debug.Log("freeze");
+        //Debug.Log("freeze");
         Freeze(other.gameObject);
     }
 
@@ -51,7 +51,7 @@ public class AnvilTool : MonoBehaviour
         while (!IsAttached(other.gameObject))
             yield return null;
 
-        Debug.Log("unfreeze");
+        //Debug.Log("unfreeze");
         Unfreeze(other.gameObject);
     }
 

@@ -10,12 +10,20 @@ public class Network_CuttableMesh : NetworkBehaviour
     public void CmdOnCut(Vector3 anchorPoint, Vector3 normalDirection, float distanceLimit)
     {
         Mesh[] mHalves = MeshCutter.MeshCut.Cut(gameObject, anchorPoint, normalDirection, distanceLimit);
+        Mesh[] cHalves = MeshCutter.MeshCut.Cut(gameObject, anchorPoint, normalDirection, distanceLimit, true);
 
         GameObject[] halves = new GameObject[2];
         for (int i = 0; i < halves.Length; i++) {
             halves[i] = InstantiateCutInstance(GetComponent<CuttableMesh>().rodPrefab, transform);
             halves[i].GetComponent<MeshFilter>().mesh = mHalves[i];
-            halves[i].GetComponent<DeformableBase>().SplitCollider(anchorPoint, i, mHalves[i].vertices);
+
+            if (cHalves != null) {
+                halves[i].GetComponent<DeformableBase>().SetMeshCollider(cHalves[i]);
+            }
+            else {
+                halves[i].GetComponent<MeshCollider>().sharedMesh = mHalves[i];
+            }
+
             halves[i].GetComponent<MeshStateHandler>().ChangeState(false);
 
             NetworkServer.Spawn(halves[i]);
@@ -37,11 +45,19 @@ public class Network_CuttableMesh : NetworkBehaviour
         gameObject.transform.position = syncPosition;
         gameObject.transform.rotation = syncRotation;
 
-        Mesh[] halves = MeshCutter.MeshCut.Cut(gameObject, anchorPoint, normalDirection, distanceLimit);
+        Mesh[] mHalves = MeshCutter.MeshCut.Cut(gameObject, anchorPoint, normalDirection, distanceLimit);
+        Mesh[] cHalves = MeshCutter.MeshCut.Cut(gameObject, anchorPoint, normalDirection, distanceLimit, true);
 
         for (int i = 0; i < halfObjects.Length; i++) {
-            halfObjects[i].GetComponent<MeshFilter>().mesh = halves[i];
-            halfObjects[i].GetComponent<MeshCollider>().sharedMesh = halves[i];
+            halfObjects[i].GetComponent<MeshFilter>().mesh = mHalves[i];
+
+            if (cHalves != null) {
+                halfObjects[i].GetComponent<DeformableBase>().SetMeshCollider(cHalves[i]);
+            }
+            else {
+                halfObjects[i].GetComponent<MeshCollider>().sharedMesh = mHalves[i];
+            }
+            
             halfObjects[i].GetComponent<MeshStateHandler>().ChangeState(false);
         }
     }

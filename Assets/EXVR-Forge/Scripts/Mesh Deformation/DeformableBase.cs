@@ -72,22 +72,15 @@ public class DeformableBase : MonoBehaviour
         mCollider.sharedMesh = simplifiedMesh;
     }
 
-    public void SplitCollider(Vector3 worldPt, int halfIndex, Vector3[] newVertices)
+    public void SetMeshCollider(Mesh colliderMesh)
     {
-        if (halfIndex < 0 || halfIndex > 1) {
-            Debug.LogWarning("Invalid half index (" + halfIndex + "). Index should be either 0 or 1, to represent one of two halves.");
-            return;
+        simplifiedMesh = colliderMesh;
+
+        if (mCollider == null) {
+            mCollider = GetComponent<MeshCollider>();
+            mCollider.sharedMesh = null;
+            mCollider.sharedMesh = simplifiedMesh;
         }
-
-        Vector3 localPt = transform.InverseTransformPoint(worldPt);
-        int closestVertex = FindClosestVertex(localPt, newVertices);
-        float percent = (closestVertex != 0 ? (closestVertex / newVertices.Length) : 0.001f);
-
-        if (halfIndex == 1) {
-            percent = 1.0f - percent;
-        }
-
-        // NEED ACCESS TO PREVIOUS DEFORMATION INFO!!
     }
 
     public static int FindClosestVertex(Vector3 localPt, Vector3[] verts)
