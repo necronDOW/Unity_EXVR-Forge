@@ -8,8 +8,25 @@ public class DeformableBase : MonoBehaviour
 {
     public float colliderSimplificationFactor = 0.4f;
 
-    protected MeshFilter mFilter;
-    protected MeshCollider mCollider;
+    private MeshFilter _mFilter;
+    protected MeshFilter mFilter
+    {
+        get {
+            if (!_mFilter)
+                _mFilter = GetComponent<MeshFilter>();
+            return _mFilter;
+        }
+    }
+
+    private MeshCollider _mCollider;
+    protected MeshCollider mCollider {
+        get {
+            if (!_mCollider)
+                _mCollider = GetComponent<MeshCollider>();
+            return _mCollider;
+        }
+    }
+
     protected int[] originalTriangles;
     protected Vector3[] originalVertices;
     protected Mesh simplifiedMesh;
@@ -45,9 +62,9 @@ public class DeformableBase : MonoBehaviour
 
     protected void UpdateComponents()
     {
-        if (!mFilter || !mCollider) {
-            mFilter = GetComponent<MeshFilter>();
-            mCollider = GetComponent<MeshCollider>();
+        if (!_mFilter || !_mCollider) {
+            _mFilter = GetComponent<MeshFilter>();
+            _mCollider = GetComponent<MeshCollider>();
             originalTriangles = mFilter.sharedMesh.triangles;
             originalVertices = mFilter.sharedMesh.vertices;
 
@@ -76,8 +93,8 @@ public class DeformableBase : MonoBehaviour
     {
         simplifiedMesh = colliderMesh;
 
-        if (mCollider == null) {
-            mCollider = GetComponent<MeshCollider>();
+        if (_mCollider == null) {
+            _mCollider = GetComponent<MeshCollider>();
             mCollider.sharedMesh = null;
             mCollider.sharedMesh = simplifiedMesh;
         }

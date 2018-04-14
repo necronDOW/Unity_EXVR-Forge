@@ -17,6 +17,7 @@ public class Heating : MonoBehaviour {
     private int[] rodLoopindex;
 
     private const int maxHeat = 100;
+    private const float maxHeatDist = 0.75f;
     
     void Awake()
     {
@@ -87,23 +88,24 @@ public class Heating : MonoBehaviour {
             vertices[i] = transform.TransformPoint(mesh.vertices[i]);
             //check fire distance
             float FireDistance = Vector3.Distance(HeatSource.transform.position, vertices[i]);
+            float tDistance = 1.0f - (FireDistance / maxHeatDist);
 
             //If in the fire
-            if (FireDistance <= 0.55f)
+            if (FireDistance <= maxHeatDist)
             {
                 if (rodLoopTemprature[j] < maxHeat)
-                    rodLoopTemprature[j] += Fire.temperature / 1000;
+                    rodLoopTemprature[j] += (Fire.temperature * tDistance * Time.deltaTime) * 0.1f;
             }
             else
             {
                 if (rodLoopTemprature[j] > 0)
-                    rodLoopTemprature[j] -= Fire.temperature / 10000;
+                    rodLoopTemprature[j] -= (Fire.temperature * Time.deltaTime) * 0.015f;
             }
 
             foreach (CoolingSource c in coolingSources) {
                 if (c != null) {
                     if (c.bounds.Contains(vertices[i]) && rodLoopTemprature[j] > 0) {
-                        rodLoopTemprature[j] -= Fire.temperature / 100;
+                        rodLoopTemprature[j] -= Fire.temperature * Time.deltaTime;
                         c.EmitSteam(vertices[i]);
                     }
                 }
@@ -113,10 +115,17 @@ public class Heating : MonoBehaviour {
         //loop over temprature array 
         for (int i = 0; i < rodLoopTemprature.Length ; i++)
         {
+            float t = (rodLoopTemprature[i] / maxHeat);
+
             //update colours for each temprature point
             for (int j = 0; j < Length; j++)
             {
-                colors[(i * Length) + j] = Color.Lerp(startColor, EndColor, (rodLoopTemprature[i] / maxHeat));
+                colors[(i * Length) + j] = new Color(
+                    EaseInSin(t, startColor.r, EndColor.r - startColor.r, 1.0f),
+                    EaseInSin(t, startColor.g, EndColor.g - startColor.g, 2.0f),
+                    EaseInSin(t, startColor.b, EndColor.b - startColor.b, 20.0f));
+                //EaseInSin((rodLoopTemprature[i] / maxHeat), startColor, EndColor - startColor, 2.5f);
+                //Color.Lerp(startColor, EndColor, (rodLoopTemprature[i] / maxHeat));
             }
         }
     }
@@ -142,6 +151,17 @@ public class Heating : MonoBehaviour {
     public float ClosestHeatAtPointNormalized(Vector3 worldPoint)
     {
         return Mathf.Clamp01(ClosestHeatAtPoint(worldPoint) / maxHeat);
+    }
+
+    private float EaseInSin(float t, float start, float change, float d)
+    {
+        return -change * Mathf.Cos(t / d * (Mathf.PI / 2)) + change + start;
+    }
+
+    private Color EaseInSin(float t, Color start, Color change, float d)
+    {
+        Color minChange = new Color(-change.r, -change.g, -change.b, -change.a);
+        return minChange * Mathf.Cos(t / d * (Mathf.PI / 2)) + change + start;
     }
 }
 

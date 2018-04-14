@@ -130,8 +130,12 @@ public class BendInstance : MonoBehaviour
             bMeshes = new BendableMesh[foundMeshes.Count];
             for (int i = 0; i < foundMeshes.Count; i++)
                 bMeshes[i] = new BendableMesh(foundMeshes[i], target.transform, transform);
-            
-            direction = DeformableBase.FindClosestVertex(target.transform.InverseTransformPoint(transform.position + (transform.up * 0.1f)), bMeshes[bMeshes.Length - 1].origVerts) > bMeshes[bMeshes.Length - 1].seperatingIndex;
+
+            if ((target.transform.position + target.transform.up).x > transform.position.x)
+                direction = false;
+            else direction = true;
+
+            //direction = DeformableBase.FindClosestVertex(target.transform.InverseTransformPoint(transform.position + (transform.up * 0.1f)), bMeshes[bMeshes.Length - 1].origVerts) > bMeshes[bMeshes.Length - 1].seperatingIndex;
         }
     }
 

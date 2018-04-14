@@ -941,9 +941,9 @@ namespace Valve.VR.InteractionSystem
 		//-------------------------------------------------
 		public void ShowTeleportHint()
 		{
-			CancelTeleportHint();
+			//CancelTeleportHint();
 
-			hintCoroutine = StartCoroutine( TeleportHintCoroutine() );
+			//hintCoroutine = StartCoroutine( TeleportHintCoroutine() );
 		}
 
 
@@ -994,7 +994,7 @@ namespace Valve.VR.InteractionSystem
 							//Haptic pulse for a few seconds
 							pulsed = true;
 
-							hand.controller.TriggerHapticPulse( 500 );
+							//hand.controller.TriggerHapticPulse( 500 );
 						}
 					}
 					else if ( !showHint && isShowingHint )
