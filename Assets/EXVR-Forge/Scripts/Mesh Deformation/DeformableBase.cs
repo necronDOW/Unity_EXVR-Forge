@@ -6,6 +6,7 @@ using UnityEngine;
 [RequireComponent(typeof(MeshCollider))]
 public class DeformableBase : MonoBehaviour
 {
+    public static int generatedVerticesLength = 0;
     public float colliderSimplificationFactor = 0.4f;
 
     private MeshFilter _mFilter;

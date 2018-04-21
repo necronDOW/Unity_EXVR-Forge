@@ -60,7 +60,7 @@ public class CubeMeshGenerator : MonoBehaviour
         }
     }
     
-    public static readonly GeneratorParams gParams = new GeneratorParams(5, 300, 5, 0.25f, 0.005f);
+    public static readonly GeneratorParams gParams = new GeneratorParams(5, 200, 5, 0.25f, 0.005f);
 
     private MeshFilter mFilter;
     private MeshCollider mCollider;
@@ -83,6 +83,7 @@ public class CubeMeshGenerator : MonoBehaviour
     {
         Debug.Log(gParams.xSize);
         Mesh mesh = new CubeMeshFactory(gParams, name).result;
+        DeformableBase.generatedVerticesLength = mesh.vertexCount;
         if (mesh == null) {
             Debug.LogError("Mesh Generation failed! (name: " + name + ").");
             return false;

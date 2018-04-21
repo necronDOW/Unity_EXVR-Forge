@@ -12,7 +12,6 @@ public class Heating : MonoBehaviour {
     private Color[] colors;
     private Mesh mesh;
     private Vector3[] vertices;
-    private Vector3[] worldPositions;
     public float[] rodLoopTemprature;
     private int[] rodLoopindex;
 
@@ -34,7 +33,7 @@ public class Heating : MonoBehaviour {
         coolingSources = new CoolingSource[2];
         coolingSources[0] = GameObject.Find("WaterSource").GetComponent<CoolingSource>();
         coolingSources[1] = GameObject.Find("OilSource").GetComponent<CoolingSource>();
-
+        
         rodLoopTemprature = new float[Heat_Detection_Accuracy];
         rodLoopindex = new int[Heat_Detection_Accuracy];
 
@@ -86,6 +85,7 @@ public class Heating : MonoBehaviour {
         {
             //Get world space location of this point
             vertices[i] = transform.TransformPoint(mesh.vertices[i]);
+            rodLoopindex[j] = i;
             //check fire distance
             float FireDistance = Vector3.Distance(HeatSource.transform.position, vertices[i]);
             float tDistance = 1.0f - (FireDistance / maxHeatDist);
@@ -138,7 +138,7 @@ public class Heating : MonoBehaviour {
         int closestVertex = 0;
 
         for (int i = 0; i < rodLoopindex.Length; i++) {
-            float distance = Vector3.Distance(worldPoint, mesh.vertices[rodLoopindex[i]]);
+            float distance = Vector3.Distance(worldPoint, VertexAtLoopIndex(i));
             if (distance < closestDistance) {
                 closestVertex = i;
                 closestDistance = distance;
@@ -162,6 +162,59 @@ public class Heating : MonoBehaviour {
     {
         Color minChange = new Color(-change.r, -change.g, -change.b, -change.a);
         return minChange * Mathf.Cos(t / d * (Mathf.PI / 2)) + change + start;
+    }
+
+    public Vector3 VertexAtLoopIndex(int i)
+    {
+        return mesh.vertices[rodLoopindex[i]];
+    }
+
+    public Vector3 WorldVertexAtLoopIndex(int i)
+    {
+        return transform.TransformPoint(VertexAtLoopIndex(i));
+    }
+
+    int lastClosest = -1;
+    public int FindClosestLoopIndexAtPoint(Vector3 worldPos, int inset = 0)
+    {
+        Vector3 localizedPos = transform.InverseTransformPoint(worldPos);
+        int closestIndex = inset;
+        float closestDist = Vector3.Distance(VertexAtLoopIndex(inset), localizedPos);
+
+        for (int i = inset + 1; i < rodLoopindex.Length - inset; i++) {
+            float dist = Vector3.Distance(VertexAtLoopIndex(i), localizedPos);
+            if (dist < closestDist) {
+                closestIndex = i;
+                closestDist = dist;
+            }
+        }
+
+        return lastClosest = closestIndex;
+    }
+
+    public int OffsetLoopIndex(int index, int offset)
+    {
+        index += offset;
+        if (index >= rodLoopindex.Length || index < 0)
+            index = -1;
+
+        return lastClosest = index;
+    }
+
+    private void OnDrawGizmos()
+    {
+        if (rodLoopindex != null)
+        {
+            for (int i = 0; i < rodLoopindex.Length; i += 2) {
+                Gizmos.color = new Color(0.0f, i * 0.01f, 0.0f);
+                Gizmos.DrawCube(WorldVertexAtLoopIndex(i), Vector3.one * 0.01f);
+            }
+
+            if (lastClosest != -1) {
+                Gizmos.color = Color.red;
+                Gizmos.DrawSphere(WorldVertexAtLoopIndex(lastClosest), 0.02f);
+            }
+        }
     }
 }
 

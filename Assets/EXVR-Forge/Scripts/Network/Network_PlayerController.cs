@@ -65,13 +65,13 @@ public class Network_PlayerController : NetworkBehaviour
     }
 
     [Command]
-    public void CmdOnBend(NetworkInstanceId bendId, float curvature, float length, float amount, bool direction)
+    public void CmdOnBend(NetworkInstanceId bendId, float curvature, float length, float amount, bool direction, bool handDirection)
     {
-        RpcOnBend(bendId, curvature, length, amount, direction);
+        RpcOnBend(bendId, curvature, length, amount, direction, handDirection);
     }
 
     [ClientRpc]
-    public void RpcOnBend(NetworkInstanceId bendInstanceId, float curvature, float length, float amount, bool direction)
+    public void RpcOnBend(NetworkInstanceId bendInstanceId, float curvature, float length, float amount, bool direction, bool handDirection)
     {
         GameObject bendInstanceLocal = ClientScene.FindLocalObject(bendInstanceId);
 
@@ -83,6 +83,7 @@ public class Network_PlayerController : NetworkBehaviour
             bendInstanceScript.length = length;
             bendInstanceScript.amount = amount;
             bendInstanceScript.direction = direction;
+            bendInstanceScript.handDirection = handDirection;
             bendInstanceScript.DeformAll();
         }
     }

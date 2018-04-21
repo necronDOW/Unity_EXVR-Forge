@@ -55,6 +55,7 @@ public class BendInstance : MonoBehaviour
     public bool showGizmo = true;
     public GameObject target;
     public bool direction = false;
+    public bool handDirection = false;
 
     private BendableMesh[] bMeshes;
 
@@ -62,6 +63,7 @@ public class BendInstance : MonoBehaviour
     private ts_Transform ts_transform, ts_targetTransform;
 
     public RodGripScript rodGripScriptReference;
+    private Heating heatScript;
     private Network_BendInstance networkBendInstance;
 
     private Thread StartThread(int iStart, int iEnd, ts_Transform thisT, ts_Transform otherT, BendParameters bp, int meshIndex)
@@ -83,9 +85,11 @@ public class BendInstance : MonoBehaviour
             target = transform.parent.parent.gameObject;
         }
 
+        heatScript = target.GetComponent<Heating>();
+
         ProjectTarget();
 
-        heatFactor = DeformableBase.FindClosestHeatFactor(target.GetComponent<Heating>(), target.transform.InverseTransformPoint(transform.position));
+        heatFactor = DeformableBase.FindClosestHeatFactor(heatScript, target.transform.InverseTransformPoint(transform.position));
 
         ts_transform = new ts_Transform(transform);
         ts_targetTransform = new ts_Transform(target.transform);
@@ -100,6 +104,7 @@ public class BendInstance : MonoBehaviour
 
         if (rodGripScriptReference) {
             if (rodGripScriptReference.isGripped) {
+                handDirection = rodGripScriptReference.grippedPoint.x > transform.position.x;
                 UpdateCurvature();
                 DeformAll();
                 networkBendInstance.UpdateNetworkDeform(this);
@@ -131,7 +136,12 @@ public class BendInstance : MonoBehaviour
             for (int i = 0; i < foundMeshes.Count; i++)
                 bMeshes[i] = new BendableMesh(foundMeshes[i], target.transform, transform);
 
-            if ((target.transform.position + target.transform.up).x > transform.position.x)
+            int closestLoopIndex = heatScript.FindClosestLoopIndexAtPoint(transform.position, 2);
+            int queryLoopIndex = heatScript.OffsetLoopIndex(closestLoopIndex, 2);
+            if (queryLoopIndex == -1)
+                queryLoopIndex = closestLoopIndex;
+
+            if (heatScript.WorldVertexAtLoopIndex(queryLoopIndex).x > transform.position.x)
                 direction = false;
             else direction = true;
 
@@ -148,8 +158,10 @@ public class BendInstance : MonoBehaviour
     {
         curvature *= heatFactor;
 
-        for (int i = 0; i < bMeshes.Length; i++) {
-            Deform(i);
+        if (handDirection) {
+            for (int i = 0; i < bMeshes.Length; i++) {
+                Deform(i);
+            }
         }
     }
 
@@ -207,8 +219,7 @@ public class BendInstance : MonoBehaviour
             dBiN = PtLineProject(wsPt, bp.P, bp.P + bp.BiN);
             dT = PtLineProject(wsPt, bp.P, bp.P + bp.T);
             
-            if (curvature != 0)
-            {
+            if (curvature != 0) {
                 v.x = (Mathf.Cos(u * curvature / Mathf.PI) * Mathf.PI / curvature - Mathf.PI / curvature) * length;
                 v.y = (Mathf.Sin(u * curvature / Mathf.PI) * Mathf.PI / curvature) * length;
                 v.z = 0;
@@ -221,8 +232,7 @@ public class BendInstance : MonoBehaviour
                 
                 T2 = Vector3.Cross(N2, bp.BiN);
             }
-            else
-            {
+            else {
                 P2 = bp.P;
                 N2 = bp.N;
                 T2 = bp.T;
@@ -234,8 +244,7 @@ public class BendInstance : MonoBehaviour
 
     private void PlotPoints(int meshIndex)
     {
-        for (int i = 0; i < bMeshes[meshIndex].origPts.Length; i++)
-        {
+        for (int i = 0; i < bMeshes[meshIndex].origPts.Length; i++) {
             float u = (float)i / (float)(bMeshes[meshIndex].origPts.Length - 1);
             //Puts the bend in the same space as the mesh
             bMeshes[meshIndex].origPts[i] = transform.TransformPoint(new Vector3(0, u * length, 0));
@@ -244,16 +253,14 @@ public class BendInstance : MonoBehaviour
             float x, y, z;
             Vector3 pt, normal, binormal, tangent;
 
-            if (curvature != 0)
-            {
+            if (curvature != 0) {
                 x = (Mathf.Cos(u * curvature / Mathf.PI) * Mathf.PI / curvature - Mathf.PI / curvature) * length;
                 y = (Mathf.Sin(u * curvature / Mathf.PI) * Mathf.PI / curvature) * length;
                 z = 0;
                 pt = transform.TransformPoint(new Vector3(x, y, z));
                 normal = transform.TransformDirection(Vector3.Normalize(new Vector3(x, y, z) - new Vector3(-Mathf.PI / curvature * length, 0, 0)));
 
-                if (curvature < 0)
-                {
+                if (curvature < 0) {
                     normal *= -1;
                 }
             }
